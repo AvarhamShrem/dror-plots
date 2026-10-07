@@ -33,6 +33,9 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .crit li.off .n{background:var(--line);color:var(--muted)}
 .crit li.off .lbl{color:var(--muted)}
 .crit .lbl{flex:1}
+.crit .inlrow{order:9;flex-basis:100%;padding-inline-start:30px}
+.crit select.inl{width:auto;padding:4px 6px;font-size:13px}
+.crit li{flex-wrap:wrap}
 .crit button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;width:30px;height:28px;cursor:pointer}
 .summary{font-size:14px;background:var(--bg);border-radius:8px;padding:10px 12px;margin:0 0 12px}
 .plots{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
@@ -129,11 +132,6 @@ a{color:var(--accent)}
       <h2>3 · סדר העדיפויות שלי</h2>
       <div class="note" style="margin-bottom:6px">מה שלמעלה שוקל יותר. ✓ = נכלל בחישוב.</div>
       <ul class="crit" id="crit"></ul>
-      <div class="row" style="margin-top:10px">
-        <label>סוג מועדף<select id="prefType"><option value="חד">חד-משפחתי</option><option value="דו">דו-משפחתי</option></select></label>
-        <label>שכונה מועדפת<select id="prefHood"></select></label>
-        <label class="needs-relief">שיפוע מועדף<select id="prefSlope"><option value="flat">מישורי</option><option value="sloped">משופע</option></select></label>
-      </div>
       <p class="note needs-relief" style="margin-top:10px;background:var(--y-bg);color:var(--ink);border-radius:6px;padding:6px 10px">⚠ <b>הגובה והשיפוע נלקחו ממפת גבהים של הקרקע לפני עבודות הפיתוח.</b> מאז השטח עבר פיתוח (יישור, מילוי וחפירה), ולכן הנתונים לא משקפים את המצב בשטח היום. השתמשו בהם לכל היותר כאינדיקציה כללית: גובה המגרש ביחס לשאר היישוב כנראה נשמר, אבל השיפוע בתוך המגרש עשוי להיות שונה לגמרי. יש לבדוק בשטח ובתכנית הבינוי.</p>
       <details class="needs-relief" style="margin-top:6px"><summary>מה זה "גבוה" ו"שיפוע"?</summary>
         <p class="note"><b>גבוה</b> = גובה ממוצע של המגרש מעל פני הים. ביישוב הטווח הוא 450–503 מ', כך שבפועל זה "גבוה ביחס לשאר היישוב". מגרש גבוה בדרך כלל צופה למרחק.<br>
@@ -354,22 +352,27 @@ function fillForm() {
   $('category').innerHTML = CATEGORIES.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
   $('pos').value = S.pos; $('category').value = S.category; $('k').value = S.k; $('use35').checked = S.use35;
   $('budget').value = S.budget || ''; $('minPrice').value = S.minPrice || ''; $('minArea').value = S.minArea || '';
-  $('prefType').value = S.prefType; $('prefSlope').value = S.prefSlope;
   $('passed').value = S.passed || ''; $('takenInput').value = S.takenText; $('waiting').checked = S.waiting;
-  $('prefHood').innerHTML = HOODS.map(h => `<option>${h}</option>`).join(''); $('prefHood').value = S.prefHood;
   $('noShow').value = Math.round(S.noShow * 100); $('margin').value = Math.round(S.margin * 100);
   $('wType').value = S.crowd.type; $('wArea').value = S.crowd.area;
   checks('hoods', HOODS, 'hoods', h => h);
   checks('types', TYPES, 'types', fullType);
   checks('edges', EDGES, 'edges', e => EDGE_LABEL[e]);
 }
+// בחירת ההעדפה צמודה לקריטריון שלה (סוג / שכונה / שיפוע)
+const opts = (id, list, cur) => `<select id="${id}" class="inl">${list.map(([v, t]) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+const INLINE = {
+  type: () => opts('prefType', [['חד', 'חד-משפחתי'], ['דו', 'דו-משפחתי']], S.prefType),
+  hood: () => opts('prefHood', HOODS.map(h => [h, 'שכונה ' + h]), S.prefHood),
+  slope: () => opts('prefSlope', [['flat', 'מישורי'], ['sloped', 'משופע']], S.prefSlope),
+};
 function renderCrit() {
   const lbl = Object.fromEntries(CRITERIA.map(c => [c.key, c.label]));
   let n = 0;
   $('crit').innerHTML = S.order.map((k, i) => {
     const on = S.enabled[k];
     return `<li class="${on ? '' : 'off'}"><span class="n">${on ? ++n : '–'}</span>
-      <label class="chk lbl"><input type="checkbox" data-en="${k}" ${on ? 'checked' : ''}>${lbl[k]}</label>
+      <label class="chk lbl"><input type="checkbox" data-en="${k}" ${on ? 'checked' : ''}>${lbl[k]}</label>${INLINE[k] ? `<div class="inlrow">${INLINE[k]()}</div>` : ''}
       <button data-up="${i}" ${i === 0 ? 'disabled' : ''} aria-label="הזז למעלה">▲</button>
       <button data-down="${i}" ${i === S.order.length - 1 ? 'disabled' : ''} aria-label="הזז למטה">▼</button></li>`;
   }).join('');
@@ -431,6 +434,7 @@ document.addEventListener('click', e => {
 });
 
 // ---- תוצאות ----
+const passesUI = p => S.hoods.includes(p.hood) && S.types.includes(p.type) && (p.edge === undefined || S.edges.includes(p.edge)) && (!S.budget || p.price <= S.budget) && (!S.minPrice || p.price >= S.minPrice) && (!S.minArea || p.area >= S.minArea);
 let ROWS = [];
 function render() {
   ROWS = enrich(window.PLOTS, settings());
@@ -441,7 +445,10 @@ function render() {
   $('summary').innerHTML = (live ? `🔴 <b>לפי מצב הבחירה:</b> הבחירה הגיעה עד מקום ${S.passed}, ונבחרו ${S.taken.length} מגרשים. ` : '')
     + (absPos(S) <= S.passed + 1 && live ? '<b>התור שלך הגיע!</b> כל המגרשים שנשארו פנויים. ' : '')
     + `לפניך עוד <b>${W}</b> זוכים. בהנחה ש-${Math.round(S.noShow * 100)}% לא מגיעים, יבחרו לפניך בפועל כ-<b>${E}</b>,
-    ויישארו כ-<b>${left}</b> מתוך ${remaining} המגרשים שעדיין פנויים. ${candidates} מגרשים עוברים את הסינון שלך.`
+    ויישארו כ-<b>${left}</b> מתוך ${remaining} המגרשים שעדיין פנויים. ${candidates} מגרשים עוברים את הסינון שלך${(() => {
+      const ok = ROWS.filter(p => !p.taken && passesUI(p)), pin = ok.filter(p => S.pinned.includes(p.id)).length, hid = ok.filter(p => S.excluded.includes(p.id)).length;
+      return pin || hid ? ` (${[pin && `${pin} כבר בפול שלך`, hid && `${hid} הסתרת`].filter(Boolean).join(', ')}, ולכן לא מופיעים בהצעות)` : '';
+    })()}.`
     + (pool.length < S.k + S.extra ? ` <b>מצאתי רק ${pool.length} הצעות עם סיכוי של 50% ומעלה. נסה להרחיב את הסינון.</b>` : '');
   // הפול שלי: לפי סדר העדיפות שהמשתמש קבע
   const byId = Object.fromEntries(ROWS.map(p => [p.id, p]));
@@ -461,7 +468,7 @@ function render() {
   const cat = CATEGORIES.find(c => c.key === S.category);
   $('use35wrap').classList.toggle('hidden', !cat.reservist);
   const gap = window.PLOTS.map(p => p.prices.pub - p.prices.res_home);
-  $('catNote').textContent = `רוב המחיר הוא פיתוח, וזהה לכולם. ההבדל בין הקטגוריה הזולה ליקרה הוא ₪${Math.min(...gap).toLocaleString('he-IL')}–₪${Math.max(...gap).toLocaleString('he-IL')} למגרש.`
+  $('catNote').textContent = `רוב המחיר (88%–94%) הוא עלות הפיתוח. היא זהה בכל הקטגוריות, אבל משתנה ממגרש למגרש לפי השטח (כ-930–1,210 ₪ למ"ר), כך שמגרש גדול יותר משלם יותר פיתוח. רק אגרת מבני הציבור (₪48,758) קבועה לכל מגרש. ההבדל בין הקטגוריה הזולה ליקרה הוא ₪${Math.min(...gap).toLocaleString('he-IL')}–₪${Math.max(...gap).toLocaleString('he-IL')} למגרש.`
     + (cat.reservist ? ' הנחת המילואים (35% על הקרקע) ניתנת פעם אחת בחיים. כאן היא שווה רק כמה אלפי ₪, ולכן כדאי לשקול לשמור אותה לרכישה עתידית.' : '');
   // לו"ז אישי מרשימת הזוכים
   const slot = slotOf(S.pos, S.waiting);
@@ -534,7 +541,7 @@ let sort = { key: 'score', dir: -1 };
 function renderTable() {
   $('thead').innerHTML = COLS.map(([k, l]) => `<th data-sort="${k}" class="${sort.key === k ? 'sorted' : ''}">${l}${sort.key === k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('');
   const q = $('q').value.trim(), only = $('onlyPass').checked, s = settings();
-  const ok = p => S.hoods.includes(p.hood) && S.types.includes(p.type) && (p.edge === undefined || S.edges.includes(p.edge)) && (!S.budget || p.price <= S.budget) && (!S.minPrice || p.price >= S.minPrice) && (!S.minArea || p.area >= S.minArea);
+  const ok = passesUI;
   const val = p => (sort.key === 'pin' ? +S.pinned.includes(p.id) : sort.key === 'id' ? parseInt(p.id)
     : sort.key === 'rank' ? (p.rank ?? 1e9) : p[sort.key]);
   const rows = ROWS.filter(p => (!q || p.id.includes(q)) && (!only || ok(p)))

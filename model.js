@@ -26,7 +26,7 @@ const CRITERIA = [
   { key: 'type', label: 'סוג מגרש מועדף', val: (p, s) => (p.type === s.prefType ? 1 : 0), hb: true },
   { key: 'hood', label: 'שכונה מועדפת', val: (p, s) => (p.hood === s.prefHood ? 1 : 0), hb: true },
   { key: 'elev', label: 'מגרש גבוה (לפי מפת גבהים לפני פיתוח)', val: p => p.elev, hb: true, needs: 'elev' },
-  { key: 'slope', label: 'שיפוע המגרש לפני פיתוח (מישורי / משופע)', val: p => p.slope, hb: s => s.prefSlope === 'sloped', needs: 'slope' },
+  { key: 'slope', label: 'שיפוע המגרש לפני פיתוח', val: p => p.slope, hb: s => s.prefSlope === 'sloped', needs: 'slope' },
 ].filter(c => !c.needs || (typeof window !== 'undefined' && window.PLOTS && window.PLOTS[0][c.needs] !== undefined));
 
 function normalizer(vals, hb) {
