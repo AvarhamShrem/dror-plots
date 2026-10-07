@@ -51,6 +51,7 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .btn{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
 .btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .acts{display:flex;gap:6px;margin-top:8px}
+.more{margin-top:6px;font-size:13px;color:var(--muted)}.more summary{cursor:pointer}.more ul{margin:4px 0;padding-inline-start:18px}
 .plot.pin{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .mine{list-style:none;padding:0;margin:0}
 .mine li{display:grid;grid-template-columns:auto auto 1fr auto;gap:4px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -150,10 +151,12 @@ a{color:var(--accent)}
       <p class="summary" id="summary"></p>
       <details class="note" style="margin:-4px 0 12px"><summary>איך לקרוא כרטיס מגרש?</summary>
         <ul style="margin:6px 0;padding-inline-start:20px">
+          <li><b>מחיר</b>: סך התשלום המשוער בקטגוריה שבחרת (קרקע + פיתוח + מבני ציבור, כולל הצמדה ומע"מ). לא כולל בנייה, היטלים, מיסים או עלויות נלוות.</li>
+          <li><b>⛰ עולה / יורד מהרחוב והפרש גובה</b>: מהשטח שלפני הפיתוח. ההסבר המלא נמצא תחת "מה זה גבוה ושיפוע" בהגדרות.</li>
+          <li>תחת <b>עוד פרטים</b>:</li>
           <li><b>שטח: 45/297</b>: המגרש הוא ה-45 בגודלו מתוך כל 297 המגרשים (1 = הגדול ביותר). <b>בשכונה א' חד: 12/227</b> = אותו דירוג, רק מול מגרשים מאותה שכונה ומאותו סוג. <b>מחיר: 30/297</b> = 1 הוא הזול ביותר בקטגוריה שבחרת.
             אלה עובדות על המגרש, לא תחזית. הכלי לא יודע מה יבחרו אחרים, אבל הדירוג עוזר להעריך את זה בעצמך. למשל, למי שבמקום 180, מגרש שהוא ה-20 בגודלו כנראה יילקח לפני שיגיע תורו.</li>
-          <li><b>התאמה 0–100</b>: כמה המגרש מתאים לסדר העדיפויות שלך, יחסית לשאר המגרשים. זה לא ציון איכות מוחלט.</li>
-          <li><b>מחיר</b>: סך התשלום המשוער בקטגוריה שבחרת (קרקע + פיתוח + מבני ציבור, כולל הצמדה ומע"מ). לא כולל בנייה, היטלים, מיסים או עלויות נלוות.</li>
+          <li><b>התאמה 0–100</b>: כמה המגרש מתאים לסדר העדיפויות שלך, יחסית לשאר המגרשים. זה לא ציון איכות מוחלט. ההצעות ממוינות לפיה.</li>
         </ul></details>
       <p class="note" id="mineLink"></p>
       <h2>💡 הצעות בשבילך</h2>
@@ -358,11 +361,15 @@ function card(p) {
     : `<button class="btn pri" data-pin="${p.id}">📌 הוסף לפול</button><button class="btn" data-hide="${p.id}">✕ לא מעניין</button>`;
   return `<div class="plot ${on ? 'pin' : ''}" ${p.taken ? 'style="opacity:.55"' : ''}>
     <div><span class="id">${p.id}</span> ${mapLink(p.id)}</div>
-    <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר${p.edge ? ` · 📍 ${EDGE_LABEL[p.edge]}` : ''}</div>
-    ${p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">לפני פיתוח: גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% · הפרש גובה במגרש ${p.drop} מ'${p.rise !== undefined ? ' · ' + riseText(p) : ''} ⚠</div>` : ''}
-    <div class="pr">${ils(p.price)} <span class="note">(${ils(p.ppm)} למ"ר)</span></div>
-    <div class="note" style="margin-top:4px" title="דירוג עובדתי מול כל המגרשים: 1 = הגדול / הזול ביותר">📊 ${facts(p)}</div>
-    <div style="margin-top:6px">${takenBadge(p)} <span class="note">התאמה לעדיפויות שלך: ${p.score}</span> ${savedBy(p)}</div>
+    <div class="pr">${ils(p.price)} · ${p.area} מ"ר</div>
+    <div class="meta">שכונה ${p.hood} · ${fullType(p.type)}${p.edge ? ` · ${EDGE_LABEL[p.edge]}` : ''}</div>
+    ${p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">⛰ ${p.rise !== undefined ? riseText(p) + ' · ' : ''}הפרש גובה ${p.drop} מ' ⚠</div>` : ''}
+    ${p.taken || savedBy(p) ? `<div style="margin-top:4px">${takenBadge(p)} ${savedBy(p)}</div>` : ''}
+    <details class="more"><summary>עוד פרטים</summary><ul>
+      <li>מחיר למ"ר: ${ils(p.ppm)}</li>
+      ${p.elev ? `<li>לפני פיתוח: גובה ${Math.round(p.elev)} מ' מעל פני הים, שיפוע ${p.slope}%</li>` : ''}
+      <li title="1 = הגדול / הזול ביותר">${facts(p)}</li>
+      <li>התאמה לעדיפויות שלך: ${p.score}</li></ul></details>
     <div class="acts no-print">${acts}</div></div>`;
 }
 // מגרשים דומים לשורה בפול — רשימה מתקפלת (פתוחה אחת בכל פעם)
@@ -381,7 +388,7 @@ function mineRow(p, i) {
       <button class="mv" data-pdown="${i}" ${i === S.pinned.length - 1 ? 'disabled' : ''} aria-label="הורד בעדיפות">▼</button></div>
     <span class="num">${i + 1}</span>
     <div class="body"><span class="id">${p.id}</span>${takenBadge(p)} ${mapLink(p.id)}
-      <div class="meta">${savedBy(p)} שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · לפני פיתוח: גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%, הפרש גובה ${p.drop} מ'${p.rise !== undefined ? ', ' + riseText(p) : ''}` : ''}</div></div>
+      <div class="meta">${savedBy(p)} שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.rise !== undefined ? ` · ⛰ ${riseText(p)}` : ''}</div></div>
     <span class="acts no-print" style="margin:0"><button class="btn" data-sim="${p.id}" aria-expanded="${openSim === p.id}">🔍 דומים</button><button class="btn" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button></span>
     ${openSim === p.id ? simList(p) : ''}
     <input class="noteIn" data-note="${p.id}" value="${esc(S.notes[p.id] || '')}" placeholder="הערה (למשל: צמוד לגן, לבדוק שיפוע מול הרחוב)">
