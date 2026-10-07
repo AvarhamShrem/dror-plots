@@ -177,8 +177,11 @@ a{color:var(--accent)}
       <p class="note no-print" id="pinHint">הרשימה מסודרת לפי סדר העדיפות שלך, ו-▲▼ מזיזים מגרש למעלה או למטה. ביום הבחירה עוברים עליה מלמעלה למטה: אם מגרש נלקח, ממשיכים לבא בתור.</p>
       <ol class="mine" id="pinned"></ol>
       <p class="note" id="pinEmpty">עוד לא הוספת מגרשים. בטאב "בחירת מגרשים" לוחצים "📌 הוסף לפול" על הצעה, או "＋" בטאב "כל המגרשים".</p>
-      <p class="no-print acts" style="margin-top:14px"><button class="btn pri" data-share="1">📤 שליחת הפול (ווטסאפ וכו')</button><button class="btn" onclick="print()">🖨 הדפסה / שמירה כ-PDF</button></p>
+      <p class="no-print acts" style="margin-top:14px;flex-wrap:wrap"><button class="btn pri" data-share="1">📤 שליחת הפול (ווטסאפ וכו')</button><button class="btn" data-mylink="1">🔗 קישור אישי לפול שלי</button><button class="btn" onclick="print()">🖨 הדפסה / שמירה כ-PDF</button></p>
       <p class="note" id="shareMsg"></p>
+      <p class="note no-print">💾 <b>שמירה:</b> כל מה שמזינים נשמר אוטומטית בדפדפן הזה, וכשחוזרים לדף הכל נמצא במקום.
+        כדאי לפתוח את הכלי בדפדפן הרגיל (ספארי או כרום, ולא מתוך ווטסאפ) ולהוסיף אותו למסך הבית.
+        כדי לעבור למכשיר אחר, למשל מהמחשב לטלפון ביום הבחירה, לוחצים <b>"🔗 קישור אישי"</b>, שולחים את הקישור לעצמך ופותחים אותו במכשיר השני.</p>
     </div>
   </section>
 
@@ -241,7 +244,8 @@ a{color:var(--accent)}
   </ul>
 
   <h3>פרטיות</h3>
-  <p>כל מה שמזינים בכלי (מקום בתור, עדיפויות, הפול, מצב הבחירה) נשמר <b>רק בדפדפן שלך</b> ולא נשלח לשום מקום.</p>
+  <p>כל מה שמזינים בכלי (מקום בתור, עדיפויות, הפול, מצב הבחירה) נשמר <b>רק בדפדפן שלך</b> ולא נשלח לשום מקום.
+    ה"קישור האישי" מכיל את הנתונים האלה בתוך הקישור עצמו, והם לא עוברים דרך שרת. מי שמקבל את הקישור יראה את הפול שלך, ולכן כדאי לשלוח אותו רק לעצמך.</p>
 
   <p class="note">הכלי לא רשמי ואינו מהווה ייעוץ משפטי, כלכלי או תכנוני. השימוש בו על אחריות המשתמש בלבד.</p>
   </div>
@@ -272,6 +276,21 @@ function parseTaken(text) {
 }
 let S;
 try { S = { ...DEF, ...JSON.parse(localStorage.getItem('dror-tool') || '{}') }; } catch { S = { ...DEF }; }
+// קישור אישי: כל ההגדרות ב-#s=... (ה-hash לא נשלח לשרת). base64url של JSON ב-UTF-8.
+const encodeState = st => btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(st))))
+  .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const decodeState = s => JSON.parse(new TextDecoder().decode(
+  Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))));
+let imported = false;
+if (location.hash.startsWith('#s=')) {
+  try {
+    const imp = decodeState(location.hash.slice(3));
+    if (!imp || typeof imp !== 'object' || !Array.isArray(imp.pinned)) throw new Error('bad');
+    const hasLocal = S.pinned.length || S.takenText;
+    if (!hasLocal || confirm(`לטעון את הפול מהקישור (${imp.pinned.length} מגרשים)? זה יחליף את מה ששמור כרגע במכשיר הזה.`)) { S = { ...DEF, ...imp }; imported = true; }
+  } catch { alert('הקישור האישי פגום או חלקי. ייתכן שהוא נחתך בהעתקה.'); }
+  history.replaceState(null, '', location.pathname);  // לא להשאיר את הנתונים בשורת הכתובת
+}
 // הגירה מגרסה קודמת: כוכבים → פול; קטגוריות ישנות
 if (S.stars) { S.pinned = [...new Set([...S.pinned, ...S.stars])]; delete S.stars; }
 S.category = { homeless: 'res_home', other: 'res' }[S.category] || S.category;
@@ -280,6 +299,7 @@ if (!CATEGORIES.some(c => c.key === S.category)) S.category = DEF.category;
 CRITERIA.forEach(c => { if (!S.order.includes(c.key)) S.order.push(c.key); });
 S.order = S.order.filter(k => CRITERIA.some(c => c.key === k));
 const save = () => { try { localStorage.setItem('dror-tool', JSON.stringify(S)); } catch {} };
+if (imported) save();
 
 const ils = n => '₪' + Math.round(n).toLocaleString('he-IL');
 const fullType = t => (t === 'חד' ? 'חד-משפחתי' : 'דו-משפחתי');
@@ -386,6 +406,7 @@ document.addEventListener('click', e => {
     const i = Number(b.dataset.pup ?? b.dataset.pdown), j = b.dataset.pup ? i - 1 : i + 1;
     [S.pinned[i], S.pinned[j]] = [S.pinned[j], S.pinned[i]];
   } else if (b.dataset.share) return sharePool();
+  else if (b.dataset.mylink) return shareMyLink();
   else if (b.dataset.fillPassed) { S.passed = Number(b.dataset.fillPassed); fillForm(); }
   else if (b.dataset.pin) {
     S.pinned = [...S.pinned, b.dataset.pin]; S.excluded = S.excluded.filter(x => x !== b.dataset.pin);
@@ -447,6 +468,16 @@ function schedPassed(now = new Date()) {
   let n = 0;
   for (const [pos, sl] of Object.entries(window.SCHEDULE.prio)) if (slotDate(sl).getTime() + 3600e3 <= now) n = Math.max(n, +pos);
   return n;
+}
+
+async function shareMyLink() {
+  const url = location.origin + location.pathname + '#s=' + encodeState(S);
+  try {
+    if (navigator.share) await navigator.share({ title: 'הפול שלי · דרור', url });
+    else { await navigator.clipboard.writeText(url); $('shareMsg').textContent = '✓ הקישור האישי הועתק. שלח אותו לעצמך ופתח אותו במכשיר השני.'; }
+  } catch (e) {
+    if (e.name !== 'AbortError') $('shareMsg').innerHTML = 'לא הצלחתי להעתיק אוטומטית. סמן והעתק:<br><textarea rows="3" style="width:100%" dir="ltr">' + esc(url) + '</textarea>';
+  }
 }
 
 async function sharePool() {
