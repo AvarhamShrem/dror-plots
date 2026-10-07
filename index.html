@@ -165,19 +165,19 @@ a{color:var(--accent)}
       <h2>📌 הפול שלי</h2>
       <p class="summary" id="mineSlot"></p>
       <div id="mineAlert"></div>
+      <div class="summary no-print" id="anonBox" style="border:1px solid var(--line)">
+        <b>👥 שיתוף אנונימי</b>
+        <label class="chk" style="margin:6px 0"><input type="checkbox" id="sharePool"> הפול שלי משותף אנונימית, כדי לעזור לאחרים לראות כמה שמרו כל מגרש</label>
+        <div class="note">כברירת מחדל נשלחים <b>רק מספרי המגרשים שבפול שלך</b>, יחד עם קוד אקראי שהדפדפן יוצר. <b>לא נשלחים</b> מקומך בתור, שמך, ההערות או כל פרט אחר.
+          אפשר לבטל בכל רגע, והביטול מוחק את הפול שלך מהמאגר.</div>
+        <div class="note" id="anonStatus"></div>
+      </div>
       <p class="note no-print" id="pinHint">הרשימה מסודרת לפי סדר העדיפות שלך, ו-▲▼ מזיזים מגרש למעלה או למטה. ביום הבחירה עוברים עליה מלמעלה למטה: אם מגרש נלקח, ממשיכים לבא בתור.
         כדאי שהרשימה תהיה ארוכה ככל שמקומך בתור רחוק יותר. <b>🔍 דומים</b> מציג מגרשים קרובים באותה שכונה ובאותו סוג, כדי להרחיב את הרשימה מנקודת מוצא.</p>
       <ol class="mine" id="pinned"></ol>
       <p class="note" id="pinEmpty">עוד לא הוספת מגרשים. בטאב "בחירת מגרשים" לוחצים "📌 הוסף לפול" על הצעה, או "＋" בטאב "כל המגרשים".</p>
       <p class="no-print acts" style="margin-top:14px;flex-wrap:wrap"><button class="btn pri" data-share="1">📤 שליחת הפול (ווטסאפ וכו')</button><button class="btn" data-mylink="1">🔗 קישור אישי לפול שלי</button><button class="btn" onclick="print()">🖨 הדפסה / שמירה כ-PDF</button></p>
       <p class="note" id="shareMsg"></p>
-      <div class="summary no-print" id="anonBox" style="margin-top:14px">
-        <b>👥 כמה משתמשים שמרו כל מגרש</b>
-        <label class="chk" style="margin:6px 0"><input type="checkbox" id="shareAnon"> לשתף את הפול שלי אנונימית, כדי לעזור לאחרים</label>
-        <div class="note">נשלחים <b>רק מספרי המגרשים שבפול שלך</b> וקוד אקראי שהדפדפן יוצר (כדי ששמירה חוזרת תחליף את הקודמת ולא תיספר פעמיים).
-          <b>לא נשלחים</b> מקומך בתור, שמך, ההערות או כל פרט אחר. ביטול הסימון מוחק את הפול שלך מהמאגר.</div>
-        <div class="note" id="anonStatus"></div>
-      </div>
       <p class="note no-print">💾 <b>שמירה:</b> כל מה שמזינים נשמר אוטומטית בדפדפן הזה, וכשחוזרים לדף הכל נמצא במקום.
         כדאי לפתוח את הכלי בדפדפן הרגיל (ספארי או כרום, ולא מתוך ווטסאפ) ולהוסיף אותו למסך הבית.
         כדי לעבור למכשיר אחר, למשל מהמחשב לטלפון ביום הבחירה, לוחצים <b>"🔗 קישור אישי"</b>, שולחים את הקישור לעצמך ופותחים אותו במכשיר השני.</p>
@@ -240,7 +240,7 @@ a{color:var(--accent)}
 
   <h3>פרטיות</h3>
   <p>כל מה שמזינים בכלי (מקום בתור, עדיפויות, הפול, מצב הבחירה) נשמר <b>רק בדפדפן שלך</b> ולא נשלח לשום מקום.
-    <b>חריג אחד, רק בהסכמה:</b> מי שמסמן "לשתף את הפול שלי אנונימית" שולח לשרת את רשימת מספרי המגרשים שבפול שלו, יחד עם קוד אקראי. השרת לא שומר מקום בתור, שם, הערות או כתובת IP. ביטול הסימון מוחק את הרשומה.
+    <b>חריג אחד:</b> כברירת מחדל, רשימת מספרי המגרשים שבפול שלך נשלחת לשרת יחד עם קוד אקראי, כדי להציג "👥 N שמרו". אפשר לבטל בטאב "הפול שלי". השרת לא שומר מקום בתור, שם, הערות או כתובת IP. ביטול הסימון מוחק את הרשומה.
     המספר "👥 N שמרו" מייצג רק משתמשים בכלי שבחרו לשתף, ולא את כל הזוכים.
     ה"קישור האישי" מכיל את הנתונים האלה בתוך הקישור עצמו, והם לא עוברים דרך שרת. מי שמקבל את הקישור יראה את הפול שלך, ולכן כדאי לשלוח אותו רק לעצמך.</p>
 
@@ -260,7 +260,7 @@ const DEF = {
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
   pinned: [], excluded: [],
-  takenText: '', taken: [], notes: {}, waiting: false, shareAnon: false, anonToken: '',
+  takenText: '', taken: [], notes: {}, waiting: false, sharePool: true, anonToken: '',
 };
 // קישור למגרש על המפה באתר של BH Software (נתיב /m/<מזהה>, מזהה = מכרז:מספר)
 const mapUrl = id => `https://dror.bhsoft.app/m/20250052%3A${encodeURIComponent(id)}`;
@@ -311,9 +311,9 @@ const applyCounts = r => { COUNTS = r.counts; anonUsers = r.users; };
 fetch(API + '/counts').then(r => r.json()).then(r => { applyCounts(r); render(); }).catch(() => {});
 const savedBy = p => (COUNTS && COUNTS[p.id] ? `<span class="note" title="משתמשים בכלי ששיתפו את הפול שלהם ושמרו את המגרש הזה (כולל אותך, אם שיתפת)">👥 ${COUNTS[p.id]} שמרו</span>` : '');
 function syncAnon() {
-  const plots = S.shareAnon ? S.pinned : [];
+  const plots = S.sharePool ? S.pinned : [];
   const key = JSON.stringify(plots);
-  if (key === lastSent || (!S.shareAnon && lastSent === null)) return;
+  if (key === lastSent || (lastSent === null && !plots.length)) return;  // לא לשלוח כלום כשאין מה לשתף או למחוק
   clearTimeout(sendTimer);
   sendTimer = setTimeout(() => {
     if (!S.anonToken) { S.anonToken = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join(''); save(); }
@@ -402,7 +402,7 @@ document.addEventListener('input', e => {
   else if (['category', 'prefType', 'prefHood', 'prefSlope'].includes(t.id)) S[t.id] = t.value;
   else if (t.id === 'use35') S.use35 = t.checked;
   else if (t.id === 'waiting') S.waiting = t.checked;
-  else if (t.id === 'shareAnon') { S.shareAnon = t.checked; if (!t.checked) lastSent = lastSent ?? 'force-delete'; }
+  else if (t.id === 'sharePool') { S.sharePool = t.checked; if (!t.checked) lastSent = lastSent ?? 'force-delete'; }
   else if (t.dataset.note) { S.notes = { ...S.notes, [t.dataset.note]: t.value }; return save(); }  // בלי render — לא לאבד פוקוס
   else if (t.id === 'takenInput') { S.takenText = t.value; S.taken = parseTaken(t.value).ok; }
   else if (t.dataset.hoods || t.dataset.types || t.dataset.edges) {
@@ -466,7 +466,7 @@ function render() {
   $('pinCount').textContent = pinned.length ? `(${pinned.length})` : '';
   $('pinEmpty').classList.toggle('hidden', pinned.length > 0);
   $('mineLink').innerHTML = pinned.length
-    ? `📌 בפול שלך ${pinned.length} מגרשים. את הסדר וההערות קובעים ב<button class="linkbtn" data-goto="mine">טאב "הפול שלי"</button>.` : '';
+    ? `📌 בפול שלך ${pinned.length} מגרשים${S.sharePool ? ' (משותף אנונימית: רק מספרי מגרשים)' : ''}. את הסדר, ההערות וההגדרה של השיתוף קובעים ב<button class="linkbtn" data-goto="mine">טאב "הפול שלי"</button>.` : '';
   $('pool').innerHTML = pool.map(p => card(p)).join('') || '<p class="note">אין הצעות נוספות. נסה להרחיב את הסינון.</p>';
   $('exclNote').innerHTML = (S.excluded.length ? `הסתרת ${S.excluded.length} מגרשים · <button class="linkbtn" data-unhide-all="1">החזר הכל</button> ` : '')
     + (S.extra ? `· <button class="linkbtn" data-fewer="1">חזור ל-${S.k} הצעות</button>` : '');
@@ -483,9 +483,10 @@ function render() {
     : `⚠ מספר ${S.pos} לא נמצא ב${S.waiting ? 'רשימת ההמתנה (1–' + Object.keys(window.SCHEDULE.wait).length + ')' : 'רשימת הזוכים (1–297)'}.`;
   const on = S.order.filter(k => S.enabled[k]).length;
   $('settingsSum').textContent = `· ${on} עדיפויות פעילות · ${S.hoods.length}/4 שכונות${S.minPrice || S.budget ? ` · מחיר ${S.minPrice ? ils(S.minPrice) : '0'}–${S.budget ? ils(S.budget) : '∞'}` : ''}`;
-  $('shareAnon').checked = S.shareAnon;
-  $('anonStatus').textContent = COUNTS ? `${anonUsers} משתמשים שיתפו עד כה.${S.shareAnon ? ' ✓ הפול שלך משותף.' : ''}` : '';
-  $('anonBox').classList.toggle('hidden', COUNTS === null && !S.shareAnon);
+  $('sharePool').checked = S.sharePool;
+  $('anonStatus').textContent = COUNTS
+    ? `${anonUsers} משתמשים שיתפו עד כה.${S.sharePool && S.pinned.length ? ' ✓ הפול שלך משותף.' : ''}`
+    : '⚠ אין חיבור לשרת המונה מהרשת הזו. ברשתות ארגוניות, למשל במקום עבודה, חומת האש חוסמת אותו לפעמים. מרשת אחרת או מהסלולרי זה יעבוד, ושאר הכלי עובד כרגיל.';
   syncAnon();
   renderLive(pinned);
   renderTable();
