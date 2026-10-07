@@ -138,6 +138,8 @@ a{color:var(--accent)}
         <div class="rng needs-relief"><div class="note">שיפוע (%)</div><input id="minSlope" type="number" step="1" placeholder="מ-" aria-label="שיפוע מינימלי"> – <input id="maxSlope" type="number" step="1" placeholder="עד" aria-label="שיפוע מקסימלי"></div>
         <div class="rng needs-relief"><div class="note">הפרש גובה במגרש (מ')</div><input id="minDrop" type="number" step="0.5" placeholder="מ-" aria-label="הפרש גובה מינימלי"> – <input id="maxDrop" type="number" step="0.5" placeholder="עד" aria-label="הפרש גובה מקסימלי"></div>
         <div class="rng needs-relief"><div class="note">גובה מעל פני הים (מ')</div><input id="minElev" type="number" step="5" placeholder="מ-" aria-label="גובה מינימלי"> – <input id="maxElev" type="number" step="5" placeholder="עד" aria-label="גובה מקסימלי"></div>
+        <div class="rng needs-shape"><div class="note">יחס אורך לרוחב (1 = ריבוע)</div><input id="minRatio" type="number" step="0.1" placeholder="מ-" aria-label="יחס מינימלי"> – <input id="maxRatio" type="number" step="0.1" placeholder="עד" aria-label="יחס מקסימלי"></div>
+        <div class="rng needs-shape"><div class="note">חזית לרחוב (מ')</div><input id="minFront" type="number" step="1" placeholder="מ-" aria-label="חזית מינימלית"> – <input id="maxFront" type="number" step="1" placeholder="עד" aria-label="חזית מקסימלית"></div>
         <div class="rng"><div class="note">מחיר למ"ר (₪)</div><input id="minPpm" type="number" step="50" placeholder="מ-" aria-label="מחיר למ״ר מינימלי"> – <input id="maxPpm" type="number" step="50" placeholder="עד" aria-label="מחיר למ״ר מקסימלי"></div>
         <div class="rng"><div class="note">קנס מכירה מוקדמת (₪)</div><input id="minPenalty" type="number" step="10000" placeholder="מ-" aria-label="קנס מינימלי"> – <input id="maxPenalty" type="number" step="10000" placeholder="עד" aria-label="קנס מקסימלי"></div>
       </div></details>
@@ -241,7 +243,8 @@ a{color:var(--accent)}
   <ul id="reliefCredit">
     <li class="needs-relief"><b>גובה ושיפוע</b> חושבו בכלי הזה מפוליגוני המגרשים וממפת הגבהים שפורסמו באתר <a href="https://dror.bhsoft.app" target="_blank" rel="noopener">dror.bhsoft.app</a> של <b>BH Software</b>, בעותק מ-06/10/2026 ובאישורו.
       מפת הגבהים מתארת את <b>הקרקע לפני עבודות הפיתוח</b> (רשת של 4 מ'). מאז השטח עבר פיתוח, ולכן הנתונים לא משקפים את המצב היום, במיוחד השיפוע. אפשר להתייחס אליהם לכל היותר כאינדיקציה כללית.<br>
-      <b>עולה/יורד מהרחוב:</b> החזית היא החלק בגבול המגרש שנוגע בדרך במפת BH. ב-78 מגרשים הרחוב לא מסומן כחלקה, והחזית זוהתה כרצועה ריקה בין שורות מגרשים. במגרש 384B לא זוהתה חזית.</li>
+      <b>עולה/יורד מהרחוב:</b> החזית היא החלק בגבול המגרש שנוגע בדרך במפת BH. ב-80 מגרשים הרחוב לא מסומן כחלקה, והחזית זוהתה כרצועה ריקה בין שורות מגרשים. במגרש 384B לא זוהתה חזית.<br>
+      <b>צורה:</b> יחס אורך לרוחב של המלבן הקטן ביותר שמקיף את המגרש (1 = ריבוע). "לא סדיר" = המגרש ממלא פחות מ-80% מהמלבן (משולש, טרפז, קשת). <b>חזית לרחוב</b> = אורך הגבול שנוגע ברחוב, בדיוק של כ-2 מ'. במגרש פינתי היא כוללת את שני הצדדים.</li>
     <li class="needs-edge"><b>מיקום ביישוב</b> (על הגדר / פונה לשטח פתוח פנימי / פנימי) חושב בכלי הזה מפוליגוני המגרשים של BH Software, לפי <b>תכנית היישוב המלאה, כולל שלבים שעוד לא שווקו</b>. "על הגדר" = המגרש נוגע בקו החיצוני של כל היישוב המתוכנן. "פונה לשטח פתוח פנימי" = נוגע בשטח פתוח בין שכונות. זה חישוב גאומטרי מקורב: יש לבדוק במפה מה בדיוק נמצא מעבר למגרש (ואדי, כביש, גן), ולזכור שתכנית הבינוי עוד לא סופית.</li>
     <li><b>"🗺 במפה"</b> פותח את המגרש באתר של BH Software, שם רואים את המיקום שלו, השכנים, המידות, תצלום אוויר ותכנית הבינוי. גם זה אתר לא רשמי.</li>
     <li><b>חד-משפחתי / דו-משפחתי</b> הוסק ממספר המגרש: סיומת A/B = דו-משפחתי. יש לוודא מול חוברת המכרז.</li>
@@ -274,11 +277,11 @@ a{color:var(--accent)}
 const $ = id => document.getElementById(id);
 const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'], RISES = ['up', 'flat', 'down'];
 const RISE_LABEL = { up: 'עולה', flat: 'מישורי', down: 'יורד' };
-const ADV = ['minPpm', 'maxPpm', 'minPenalty', 'maxPenalty', 'minElev', 'maxElev', 'minSlope', 'maxSlope', 'minDrop', 'maxDrop'];
+const ADV = ['minPpm', 'maxPpm', 'minPenalty', 'maxPenalty', 'minElev', 'maxElev', 'minSlope', 'maxSlope', 'minDrop', 'maxDrop', 'minRatio', 'maxRatio', 'minFront', 'maxFront'];
 const NUM_FILTERS = ['budget', 'minPrice', 'minArea', 'maxArea', ...ADV];
 const EDGE_LABEL = { fence: 'על גדר היישוב', open: 'פונה לשטח פתוח פנימי', inner: 'פנימי' };
 const DEF = {
-  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minPrice: 0, minArea: 0, maxArea: 0, minPpm: 0, maxPpm: 0, minPenalty: 0, maxPenalty: 0, minElev: 0, maxElev: 0, minSlope: 0, maxSlope: 0, minDrop: 0, maxDrop: 0, rises: RISES,
+  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minPrice: 0, minArea: 0, maxArea: 0, minPpm: 0, maxPpm: 0, minPenalty: 0, maxPenalty: 0, minElev: 0, maxElev: 0, minSlope: 0, maxSlope: 0, minDrop: 0, maxDrop: 0, minRatio: 0, maxRatio: 0, minFront: 0, maxFront: 0, rises: RISES,
   hoods: HOODS, types: TYPES, edges: EDGES, prefType: 'חד', prefHood: 'א', prefSlope: 'flat',
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
@@ -365,6 +368,8 @@ function syncAnon() {
 }
 // מול הרחוב: גובה החלק האחורי פחות גובה החזית (לפני פיתוח); עד מטר לכל כיוון = מישורי
 const riseText = p => p.rise === undefined ? '' : p.rise > 1 ? `עולה מהרחוב ${p.rise} מ'` : p.rise < -1 ? `יורד מהרחוב ${-p.rise} מ'` : 'מישורי מול הרחוב';
+// צורה: יחס אורך/רוחב של המלבן החוסם; מילוי מתחת ל-80% = לא סדיר (משולש, טרפז, קשת)
+const shapeText = p => p.ratio === undefined ? '' : `${p.ratio < 1.3 ? 'ריבועי' : p.ratio < 1.8 ? 'רגיל' : p.ratio < 2.5 ? 'מוארך' : 'צר וארוך'} (יחס ${p.ratio})${p.fill < 0.8 ? ', לא סדיר' : ''}`;
 const takenBadge = p => (p.taken ? '<span class="badge b-r">❌ נבחר כבר</span>' : '');
 const facts = p => `שטח: ${p.areaRank}/297 · בשכונה ${p.hood} ${p.type}: ${p.groupRank}/${p.groupSize} · מחיר: ${p.priceRank}/297`;
 function card(p) {
@@ -379,6 +384,7 @@ function card(p) {
     ${p.taken || savedBy(p) ? `<div style="margin-top:4px">${takenBadge(p)} ${savedBy(p)}</div>` : ''}
     <details class="more"><summary>עוד פרטים</summary><ul>
       <li>מחיר למ"ר: ${ils(p.ppm)}</li>
+      ${p.ratio !== undefined ? `<li>צורה: ${shapeText(p)}${p.front ? ` · חזית לרחוב כ-${p.front} מ'` : ''}</li>` : ''}
       ${p.elev ? `<li>לפני פיתוח: גובה ${Math.round(p.elev)} מ' מעל פני הים, שיפוע ${p.slope}%</li>` : ''}
       <li title="1 = הגדול / הזול ביותר">${facts(p)}</li>
       <li>התאמה לעדיפויות שלך: ${p.score}</li></ul></details>
@@ -587,8 +593,8 @@ function renderLive(pinned) {
 
 const COLS = [
   ['pin', '📌'], ['id', 'מגרש'], ['hood', 'שכונה'], ['type', 'סוג'], ['edge', 'מיקום'], ['area', 'שטח'], ['price', 'מחיר כולל'],
-  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['drop', 'הפרש גובה*'], ['rise', 'מול הרחוב*'], ['penalty', 'קנס מכירה מוקדמת'], ['areaRank', 'דירוג שטח'], ['priceRank', 'דירוג מחיר'], ['taken', 'סטטוס'], ['saved', '👥 שמרו'], ['score', 'התאמה לי'],
-].filter(([k]) => !['elev', 'slope', 'drop', 'rise', 'edge'].includes(k) || window.PLOTS[0][k] !== undefined);
+  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['drop', 'הפרש גובה*'], ['rise', 'מול הרחוב*'], ['ratio', 'יחס אורך/רוחב'], ['front', 'חזית לרחוב (מ׳)'], ['penalty', 'קנס מכירה מוקדמת'], ['areaRank', 'דירוג שטח'], ['priceRank', 'דירוג מחיר'], ['taken', 'סטטוס'], ['saved', '👥 שמרו'], ['score', 'התאמה לי'],
+].filter(([k]) => !['elev', 'slope', 'drop', 'rise', 'ratio', 'front', 'edge'].includes(k) || window.PLOTS[0][k] !== undefined);
 let sort = { key: 'score', dir: -1 };
 function renderTable() {
   $('thead').innerHTML = COLS.map(([k, l]) => `<th data-sort="${k}" class="${sort.key === k ? 'sorted' : ''}">${l}${sort.key === k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('');
@@ -618,6 +624,7 @@ $('thead').addEventListener('click', e => {
 // גרסה בלי נתוני גובה (build.py --no-relief) — להסתיר כל מה שמתייחס לגובה/שיפוע
 if (window.PLOTS[0].elev === undefined) document.querySelectorAll('.needs-relief').forEach(e => e.classList.add('hidden'));
 if (window.PLOTS[0].edge === undefined) document.querySelectorAll('.needs-edge').forEach(e => e.classList.add('hidden'));
+if (window.PLOTS[0].ratio === undefined) document.querySelectorAll('.needs-shape').forEach(e => e.classList.add('hidden'));
 fillForm(); renderCrit(); render();
 // בטלפון — ההגדרות מקופלות כדי שהפול יופיע מיד; במחשב — פתוחות
 if (matchMedia('(min-width: 800px)').matches) $('settings').open = true;

@@ -75,6 +75,7 @@ const RANGES = {
   minPrice: ['price', 1], budget: ['price', -1], minArea: ['area', 1], maxArea: ['area', -1],
   minPpm: ['ppm', 1], maxPpm: ['ppm', -1], minPenalty: ['penalty', 1], maxPenalty: ['penalty', -1],
   minElev: ['elev', 1], maxElev: ['elev', -1], minSlope: ['slope', 1], maxSlope: ['slope', -1], minDrop: ['drop', 1], maxDrop: ['drop', -1],
+  minRatio: ['ratio', 1], maxRatio: ['ratio', -1], minFront: ['front', 1], maxFront: ['front', -1],
 };
 // מול הרחוב: עד מטר לכל כיוון = מישורי
 const riseDir = p => (p.rise === undefined ? undefined : p.rise > 1 ? 'up' : p.rise < -1 ? 'down' : 'flat');
