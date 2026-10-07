@@ -57,6 +57,8 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .mine .num{font-size:18px;font-weight:700;color:var(--accent);min-width:22px;text-align:center}
 .mine .body .id{font-size:18px;font-weight:700;margin-inline-end:8px}
 .mine .noteIn{grid-column:3/5;margin-top:0}
+.simbox{grid-column:1/5;background:var(--bg);border-radius:8px;padding:8px 10px;margin-top:4px}
+.simrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:5px 0;border-top:1px solid var(--line)}
 .mine li.gone .body{opacity:.55;text-decoration:line-through}
 .tabs button span{font-size:12px}
 .prio{display:inline-block;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;border-radius:99px;padding:1px 8px;margin-inline-end:6px}
@@ -89,7 +91,7 @@ a{color:var(--accent)}
 <header>
   <h1>בחירת מגרש בדרור (חירן) · מכרז 52/2025</h1>
   <div class="sub">מזינים מקום בתור ועדיפויות, ומקבלים רשימת מגרשים שכדאי להגיע איתה ליום הבחירה.</div>
-  <p class="warn">⚠ <b>כלי עזר לא רשמי.</b> הוא לא של רמ"י, לא של המועצה ולא של משווק כלשהו, ואינו ייעוץ. הנתונים נאספו ממקורות פומביים ועשויים להכיל טעויות, והסיכויים הם הערכה בלבד.
+  <p class="warn">⚠ <b>כלי עזר לא רשמי.</b> הוא לא של רמ"י, לא של המועצה ולא של משווק כלשהו, ואינו ייעוץ. הנתונים נאספו ממקורות פומביים ועשויים להכיל טעויות.
     לפני החלטה יש לבדוק מול המקורות הרשמיים. <a href="#about">מקורות המידע וההסתייגויות ↓</a></p>
 </header>
 <main>
@@ -144,8 +146,8 @@ a{color:var(--accent)}
       <p class="summary" id="summary"></p>
       <details class="note" style="margin:-4px 0 12px"><summary>איך לקרוא כרטיס מגרש?</summary>
         <ul style="margin:6px 0;padding-inline-start:20px">
-          <li><b>כנראה פנוי / גבולי / כנראה תפוס + %</b>: ההערכה כמה סביר שהמגרש עוד יהיה פנוי כשיגיע תורך. 70% פירושו שבכ-7 מתוך 10 תרחישים דומים הוא יישאר. זו לא התחייבות.</li>
-          <li><b>#N בביקוש</b>: הדירוג המשוער של המגרש בעיני הבוחרים שלפניך (1 = המבוקש ביותר), לפי ההנחות בסעיף "הנחות המודל".</li>
+          <li><b>שטח: 45/297</b>: המגרש הוא ה-45 בגודלו מתוך כל 297 המגרשים (1 = הגדול ביותר). <b>בשכונה א' חד: 12/227</b> = אותו דירוג, רק מול מגרשים מאותה שכונה ומאותו סוג. <b>מחיר: 30/297</b> = 1 הוא הזול ביותר בקטגוריה שבחרת.
+            אלה עובדות על המגרש, לא תחזית. הכלי לא יודע מה יבחרו אחרים, אבל הדירוג עוזר להעריך את זה בעצמך. למשל, למי שבמקום 180, מגרש שהוא ה-20 בגודלו כנראה יילקח לפני שיגיע תורו.</li>
           <li><b>התאמה 0–100</b>: כמה המגרש מתאים לסדר העדיפויות שלך, יחסית לשאר המגרשים. זה לא ציון איכות מוחלט.</li>
           <li><b>מחיר</b>: סך התשלום המשוער בקטגוריה שבחרת (קרקע + פיתוח + מבני ציבור, כולל הצמדה ומע"מ). לא כולל בנייה, היטלים, מיסים או עלויות נלוות.</li>
         </ul></details>
@@ -153,22 +155,9 @@ a{color:var(--accent)}
       <h2>💡 הצעות בשבילך</h2>
       <div class="plots" id="pool"></div>
       <p class="no-print"><button class="btn" data-more="1">➕ הצע לי עוד 5</button></p>
-      <div id="gambleWrap"><h3>הימורים · מגרשים שאתה מעדיף, אבל הסיכוי שיישארו נמוך</h3><div class="plots" id="gambles"></div></div>
       <p class="note no-print" id="exclNote"></p>
     </div>
 
-    <details class="card no-print">
-      <summary>הנחות המודל (מתקדם)</summary>
-      <p class="note">ההערכה מניחה שהבוחרים שלפניך לוקחים קודם את המגרשים המבוקשים: חד-משפחתי לפני דו-משפחתי, וגדול לפני קטן.
-        מכאן נגזר "דירוג פופולריות" לכל מגרש. ממספר הבוחרים שלפניך מנכים את מי שלא מגיע, ומגרש שמדורג מתחת למספר הבוחרים בפועל כנראה יישאר.<br>
-        <b>אלה הנחות, לא נתונים.</b> בפועל אנשים בוחרים גם לפי מיקום, שכנים, נוף ומחיר, ולכן ההערכה עלולה לטעות, במיוחד במגרשים "גבוליים". אפשר לשנות את ההנחות כאן ולראות איך ההצעות משתנות.</p>
-      <div class="row">
-        <label>% שלא מגיעים לבחור<input id="noShow" type="number" min="0" max="90" step="5"></label>
-        <label>מרווח אי-ודאות (%)<input id="margin" type="number" min="5" max="80" step="5"></label>
-        <label>משקל "חד לפני דו"<input id="wType" type="number" min="0" max="10" step="1"></label>
-        <label>משקל "גדול לפני קטן"<input id="wArea" type="number" min="0" max="10" step="1"></label>
-      </div>
-    </details>
   </section>
 
   <section id="tab-mine" class="hidden">
@@ -176,7 +165,8 @@ a{color:var(--accent)}
       <h2>📌 הפול שלי</h2>
       <p class="summary" id="mineSlot"></p>
       <div id="mineAlert"></div>
-      <p class="note no-print" id="pinHint">הרשימה מסודרת לפי סדר העדיפות שלך, ו-▲▼ מזיזים מגרש למעלה או למטה. ביום הבחירה עוברים עליה מלמעלה למטה: אם מגרש נלקח, ממשיכים לבא בתור.</p>
+      <p class="note no-print" id="pinHint">הרשימה מסודרת לפי סדר העדיפות שלך, ו-▲▼ מזיזים מגרש למעלה או למטה. ביום הבחירה עוברים עליה מלמעלה למטה: אם מגרש נלקח, ממשיכים לבא בתור.
+        כדאי שהרשימה תהיה ארוכה ככל שמקומך בתור רחוק יותר. <b>🔍 דומים</b> מציג מגרשים קרובים באותה שכונה ובאותו סוג, כדי להרחיב את הרשימה מנקודת מוצא.</p>
       <ol class="mine" id="pinned"></ol>
       <p class="note" id="pinEmpty">עוד לא הוספת מגרשים. בטאב "בחירת מגרשים" לוחצים "📌 הוסף לפול" על הצעה, או "＋" בטאב "כל המגרשים".</p>
       <p class="no-print acts" style="margin-top:14px;flex-wrap:wrap"><button class="btn pri" data-share="1">📤 שליחת הפול (ווטסאפ וכו')</button><button class="btn" data-mylink="1">🔗 קישור אישי לפול שלי</button><button class="btn" onclick="print()">🖨 הדפסה / שמירה כ-PDF</button></p>
@@ -190,16 +180,11 @@ a{color:var(--accent)}
   <section id="tab-live" class="hidden">
     <div class="card">
       <h2>מצב הבחירה</h2>
-      <p class="note">ממלאים לפי מה שפורסם (רמ"י, קבוצת הווטסאפ). כל החישובים בכלי מתעדכנים מיד: מגרשים שנבחרו יוצאים מההצעות, והסיכויים מחושבים מחדש לפי מה שבאמת נשאר. הנתונים נשמרים רק אצלך.</p>
-      <div class="row">
-        <label>עד איזה מקום בתור הגיעה הבחירה?<input id="passed" type="number" min="0" placeholder="0" class="big"></label>
-      </div>
-      <p class="note" id="schedHint"></p>
+      <p class="note">ממלאים לפי מה שפורסם (רמ"י, קבוצת הווטסאפ). מגרשים שנבחרו יוצאים מההצעות, ובפול שלך הם מסומנים "נבחר כבר". הנתונים נשמרים רק אצלך.</p>
       <label style="margin-top:12px">מגרשים שכבר נבחרו (אפשר להדביק רשימה: רווח, פסיק או שורה חדשה בין מגרש למגרש)
         <textarea id="takenInput" rows="5" dir="ltr" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%" placeholder="212, 213, 186B ..."></textarea></label>
       <p class="note" id="takenParse"></p>
       <div id="liveAlert"></div>
-      <p class="summary" id="liveStats"></p>
       <p class="no-print"><button class="btn" data-reset-live="1">🗑 איפוס מצב הבחירה</button></p>
     </div>
   </section>
@@ -208,7 +193,7 @@ a{color:var(--accent)}
     <div class="card no-print row">
       <label>חיפוש מגרש<input id="q" type="search" placeholder="מספר מגרש" style="font:inherit;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"></label>
       <label class="chk"><input type="checkbox" id="onlyPass"> רק מה שעובר את הסינון שלי</label>
-      <span class="note">* גובה ושיפוע לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום · לחיצה על כותרת עמודה ממיינת · הסיכוי מחושב לפי המקום בתור שהזנת</span>
+      <span class="note">* גובה ושיפוע לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום · דירוג שטח: 1 = הגדול ביותר · דירוג מחיר: 1 = הזול ביותר · לחיצה על כותרת עמודה ממיינת</span>
     </div>
     <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
   </section>
@@ -235,9 +220,8 @@ a{color:var(--accent)}
     <li><b>חד-משפחתי / דו-משפחתי</b> הוסק ממספר המגרש: סיומת A/B = דו-משפחתי. יש לוודא מול חוברת המכרז.</li>
   </ul>
 
-  <h3>הערכת הסיכויים</h3>
+  <h3>מקום בתור</h3>
   <ul>
-    <li>מבוססת על <b>הנחות</b> (חד לפני דו, גדול לפני קטן, כ-20% שלא מגיעים) ולא על נתוני בחירה אמיתיים. ב"מצב הבחירה" אפשר לעדכן אותה לפי מה שקורה בפועל.</li>
     <li>"מקום בתור" הוא מספר הקדימות ברשימת הזוכים. סדר הבחירה בפועל, הימים והשעות נקבעים רק על ידי רמ"י.</li>
   </ul>
 
@@ -266,8 +250,8 @@ const DEF = {
   hoods: HOODS, types: TYPES, edges: EDGES, prefType: 'חד', prefHood: 'א', prefSlope: 'flat',
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
-  noShow: 0.2, margin: 0.2, crowd: { type: 7, area: 3 }, pinned: [], excluded: [],
-  passed: 0, takenText: '', taken: [], notes: {}, waiting: false,
+  pinned: [], excluded: [],
+  takenText: '', taken: [], notes: {}, waiting: false,
 };
 // קישור למגרש על המפה באתר של BH Software (נתיב /m/<מזהה>, מזהה = מכרז:מספר)
 const mapUrl = id => `https://dror.bhsoft.app/m/20250052%3A${encodeURIComponent(id)}`;
@@ -311,23 +295,29 @@ if (imported) save();
 
 const ils = n => '₪' + Math.round(n).toLocaleString('he-IL');
 const fullType = t => (t === 'חד' ? 'חד-משפחתי' : 'דו-משפחתי');
-function badge(prob, taken) {
-  if (taken) return '<span class="badge b-r">❌ נבחר כבר</span>';
-  const pc = Math.round(prob * 100);
-  const [cls, txt] = prob >= 0.7 ? ['b-g', 'כנראה פנוי'] : prob >= 0.3 ? ['b-y', 'גבולי'] : ['b-r', 'כנראה תפוס'];
-  return `<span class="badge ${cls}">${txt} · ${pc}%</span>`;
-}
+const takenBadge = p => (p.taken ? '<span class="badge b-r">❌ נבחר כבר</span>' : '');
+const facts = p => `שטח: ${p.areaRank}/297 · בשכונה ${p.hood} ${p.type}: ${p.groupRank}/${p.groupSize} · מחיר: ${p.priceRank}/297`;
 function card(p) {
   const on = S.pinned.includes(p.id);
   const acts = on ? '<span class="note">📌 כבר בפול שלך</span>'
     : `<button class="btn pri" data-pin="${p.id}">📌 הוסף לפול</button><button class="btn" data-hide="${p.id}">✕ לא מעניין</button>`;
-  return `<div class="plot ${on ? 'pin' : ''}" ${p.taken ? 'style="opacity:.55"' : ''}>${p.rank ? `<span class="rankno" title="דירוג פופולריות משוער בין המגרשים שנשארו">#${p.rank} בביקוש</span>` : ''}
+  return `<div class="plot ${on ? 'pin' : ''}" ${p.taken ? 'style="opacity:.55"' : ''}>
     <div><span class="id">${p.id}</span> ${mapLink(p.id)}</div>
     <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר${p.edge ? ` · 📍 ${EDGE_LABEL[p.edge]}` : ''}</div>
     ${p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">לפני פיתוח: גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% ⚠</div>` : ''}
     <div class="pr">${ils(p.price)} <span class="note">(${ils(p.ppm)} למ"ר)</span></div>
-    <div style="margin-top:6px">${badge(p.prob, p.taken)} <span class="note">התאמה ${p.score}</span></div>
+    <div class="note" style="margin-top:4px" title="דירוג עובדתי מול כל המגרשים: 1 = הגדול / הזול ביותר">📊 ${facts(p)}</div>
+    <div style="margin-top:6px">${takenBadge(p)} <span class="note">התאמה לעדיפויות שלך: ${p.score}</span></div>
     <div class="acts no-print">${acts}</div></div>`;
+}
+// מגרשים דומים לשורה בפול — רשימה מתקפלת (פתוחה אחת בכל פעם)
+let openSim = null;
+function simList(p) {
+  const sims = similar(p, ROWS, 5);
+  return `<div class="simbox no-print">${sims.length ? `<div class="note">דומים ל-${p.id}: שכונה ${p.hood}, ${fullType(p.type)}, שטח ±15%:</div>` + sims.map(q => `<div class="simrow">
+      <b>${q.id}</b> ${mapLink(q.id)} <span class="meta">${q.area} מ"ר · ${ils(q.price)}${q.edge ? ' · ' + EDGE_LABEL[q.edge] : ''}</span>
+      ${S.pinned.includes(q.id) ? '<span class="note">📌 בפול</span>' : `<button class="btn" data-pin="${q.id}">＋ לפול</button>`}</div>`).join('')
+    : '<div class="note">לא נמצאו מגרשים דומים פנויים (אותה שכונה ואותו סוג, שטח ±15%).</div>'}</div>`;
 }
 // שורה בטאב "הפול שלי"
 function mineRow(p, i) {
@@ -335,9 +325,10 @@ function mineRow(p, i) {
     <div class="arr no-print"><button class="mv" data-pup="${i}" ${i === 0 ? 'disabled' : ''} aria-label="העלה בעדיפות">▲</button>
       <button class="mv" data-pdown="${i}" ${i === S.pinned.length - 1 ? 'disabled' : ''} aria-label="הורד בעדיפות">▼</button></div>
     <span class="num">${i + 1}</span>
-    <div class="body"><span class="id">${p.id}</span>${badge(p.prob, p.taken)} ${mapLink(p.id)}
+    <div class="body"><span class="id">${p.id}</span>${takenBadge(p)} ${mapLink(p.id)}
       <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · לפני פיתוח: גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%` : ''}</div></div>
-    <button class="btn no-print" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button>
+    <span class="acts no-print" style="margin:0"><button class="btn" data-sim="${p.id}" aria-expanded="${openSim === p.id}">🔍 דומים</button><button class="btn" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button></span>
+    ${openSim === p.id ? simList(p) : ''}
     <input class="noteIn" data-note="${p.id}" value="${esc(S.notes[p.id] || '')}" placeholder="הערה (למשל: צמוד לגן, לבדוק שיפוע מול הרחוב)">
   </li>`;
 }
@@ -352,9 +343,7 @@ function fillForm() {
   $('category').innerHTML = CATEGORIES.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
   $('pos').value = S.pos; $('category').value = S.category; $('k').value = S.k; $('use35').checked = S.use35;
   $('budget').value = S.budget || ''; $('minPrice').value = S.minPrice || ''; $('minArea').value = S.minArea || '';
-  $('passed').value = S.passed || ''; $('takenInput').value = S.takenText; $('waiting').checked = S.waiting;
-  $('noShow').value = Math.round(S.noShow * 100); $('margin').value = Math.round(S.margin * 100);
-  $('wType').value = S.crowd.type; $('wArea').value = S.crowd.area;
+  $('takenInput').value = S.takenText; $('waiting').checked = S.waiting;
   checks('hoods', HOODS, 'hoods', h => h);
   checks('types', TYPES, 'types', fullType);
   checks('edges', EDGES, 'edges', e => EDGE_LABEL[e]);
@@ -387,11 +376,7 @@ document.addEventListener('input', e => {
   else if (t.id === 'use35') S.use35 = t.checked;
   else if (t.id === 'waiting') S.waiting = t.checked;
   else if (t.dataset.note) { S.notes = { ...S.notes, [t.dataset.note]: t.value }; return save(); }  // בלי render — לא לאבד פוקוס
-  else if (t.id === 'passed') S.passed = Math.max(0, num(t.value));
   else if (t.id === 'takenInput') { S.takenText = t.value; S.taken = parseTaken(t.value).ok; }
-  else if (['noShow', 'margin'].includes(t.id)) S[t.id] = num(t.value) / 100;
-  else if (t.id === 'wType') S.crowd = { ...S.crowd, type: num(t.value) };
-  else if (t.id === 'wArea') S.crowd = { ...S.crowd, area: num(t.value) };
   else if (t.dataset.hoods || t.dataset.types || t.dataset.edges) {
     const key = t.dataset.hoods ? 'hoods' : t.dataset.types ? 'types' : 'edges', v = t.dataset[key];
     S[key] = t.checked ? [...S[key], v] : S[key].filter(x => x !== v);
@@ -409,9 +394,9 @@ document.addEventListener('click', e => {
     return;
   }
   if (b.dataset.resetLive) {
-    if (!confirm('לאפס את מצב הבחירה (מקום בתור שעבר ורשימת המגרשים שנבחרו)?')) return;
-    S.passed = 0; S.takenText = ''; S.taken = []; fillForm();
-  } else if (b.dataset.useRate) { S.noShow = 1 - Number(b.dataset.useRate); fillForm(); } else
+    if (!confirm('לאפס את רשימת המגרשים שנבחרו?')) return;
+    S.takenText = ''; S.taken = []; fillForm();
+  } else
   if (b.dataset.up || b.dataset.down) {
     const i = Number(b.dataset.up ?? b.dataset.down), j = b.dataset.up ? i - 1 : i + 1;
     [S.order[i], S.order[j]] = [S.order[j], S.order[i]];
@@ -419,9 +404,9 @@ document.addEventListener('click', e => {
   } else if (b.dataset.pup || b.dataset.pdown) {
     const i = Number(b.dataset.pup ?? b.dataset.pdown), j = b.dataset.pup ? i - 1 : i + 1;
     [S.pinned[i], S.pinned[j]] = [S.pinned[j], S.pinned[i]];
-  } else if (b.dataset.share) return sharePool();
+  } else if (b.dataset.sim) { openSim = openSim === b.dataset.sim ? null : b.dataset.sim; return render(); }
+  else if (b.dataset.share) return sharePool();
   else if (b.dataset.mylink) return shareMyLink();
-  else if (b.dataset.fillPassed) { S.passed = Number(b.dataset.fillPassed); fillForm(); }
   else if (b.dataset.pin) {
     S.pinned = [...S.pinned, b.dataset.pin]; S.excluded = S.excluded.filter(x => x !== b.dataset.pin);
   } else if (b.dataset.unpin) S.pinned = S.pinned.filter(x => x !== b.dataset.unpin);
@@ -438,18 +423,13 @@ const passesUI = p => S.hoods.includes(p.hood) && S.types.includes(p.type) && (p
 let ROWS = [];
 function render() {
   ROWS = enrich(window.PLOTS, settings());
-  const { pool, gambles, candidates } = buildPool(ROWS, settings());
-  const E = Math.round(effectiveBefore(S)), W = waitingBefore(S);
-  const remaining = window.PLOTS.length - S.taken.length, left = Math.max(0, remaining - E);
-  const live = S.passed || S.taken.length;
-  $('summary').innerHTML = (live ? `🔴 <b>לפי מצב הבחירה:</b> הבחירה הגיעה עד מקום ${S.passed}, ונבחרו ${S.taken.length} מגרשים. ` : '')
-    + (absPos(S) <= S.passed + 1 && live ? '<b>התור שלך הגיע!</b> כל המגרשים שנשארו פנויים. ' : '')
-    + `לפניך עוד <b>${W}</b> זוכים. בהנחה ש-${Math.round(S.noShow * 100)}% לא מגיעים, יבחרו לפניך בפועל כ-<b>${E}</b>,
-    ויישארו כ-<b>${left}</b> מתוך ${remaining} המגרשים שעדיין פנויים. ${candidates} מגרשים עוברים את הסינון שלך${(() => {
+  const { pool, candidates } = buildPool(ROWS, settings());
+  const W = waitingBefore(S), remaining = window.PLOTS.length - S.taken.length;
+  $('summary').innerHTML = (S.taken.length ? `🔴 <b>לפי מצב הבחירה:</b> נבחרו עד כה ${S.taken.length} מגרשים, ונשארו ${remaining}. ` : '')
+    + `לפניך בתור <b>${W}</b> זוכים. ${candidates} מגרשים עוברים את הסינון שלך${(() => {
       const ok = ROWS.filter(p => !p.taken && passesUI(p)), pin = ok.filter(p => S.pinned.includes(p.id)).length, hid = ok.filter(p => S.excluded.includes(p.id)).length;
       return pin || hid ? ` (${[pin && `${pin} כבר בפול שלך`, hid && `${hid} הסתרת`].filter(Boolean).join(', ')}, ולכן לא מופיעים בהצעות)` : '';
-    })()}.`
-    + (pool.length < S.k + S.extra ? ` <b>מצאתי רק ${pool.length} הצעות עם סיכוי של 50% ומעלה. נסה להרחיב את הסינון.</b>` : '');
+    })()}.`;
   // הפול שלי: לפי סדר העדיפות שהמשתמש קבע
   const byId = Object.fromEntries(ROWS.map(p => [p.id, p]));
   const pinned = S.pinned.map(id => byId[id]).filter(Boolean);
@@ -460,8 +440,6 @@ function render() {
   $('mineLink').innerHTML = pinned.length
     ? `📌 בפול שלך ${pinned.length} מגרשים. את הסדר וההערות קובעים ב<button class="linkbtn" data-goto="mine">טאב "הפול שלי"</button>.` : '';
   $('pool').innerHTML = pool.map(p => card(p)).join('') || '<p class="note">אין הצעות נוספות. נסה להרחיב את הסינון.</p>';
-  $('gambles').innerHTML = gambles.map(p => card(p)).join('');
-  $('gambleWrap').classList.toggle('hidden', !gambles.length);
   $('exclNote').innerHTML = (S.excluded.length ? `הסתרת ${S.excluded.length} מגרשים · <button class="linkbtn" data-unhide-all="1">החזר הכל</button> ` : '')
     + (S.extra ? `· <button class="linkbtn" data-fewer="1">חזור ל-${S.k} הצעות</button>` : '');
   // ההפרש בין הקטגוריות — רוב המחיר הוא פיתוח
@@ -481,13 +459,6 @@ function render() {
   renderTable();
 }
 
-// כמה מקומות בתור אמורים כבר לעבור לפי הלו"ז — רק הצעה, המשתמש מאשר
-function schedPassed(now = new Date()) {
-  let n = 0;
-  for (const [pos, sl] of Object.entries(window.SCHEDULE.prio)) if (slotDate(sl).getTime() + 3600e3 <= now) n = Math.max(n, +pos);
-  return n;
-}
-
 async function shareMyLink() {
   const url = location.origin + location.pathname + '#s=' + encodeState(S);
   try {
@@ -500,7 +471,7 @@ async function shareMyLink() {
 
 async function sharePool() {
   const byId = Object.fromEntries(ROWS.map(p => [p.id, p]));
-  const line = p => `${p.id} · שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)} · ${p.taken ? 'נבחר כבר' : 'סיכוי ' + Math.round(p.prob * 100) + '%'}`;
+  const line = p => `${p.id} · שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)} · ${p.taken ? 'נבחר כבר' : (p.edge ? EDGE_LABEL[p.edge] : '')}`;
   const slot = slotOf(S.pos, S.waiting);
   const { pool } = buildPool(ROWS, S);
   const text = [`הפול שלי · דרור מכרז 52/2025`,
@@ -520,22 +491,14 @@ function renderLive(pinned) {
   const { ok, bad } = parseTaken(S.takenText);
   $('takenParse').innerHTML = (ok.length ? `✓ זוהו ${ok.length} מגרשים.` : '')
     + (bad.length ? ` <b style="color:var(--r)">⚠ לא זוהו (בדוק את המספר):</b> ${bad.join(', ')}` : '');
-  const sp = schedPassed();
-  $('schedHint').innerHTML = sp && sp !== S.passed
-    ? `לפי הלו"ז של רמ"י, עד עכשיו היו אמורים לבחור כל בעלי הקדימות 1–${sp}. <button class="linkbtn" data-fill-passed="${sp}">מלא ${sp}</button> (רק אם זה תואם את מה שידוע לך)` : '';
   const lost = pinned.filter(p => p.taken);
   $('mineAlert').innerHTML = $('liveAlert').innerHTML = lost.length
-    ? `<p class="summary" style="background:var(--r-bg);color:var(--r)">⚠ מהפול שלך כבר נבחרו: <b>${lost.map(p => p.id).join(', ')}</b>. הצעות חלופיות בטאב "בחירת מגרשים".</p>` : '';
-  const rate = observedShowRate(S);
-  $('liveStats').innerHTML = rate === null
-    ? 'כשתמלא עד איזה מקום הגיעה הבחירה וכמה מגרשים נבחרו, אחשב את שיעור ההגעה בפועל.'
-    : `<b>שיעור הגעה בפועל:</b> ${Math.round(rate * 100)}% (${S.taken.length} מגרשים נבחרו ב-${S.passed} מקומות בתור). המודל מניח כרגע ${Math.round((1 - S.noShow) * 100)}%.
-       ${Math.abs(rate - (1 - S.noShow)) >= 0.02 ? `<button class="btn" data-use-rate="${rate.toFixed(3)}">השתמש בשיעור בפועל</button>` : '✓ תואם.'}`;
+    ? `<p class="summary" style="background:var(--r-bg);color:var(--r)">⚠ מהפול שלך כבר נבחרו: <b>${lost.map(p => p.id).join(', ')}</b>. לחלופות קרובות: <b>🔍 דומים</b> ליד המגרש בטאב "הפול שלי".</p>` : '';
 }
 
 const COLS = [
   ['pin', '📌'], ['id', 'מגרש'], ['hood', 'שכונה'], ['type', 'סוג'], ['edge', 'מיקום'], ['area', 'שטח'], ['price', 'מחיר כולל'],
-  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['penalty', 'קנס מכירה מוקדמת'], ['rank', 'דירוג ביקוש'], ['prob', 'סיכוי שיישאר'], ['score', 'התאמה לי'],
+  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['penalty', 'קנס מכירה מוקדמת'], ['areaRank', 'דירוג שטח'], ['priceRank', 'דירוג מחיר'], ['taken', 'סטטוס'], ['score', 'התאמה לי'],
 ].filter(([k]) => !['elev', 'slope', 'edge'].includes(k) || window.PLOTS[0][k] !== undefined);
 let sort = { key: 'score', dir: -1 };
 function renderTable() {
@@ -543,7 +506,7 @@ function renderTable() {
   const q = $('q').value.trim(), only = $('onlyPass').checked, s = settings();
   const ok = passesUI;
   const val = p => (sort.key === 'pin' ? +S.pinned.includes(p.id) : sort.key === 'id' ? parseInt(p.id)
-    : sort.key === 'rank' ? (p.rank ?? 1e9) : p[sort.key]);
+    : sort.key === 'taken' ? +p.taken : p[sort.key]);
   const rows = ROWS.filter(p => (!q || p.id.includes(q)) && (!only || ok(p)))
     .sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * sort.dir);
   const cell = {
@@ -551,14 +514,14 @@ function renderTable() {
       ? `<button class="btn pri" data-unpin="${p.id}" title="הוצא מהפול">📌</button>`
       : `<button class="btn" data-pin="${p.id}" title="הוסף לפול">＋</button>`),
     id: p => `<b>${p.id}</b> ${mapLink(p.id)}`, price: p => ils(p.price), ppm: p => ils(p.ppm), penalty: p => ils(p.penalty),
-    elev: p => Math.round(p.elev), edge: p => EDGE_LABEL[p.edge], prob: p => badge(p.prob, p.taken), rank: p => p.rank ?? '—',
+    elev: p => Math.round(p.elev), edge: p => EDGE_LABEL[p.edge], taken: p => takenBadge(p) || 'פנוי',
   };
   $('tbody').innerHTML = rows.map(p => `<tr class="${ok(p) ? '' : 'miss'}">`
     + COLS.map(([k]) => `<td>${cell[k] ? cell[k](p) : p[k]}</td>`).join('') + '</tr>').join('');
 }
 $('thead').addEventListener('click', e => {
   const k = e.target.closest('th')?.dataset.sort; if (!k) return;
-  sort = { key: k, dir: sort.key === k ? -sort.dir : (['price', 'ppm', 'rank', 'penalty', 'id'].includes(k) ? 1 : -1) };
+  sort = { key: k, dir: sort.key === k ? -sort.dir : (['price', 'ppm', 'areaRank', 'priceRank', 'penalty', 'id'].includes(k) ? 1 : -1) };
   renderTable();
 });
 

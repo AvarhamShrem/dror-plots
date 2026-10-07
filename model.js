@@ -34,52 +34,37 @@ function normalizer(vals, hb) {
   return v => (mx === mn ? 1 : (hb ? v - mn : mx - v) / (mx - mn));
 }
 
-// מודל הקהל: חד-משפחתי וגדול נבחרים קודם. מחזיר {id: דירוג}, 1 = הכי מבוקש.
-function crowdRanks(plots, w) {
-  const an = normalizer(plots.map(p => p.area), true);
-  const scored = plots.map(p => ({ id: p.id, s: w.type * (p.type === 'חד' ? 1 : 0) + w.area * an(p.area) }));
-  scored.sort((a, b) => b.s - a.s);
-  const r = {};
-  scored.forEach((x, i) => (r[x.id] = i + 1));
-  return r;
-}
+// זוכים שבוחרים לפניך (עובדה מרשימת הזוכים; רשימת ההמתנה אחרי כל 297)
+const waitingBefore = s => Math.max(0, absPos(s) - 1);
 
-// זוכים שעוד לפניך = מקומך פחות מי שכבר עבר בתור (passed), ואחרי ניכוי מי שלא מגיע
-const waitingBefore = s => Math.max(0, absPos(s) - 1 - (s.passed || 0));
-const effectiveBefore = s => waitingBefore(s) * (1 - s.noShow);
-
-// שיעור הגעה בפועל מתוך הבחירה שכבר התקיימה: מגרשים שנבחרו / מקומות שעברו
-const observedShowRate = s => (s.passed > 0 && s.taken?.length ? Math.min(1, s.taken.length / s.passed) : null);
-
-// סיכוי שמגרש בדירוג rank (בין המגרשים שנשארו) עדיין יהיה פנוי, כש-E בוחרים בפועל לפניך.
-// 50% כשהדירוג = E; margin קובע את רוחב אי-הוודאות (בדירוג E±margin·E הסיכוי ~12% / ~88%).
-function availability(rank, E, margin) {
-  if (E === 0) return 1;
-  const k = Math.max(1, margin * E) / 2;
-  return 1 / (1 + Math.exp(-(rank - 0.5 - E) / k));
-}
+// דירוג עובדתי: 1 + מספר המגרשים ש"טובים" ממנו בתכונה (שוויון = אותו דירוג)
+const rankBy = (all, val, better) => p => 1 + all.filter(q => better(val(q), val(p))).length;
 
 function enrich(plots, s) {
   const taken = new Set(s.taken || []);
-  const ranks = crowdRanks(plots.filter(p => !taken.has(p.id)), s.crowd);  // דירוג רק בין מה שנשאר
-  const E = effectiveBefore(s);
   const active = s.order.filter(k => s.enabled[k]);
   const hb = c => (typeof c.hb === 'function' ? c.hb(s) : c.hb);
   const norms = Object.fromEntries(CRITERIA.map(c => [c.key, normalizer(plots.map(p => c.val(p, s)), hb(c))]));
   const crit = Object.fromEntries(CRITERIA.map(c => [c.key, c]));
   const wsum = active.reduce((a, _, i) => a + (active.length - i), 0);
+  const areaRank = rankBy(plots, p => p.area, (a, b) => a > b);
+  const priceRank = rankBy(plots, p => priceOf(p, s), (a, b) => a < b);
+  const groups = {};
+  for (const p of plots) (groups[p.hood + p.type] ||= []).push(p);
   return plots.map(p => {
     const score = wsum
       ? active.reduce((a, k, i) => a + (active.length - i) * norms[k](crit[k].val(p, s)), 0) / wsum
       : 0;
+    const g = groups[p.hood + p.type];
     return {
       ...p,
       price: priceOf(p, s),
       penalty: p.penalties[catKey(s)],
       ppm: Math.round(priceOf(p, s) / p.area),
       taken: taken.has(p.id),
-      rank: ranks[p.id] ?? null,
-      prob: taken.has(p.id) ? 0 : availability(ranks[p.id], E, s.margin),
+      areaRank: areaRank(p),                                           // 1 = הגדול ביותר מ-297
+      groupRank: rankBy(g, q => q.area, (a, b) => a > b)(p), groupSize: g.length,  // בשכונה+סוג
+      priceRank: priceRank(p),                                         // 1 = הזול ביותר
       score: Math.round(score * 100),
     };
   });
@@ -91,17 +76,22 @@ function passes(p, s) {
     && (!s.edges || p.edge === undefined || s.edges.includes(p.edge));
 }
 
-// הצעות = K (+extra) מגרשים עם הציון האישי הגבוה ביותר מתוך אלה שסיכוי שיישארו ≥50%,
-// ועוד עד 3 "הימורים" (15%–50%) שמדורגים אישית גבוה מההצעה האחרונה.
-// מגרשים שהמשתמש כבר הוסיף לפול (pinned) או הסתיר (excluded) לא מוצעים — וההצעות מתמלאות מחדש.
+// הצעות = K (+extra) המגרשים עם הציון האישי הגבוה ביותר שעוברים את הסינון ולא נבחרו.
+// מגרשים שכבר בפול (pinned) או הוסתרו (excluded) לא מוצעים — וההצעות מתמלאות מחדש.
 function buildPool(rows, s) {
   const skip = new Set([...(s.pinned || []), ...(s.excluded || [])]);
-  const cand = rows.filter(p => !p.taken && passes(p, s)).sort((a, b) => b.score - a.score || b.prob - a.prob);
-  const open = cand.filter(p => !skip.has(p.id));
-  const pool = open.filter(p => p.prob >= 0.5).slice(0, s.k + (s.extra || 0));
-  const floor = pool.length ? pool[pool.length - 1].score : -1;
-  const gambles = open.filter(p => p.prob >= 0.15 && p.prob < 0.5 && p.score > floor).slice(0, 3);
-  return { pool, gambles, candidates: cand.length };
+  const cand = rows.filter(p => !p.taken && passes(p, s)).sort((a, b) => b.score - a.score || a.priceRank - b.priceRank);
+  const pool = cand.filter(p => !skip.has(p.id)).slice(0, s.k + (s.extra || 0));
+  return { pool, candidates: cand.length };
 }
 
-if (typeof module !== 'undefined') module.exports = { CATEGORIES, CRITERIA, absPos, crowdRanks, availability, waitingBefore, effectiveBefore, observedShowRate, enrich, buildPool };
+// מגרשים דומים — להרחבת הפול מנקודת מוצא: אותה שכונה ואותו סוג, שטח עד ±15%,
+// מדורג לפי הפרש שטח + הפרש מחיר (יחסיים) + קנס קטן אם המיקום ביישוב שונה. לא כולל שנבחרו.
+function similar(p, rows, n = 4) {
+  return rows
+    .filter(q => q.id !== p.id && !q.taken && q.hood === p.hood && q.type === p.type && Math.abs(q.area - p.area) / p.area <= 0.15)
+    .map(q => ({ q, d: Math.abs(q.area - p.area) / p.area + Math.abs(q.price - p.price) / p.price + (q.edge !== p.edge ? 0.1 : 0) }))
+    .sort((a, b) => a.d - b.d).slice(0, n).map(x => x.q);
+}
+
+if (typeof module !== 'undefined') module.exports = { CATEGORIES, CRITERIA, absPos, waitingBefore, enrich, buildPool, similar };
