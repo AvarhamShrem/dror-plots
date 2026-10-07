@@ -51,7 +51,7 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .btn{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
 .btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .acts{display:flex;gap:6px;margin-top:8px}
-.more{margin-top:6px;font-size:13px;color:var(--muted)}.more summary{cursor:pointer}footer .more{color:var(--ink);font-size:inherit;margin-top:8px}.more ul{margin:4px 0;padding-inline-start:18px}
+.more{margin-top:6px;font-size:13px;color:var(--muted)}.more summary{cursor:pointer}.rng input{width:7.5em}footer .more{color:var(--ink);font-size:inherit;margin-top:8px}.more ul{margin:4px 0;padding-inline-start:18px}
 .plot.pin{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .mine{list-style:none;padding:0;margin:0}
 .mine li{display:grid;grid-template-columns:auto auto 1fr auto;gap:4px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -124,10 +124,8 @@ a{color:var(--accent)}
     <div style="margin-top:12px">
       <h2>2 · מה לא רלוונטי לי בכלל</h2>
       <div class="row">
-        <label>מחיר מינימלי (₪)<input id="minPrice" type="number" step="10000" placeholder="ללא"></label>
-        <label>מחיר מקסימלי (₪)<input id="budget" type="number" step="10000" placeholder="ללא הגבלה"></label>
-        <label>שטח מינימלי (מ"ר)<input id="minArea" type="number" step="10" placeholder="ללא"></label>
-        <label>שטח מקסימלי (מ"ר)<input id="maxArea" type="number" step="10" placeholder="ללא"></label>
+        <div class="rng"><div class="note">מחיר (₪)</div><input id="minPrice" type="number" step="10000" placeholder="מ-" aria-label="מחיר מינימלי"> – <input id="budget" type="number" step="10000" placeholder="עד" aria-label="מחיר מקסימלי"></div>
+        <div class="rng"><div class="note">שטח (מ"ר)</div><input id="minArea" type="number" step="10" placeholder="מ-" aria-label="שטח מינימלי"> – <input id="maxArea" type="number" step="10" placeholder="עד" aria-label="שטח מקסימלי"></div>
         <div><div class="note">שכונות</div><div class="row" id="hoods"></div></div>
         <div><div class="note">סוג</div><div class="row" id="types"></div></div>
       </div>
@@ -135,11 +133,11 @@ a{color:var(--accent)}
       <div class="row" style="margin-top:8px">
         <div class="needs-edge"><div class="note">מיקום ביישוב <span title="מחושב מתכנית היישוב המלאה, כולל שלבים עתידיים. ראה מקורות המידע למטה">ⓘ</span></div><div class="row" id="edges"></div></div>
         <div class="needs-relief"><div class="note">מול הרחוב (לפני פיתוח)</div><div class="row" id="rises"></div></div>
-        <label class="needs-relief">שיפוע מקסימלי (%)<input id="maxSlope" type="number" step="1" placeholder="ללא"></label>
-        <label class="needs-relief">הפרש גובה מקסימלי במגרש (מ')<input id="maxDrop" type="number" step="0.5" placeholder="ללא"></label>
-        <label class="needs-relief">גובה מינימלי מעל פני הים (מ')<input id="minElev" type="number" step="5" placeholder="ללא"></label>
-        <label>מחיר מקסימלי למ"ר (₪)<input id="maxPpm" type="number" step="50" placeholder="ללא"></label>
-        <label>קנס מכירה מוקדמת מקסימלי (₪)<input id="maxPenalty" type="number" step="10000" placeholder="ללא"></label>
+        <div class="rng needs-relief"><div class="note">שיפוע (%)</div><input id="minSlope" type="number" step="1" placeholder="מ-" aria-label="שיפוע מינימלי"> – <input id="maxSlope" type="number" step="1" placeholder="עד" aria-label="שיפוע מקסימלי"></div>
+        <div class="rng needs-relief"><div class="note">הפרש גובה במגרש (מ')</div><input id="minDrop" type="number" step="0.5" placeholder="מ-" aria-label="הפרש גובה מינימלי"> – <input id="maxDrop" type="number" step="0.5" placeholder="עד" aria-label="הפרש גובה מקסימלי"></div>
+        <div class="rng needs-relief"><div class="note">גובה מעל פני הים (מ')</div><input id="minElev" type="number" step="5" placeholder="מ-" aria-label="גובה מינימלי"> – <input id="maxElev" type="number" step="5" placeholder="עד" aria-label="גובה מקסימלי"></div>
+        <div class="rng"><div class="note">מחיר למ"ר (₪)</div><input id="minPpm" type="number" step="50" placeholder="מ-" aria-label="מחיר למ״ר מינימלי"> – <input id="maxPpm" type="number" step="50" placeholder="עד" aria-label="מחיר למ״ר מקסימלי"></div>
+        <div class="rng"><div class="note">קנס מכירה מוקדמת (₪)</div><input id="minPenalty" type="number" step="10000" placeholder="מ-" aria-label="קנס מינימלי"> – <input id="maxPenalty" type="number" step="10000" placeholder="עד" aria-label="קנס מקסימלי"></div>
       </div></details>
     </div>
 
@@ -274,11 +272,11 @@ a{color:var(--accent)}
 const $ = id => document.getElementById(id);
 const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'], RISES = ['up', 'flat', 'down'];
 const RISE_LABEL = { up: 'עולה', flat: 'מישורי', down: 'יורד' };
-const NUM_FILTERS = ['budget', 'minPrice', 'minArea', 'maxArea', 'maxPpm', 'maxPenalty', 'minElev', 'maxSlope', 'maxDrop'];
-const ADV = ['maxPpm', 'maxPenalty', 'minElev', 'maxSlope', 'maxDrop'];
+const ADV = ['minPpm', 'maxPpm', 'minPenalty', 'maxPenalty', 'minElev', 'maxElev', 'minSlope', 'maxSlope', 'minDrop', 'maxDrop'];
+const NUM_FILTERS = ['budget', 'minPrice', 'minArea', 'maxArea', ...ADV];
 const EDGE_LABEL = { fence: 'על גדר היישוב', open: 'פונה לשטח פתוח פנימי', inner: 'פנימי' };
 const DEF = {
-  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minPrice: 0, minArea: 0, maxArea: 0, maxPpm: 0, maxPenalty: 0, minElev: 0, maxSlope: 0, maxDrop: 0, rises: RISES,
+  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minPrice: 0, minArea: 0, maxArea: 0, minPpm: 0, maxPpm: 0, minPenalty: 0, maxPenalty: 0, minElev: 0, maxElev: 0, minSlope: 0, maxSlope: 0, minDrop: 0, maxDrop: 0, rises: RISES,
   hoods: HOODS, types: TYPES, edges: EDGES, prefType: 'חד', prefHood: 'א', prefSlope: 'flat',
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
@@ -533,7 +531,7 @@ function render() {
     ? `🗓 לפי רשימת הזוכים של רמ"י, ${S.waiting ? 'ממתין' : 'קדימות'} מס' ${S.pos} מוזמן ל<b>בחירה ב-${slot[0]}/${YEAR} בשעה ${slot[1]}</b> (משרדי רמ"י, באר שבע). יש לוודא מול הזימון האישי.`
     : `⚠ מספר ${S.pos} לא נמצא ב${S.waiting ? 'רשימת ההמתנה (1–' + Object.keys(window.SCHEDULE.wait).length + ')' : 'רשימת הזוכים (1–297)'}.`;
   const on = S.order.filter(k => S.enabled[k]).length;
-  const adv = ADV.filter(k => S[k]).length + (S.edges.length < EDGES.length) + (S.rises.length < RISES.length);
+  const adv = new Set(ADV.filter(k => S[k]).map(k => k.slice(3))).size +(S.edges.length < EDGES.length) + (S.rises.length < RISES.length);
   $('advSum').textContent = adv ? `· ${adv} פעילים` : '';
   $('settingsSum').textContent =`· ${on} עדיפויות פעילות · ${S.hoods.length}/4 שכונות${S.minPrice || S.budget ? ` · מחיר ${S.minPrice ? ils(S.minPrice) : '0'}–${S.budget ? ils(S.budget) : '∞'}` : ''}`;
   $('sharePool').checked = S.sharePool;
