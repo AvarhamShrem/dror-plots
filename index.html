@@ -99,15 +99,16 @@ a{color:var(--accent)}
 </header>
 <main>
   <div class="tabs no-print">
-    <button data-tab="pool" class="on">בחירת מגרשים</button>
+    <button data-tab="pool" class="on">🔎 הצעות מגרשים</button>
     <button data-tab="mine">📌 הפול שלי <span id="pinCount"></span></button>
-    <button data-tab="all">כל המגרשים</button>
-    <button data-tab="live">מצב הבחירה</button>
+    <button data-tab="all">📋 כל המגרשים</button>
+    <button data-tab="live">❌ מה כבר נבחר</button>
   </div>
 
   <section id="tab-pool">
     <div class="card no-print">
       <h2>1 · הפרטים שלך</h2>
+      <div class="note" style="margin:-6px 0 8px">לפיהם נקבעים המחיר שלך ויום הבחירה שלך.</div>
       <div class="row">
         <label title="מספר הקדימות שלך ברשימת הזוכים שפרסמה רמ&quot;י (רשימת הזוכים, סדר קדימות ותאריכי בחירה)">מקום בתור (מספר הקדימות ברשימת הזוכים)<input id="pos" type="number" min="1" class="big"></label>
         <label>קטגוריית מחיר<select id="category" style="width:auto"></select></label>
@@ -122,7 +123,8 @@ a{color:var(--accent)}
     <details class="card no-print" id="settings">
       <summary style="font-size:15px;color:var(--ink);font-weight:600">⚙ סינון וסדר עדיפויות <span class="note" id="settingsSum"></span></summary>
     <div style="margin-top:12px">
-      <h2>2 · מה לא רלוונטי לי בכלל</h2>
+      <h2>2 · סינון</h2>
+      <div class="note" style="margin:-6px 0 8px">מגרשים שלא עומדים בתנאים לא יוצעו בכלל. שדה ריק = בלי הגבלה.</div>
       <div class="row">
         <div class="rng"><div class="note">מחיר (₪)</div><input id="minPrice" type="number" step="10000" placeholder="מ-" aria-label="מחיר מינימלי"> – <input id="budget" type="number" step="10000" placeholder="עד" aria-label="מחיר מקסימלי"></div>
         <div class="rng"><div class="note">שטח (מ"ר)</div><input id="minArea" type="number" step="10" placeholder="מ-" aria-label="שטח מינימלי"> – <input id="maxArea" type="number" step="10" placeholder="עד" aria-label="שטח מקסימלי"></div>
@@ -143,7 +145,7 @@ a{color:var(--accent)}
 
     <div style="margin-top:18px">
       <h2>3 · סדר העדיפויות שלי</h2>
-      <div class="note" style="margin-bottom:6px">מה שלמעלה שוקל יותר. ✓ = נכלל בחישוב.</div>
+      <div class="note" style="margin-bottom:6px">קובע את סדר ההצעות, בלי להוציא אף מגרש. מה שלמעלה שוקל יותר. ✓ = נכלל בחישוב.</div>
       <ul class="crit" id="crit"></ul>
       <details class="more needs-relief" style="margin-top:10px"><summary>⚠ גובה ושיפוע: נתונים מלפני הפיתוח. מה זה אומר?</summary>
       <p class="note" style="background:var(--y-bg);color:var(--ink);border-radius:6px;padding:6px 10px"><b>הגובה והשיפוע נלקחו ממפת גבהים של הקרקע לפני עבודות הפיתוח.</b> מאז השטח עבר פיתוח (יישור, מילוי וחפירה), ולכן הנתונים לא משקפים את המצב בשטח היום. השתמשו בהם לכל היותר כאינדיקציה כללית: גובה המגרש ביחס לשאר היישוב כנראה נשמר, אבל השיפוע בתוך המגרש עשוי להיות שונה לגמרי. יש לבדוק בשטח ובתכנית הבינוי.</p>
@@ -192,7 +194,7 @@ a{color:var(--accent)}
       <details class="more no-print" id="pinHint"><summary>איך משתמשים ברשימה?</summary><p class="note">הרשימה מסודרת לפי סדר העדיפות שלך, ו-▲▼ מזיזים מגרש למעלה או למטה. ביום הבחירה עוברים עליה מלמעלה למטה: אם מגרש נלקח, ממשיכים לבא בתור.
         כדאי שהרשימה תהיה ארוכה ככל שמקומך בתור רחוק יותר. <b>🔍 דומים</b> מציג מגרשים קרובים באותה שכונה ובאותו סוג, כדי להרחיב את הרשימה מנקודת מוצא.</p></details>
       <ol class="mine" id="pinned"></ol>
-      <p class="note" id="pinEmpty">עוד לא הוספת מגרשים. בטאב "בחירת מגרשים" לוחצים "📌 הוסף לפול" על הצעה, או "＋" בטאב "כל המגרשים".</p>
+      <p class="note" id="pinEmpty">עוד לא הוספת מגרשים. בטאב "הצעות מגרשים" לוחצים "📌 הוסף לפול" על הצעה, או "＋" בטאב "כל המגרשים".</p>
       <p class="no-print acts" style="margin-top:14px;flex-wrap:wrap"><button class="btn pri" data-share="1">📤 שליחת הפול (ווטסאפ וכו')</button><button class="btn" data-mylink="1">🔗 קישור אישי לפול שלי</button><button class="btn" onclick="print()">🖨 הדפסה / שמירה כ-PDF</button></p>
       <p class="note" id="shareMsg"></p>
       <details class="more no-print"><summary>💾 איך הפול נשמר, ואיך עוברים למכשיר אחר?</summary><p class="note">כל מה שמזינים נשמר אוטומטית בדפדפן הזה, וכשחוזרים לדף הכל נמצא במקום.
@@ -203,13 +205,13 @@ a{color:var(--accent)}
 
   <section id="tab-live" class="hidden">
     <div class="card">
-      <h2>מצב הבחירה</h2>
+      <h2>❌ מגרשים שכבר נבחרו</h2>
       <p class="note">ממלאים לפי מה שפורסם (רמ"י, קבוצת הווטסאפ). מגרשים שנבחרו יוצאים מההצעות, ובפול שלך הם מסומנים "נבחר כבר". הנתונים נשמרים רק אצלך.</p>
       <label style="margin-top:12px">מגרשים שכבר נבחרו (אפשר להדביק רשימה: רווח, פסיק או שורה חדשה בין מגרש למגרש)
         <textarea id="takenInput" rows="5" dir="ltr" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%" placeholder="212, 213, 186B ..."></textarea></label>
       <p class="note" id="takenParse"></p>
       <div id="liveAlert"></div>
-      <p class="no-print"><button class="btn" data-reset-live="1">🗑 איפוס מצב הבחירה</button></p>
+      <p class="no-print"><button class="btn" data-reset-live="1">🗑 ניקוי הרשימה</button></p>
     </div>
   </section>
 
@@ -245,7 +247,7 @@ a{color:var(--accent)}
     <li><b>חד-משפחתי / דו-משפחתי</b> הוסק ממספר המגרש: סיומת A/B = דו-משפחתי. יש לוודא מול חוברת המכרז.</li>
   </ul></details>
 
-  <details class="more"><summary><b>מקום בתור</b></summary>
+  <details class="more"><summary><b>מקום בתור ולוח זמנים</b></summary>
   <ul>
     <li>"מקום בתור" הוא מספר הקדימות ברשימת הזוכים. סדר הבחירה בפועל, הימים והשעות נקבעים רק על ידי רמ"י.</li>
   </ul></details>
@@ -257,7 +259,7 @@ a{color:var(--accent)}
   </ul></details>
 
   <details class="more"><summary><b>פרטיות</b></summary>
-  <p>כל מה שמזינים בכלי (מקום בתור, עדיפויות, הפול, מצב הבחירה) נשמר <b>רק בדפדפן שלך</b> ולא נשלח לשום מקום.
+  <p>כל מה שמזינים בכלי (מקום בתור, עדיפויות, הפול, המגרשים שסימנת כנבחרו) נשמר <b>רק בדפדפן שלך</b> ולא נשלח לשום מקום.
     <b>חריג אחד:</b> כברירת מחדל, רשימת מספרי המגרשים שבפול שלך נשלחת לשרת יחד עם קוד אקראי, כדי להציג "👥 N שמרו". אפשר לבטל בטאב "הפול שלי". <b>יום הבחירה</b> נשלח רק למי שמסמן זאת במפורש. <b>מספר הקדימות המדויק לא נשלח אף פעם</b>, כי ברשימת הזוכים הפומבית הוא מקושר לתעודת זהות. השרת לא שומר מקום בתור, שם, הערות או כתובת IP. ביטול הסימון מוחק את הרשומה.
     המספר "👥 N שמרו" מייצג רק משתמשים בכלי שבחרו לשתף, ולא את כל הזוכים.
     ה"קישור האישי" מכיל את הנתונים האלה בתוך הקישור עצמו, והם לא עוברים דרך שרת. מי שמקבל את הקישור יראה את הפול שלך, ולכן כדאי לשלוח אותו רק לעצמך.</p></details>
@@ -500,7 +502,7 @@ function render() {
   ROWS = enrich(window.PLOTS, settings());
   const { pool, candidates } = buildPool(ROWS, settings());
   const W = waitingBefore(S), remaining = window.PLOTS.length - S.taken.length;
-  $('summary').innerHTML = (S.taken.length ? `🔴 <b>לפי מצב הבחירה:</b> נבחרו עד כה ${S.taken.length} מגרשים, ונשארו ${remaining}. ` : '')
+  $('summary').innerHTML = (S.taken.length ? `🔴 <b>לפי "מה כבר נבחר":</b> נבחרו עד כה ${S.taken.length} מגרשים, ונשארו ${remaining}. ` : '')
     + `לפניך בתור <b>${W}</b> זוכים. ${candidates} מגרשים עוברים את הסינון שלך${(() => {
       const ok = ROWS.filter(p => !p.taken && passesUI(p)), pin = ok.filter(p => S.pinned.includes(p.id)).length, hid = ok.filter(p => S.excluded.includes(p.id)).length;
       return pin || hid ? ` (${[pin && `${pin} כבר בפול שלך`, hid && `${hid} הסתרת`].filter(Boolean).join(', ')}, ולכן לא מופיעים בהצעות)` : '';
