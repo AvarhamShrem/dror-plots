@@ -206,7 +206,7 @@ a{color:var(--accent)}
     <div class="card no-print row">
       <label>חיפוש מגרש<input id="q" type="search" placeholder="מספר מגרש" style="font:inherit;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"></label>
       <label class="chk"><input type="checkbox" id="onlyPass"> רק מה שעובר את הסינון שלי</label>
-      <span class="note">* גובה ושיפוע לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום · דירוג שטח: 1 = הגדול ביותר · דירוג מחיר: 1 = הזול ביותר · לחיצה על כותרת עמודה ממיינת</span>
+      <span class="note">* גובה, שיפוע והפרש גובה (במטרים, בין הנקודה הגבוהה לנמוכה במגרש) לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום · דירוג שטח: 1 = הגדול ביותר · דירוג מחיר: 1 = הזול ביותר · לחיצה על כותרת עמודה ממיינת</span>
     </div>
     <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
   </section>
@@ -355,7 +355,7 @@ function card(p) {
   return `<div class="plot ${on ? 'pin' : ''}" ${p.taken ? 'style="opacity:.55"' : ''}>
     <div><span class="id">${p.id}</span> ${mapLink(p.id)}</div>
     <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר${p.edge ? ` · 📍 ${EDGE_LABEL[p.edge]}` : ''}</div>
-    ${p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">לפני פיתוח: גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% ⚠</div>` : ''}
+    ${p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">לפני פיתוח: גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% · הפרש גובה במגרש ${p.drop} מ' ⚠</div>` : ''}
     <div class="pr">${ils(p.price)} <span class="note">(${ils(p.ppm)} למ"ר)</span></div>
     <div class="note" style="margin-top:4px" title="דירוג עובדתי מול כל המגרשים: 1 = הגדול / הזול ביותר">📊 ${facts(p)}</div>
     <div style="margin-top:6px">${takenBadge(p)} <span class="note">התאמה לעדיפויות שלך: ${p.score}</span> ${savedBy(p)}</div>
@@ -377,7 +377,7 @@ function mineRow(p, i) {
       <button class="mv" data-pdown="${i}" ${i === S.pinned.length - 1 ? 'disabled' : ''} aria-label="הורד בעדיפות">▼</button></div>
     <span class="num">${i + 1}</span>
     <div class="body"><span class="id">${p.id}</span>${takenBadge(p)} ${mapLink(p.id)}
-      <div class="meta">${savedBy(p)} שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · לפני פיתוח: גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%` : ''}</div></div>
+      <div class="meta">${savedBy(p)} שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · לפני פיתוח: גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%, הפרש גובה ${p.drop} מ'` : ''}</div></div>
     <span class="acts no-print" style="margin:0"><button class="btn" data-sim="${p.id}" aria-expanded="${openSim === p.id}">🔍 דומים</button><button class="btn" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button></span>
     ${openSim === p.id ? simList(p) : ''}
     <input class="noteIn" data-note="${p.id}" value="${esc(S.notes[p.id] || '')}" placeholder="הערה (למשל: צמוד לגן, לבדוק שיפוע מול הרחוב)">
@@ -561,8 +561,8 @@ function renderLive(pinned) {
 
 const COLS = [
   ['pin', '📌'], ['id', 'מגרש'], ['hood', 'שכונה'], ['type', 'סוג'], ['edge', 'מיקום'], ['area', 'שטח'], ['price', 'מחיר כולל'],
-  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['penalty', 'קנס מכירה מוקדמת'], ['areaRank', 'דירוג שטח'], ['priceRank', 'דירוג מחיר'], ['taken', 'סטטוס'], ['saved', '👥 שמרו'], ['score', 'התאמה לי'],
-].filter(([k]) => !['elev', 'slope', 'edge'].includes(k) || window.PLOTS[0][k] !== undefined);
+  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['drop', 'הפרש גובה*'], ['penalty', 'קנס מכירה מוקדמת'], ['areaRank', 'דירוג שטח'], ['priceRank', 'דירוג מחיר'], ['taken', 'סטטוס'], ['saved', '👥 שמרו'], ['score', 'התאמה לי'],
+].filter(([k]) => !['elev', 'slope', 'drop', 'edge'].includes(k) || window.PLOTS[0][k] !== undefined);
 let sort = { key: 'score', dir: -1 };
 function renderTable() {
   $('thead').innerHTML = COLS.map(([k, l]) => `<th data-sort="${k}" class="${sort.key === k ? 'sorted' : ''}">${l}${sort.key === k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('');
