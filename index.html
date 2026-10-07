@@ -481,7 +481,8 @@ function render() {
     + `לפניך בתור <b>${W}</b> זוכים. ${candidates} מגרשים עוברים את הסינון שלך${(() => {
       const ok = ROWS.filter(p => !p.taken && passesUI(p)), pin = ok.filter(p => S.pinned.includes(p.id)).length, hid = ok.filter(p => S.excluded.includes(p.id)).length;
       return pin || hid ? ` (${[pin && `${pin} כבר בפול שלך`, hid && `${hid} הסתרת`].filter(Boolean).join(', ')}, ולכן לא מופיעים בהצעות)` : '';
-    })()}.`;
+    })()}.`
+    + (COUNTS ? `<br>👥 ${anonUsers} משתמשים שיתפו את הפול שלהם. ליד מגרש שמישהו שמר מופיע "👥 N שמרו". מגרש בלי הסימון: אף אחד עוד לא שמר אותו.` : '');
   // הפול שלי: לפי סדר העדיפות שהמשתמש קבע
   const byId = Object.fromEntries(ROWS.map(p => [p.id, p]));
   const pinned = S.pinned.map(id => byId[id]).filter(Boolean);
