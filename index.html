@@ -115,7 +115,8 @@ a{color:var(--accent)}
     <div style="margin-top:12px">
       <h2>2 · מה לא רלוונטי לי בכלל</h2>
       <div class="row">
-        <label>תקציב מקסימלי (₪)<input id="budget" type="number" step="10000" placeholder="ללא הגבלה"></label>
+        <label>מחיר מינימלי (₪)<input id="minPrice" type="number" step="10000" placeholder="ללא"></label>
+        <label>מחיר מקסימלי (₪)<input id="budget" type="number" step="10000" placeholder="ללא הגבלה"></label>
         <label>שטח מינימלי (מ"ר)<input id="minArea" type="number" step="10" placeholder="ללא"></label>
         <div><div class="note">שכונות</div><div class="row" id="hoods"></div></div>
         <div><div class="note">סוג</div><div class="row" id="types"></div></div>
@@ -131,7 +132,8 @@ a{color:var(--accent)}
         <label>שכונה מועדפת<select id="prefHood"></select></label>
         <label class="needs-relief">שיפוע מועדף<select id="prefSlope"><option value="flat">מישורי</option><option value="sloped">משופע</option></select></label>
       </div>
-      <details class="needs-relief" style="margin-top:10px"><summary>מה זה "גבוה" ו"שיפוע"?</summary>
+      <p class="note needs-relief" style="margin-top:10px;background:var(--y-bg);color:var(--ink);border-radius:6px;padding:6px 10px">⚠ <b>הגובה והשיפוע נלקחו ממפת גבהים של הקרקע לפני עבודות הפיתוח.</b> מאז השטח עבר פיתוח (יישור, מילוי וחפירה), ולכן הנתונים לא משקפים את המצב בשטח היום. השתמשו בהם לכל היותר כאינדיקציה כללית: גובה המגרש ביחס לשאר היישוב כנראה נשמר, אבל השיפוע בתוך המגרש עשוי להיות שונה לגמרי. יש לבדוק בשטח ובתכנית הבינוי.</p>
+      <details class="needs-relief" style="margin-top:6px"><summary>מה זה "גבוה" ו"שיפוע"?</summary>
         <p class="note"><b>גבוה</b> = גובה ממוצע של המגרש מעל פני הים. ביישוב הטווח הוא 450–503 מ', כך שבפועל זה "גבוה ביחס לשאר היישוב". מגרש גבוה בדרך כלל צופה למרחק.<br>
         <b>שיפוע</b> = כמה הקרקע נוטה בתוך המגרש (%). <b>מישורי</b> פשוט וזול יותר לבנייה. <b>משופע</b> מתאים למי שרוצה בית מדורג, קומת מרתף או מפלס תחתון עם יציאה לחצר, ולפעמים גם לנוף פתוח.
         "הפרש" = ההפרש בין הנקודה הגבוהה לנמוכה במגרש. אי אפשר לדעת מהנתונים אם המגרש עולה או יורד ביחס לרחוב. את זה צריך לבדוק במפה.</p></details>
@@ -206,7 +208,7 @@ a{color:var(--accent)}
     <div class="card no-print row">
       <label>חיפוש מגרש<input id="q" type="search" placeholder="מספר מגרש" style="font:inherit;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"></label>
       <label class="chk"><input type="checkbox" id="onlyPass"> רק מה שעובר את הסינון שלי</label>
-      <span class="note">לחיצה על כותרת עמודה ממיינת · הסיכוי מחושב לפי המקום בתור שהזנת</span>
+      <span class="note">* גובה ושיפוע לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום · לחיצה על כותרת עמודה ממיינת · הסיכוי מחושב לפי המקום בתור שהזנת</span>
     </div>
     <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
   </section>
@@ -226,8 +228,7 @@ a{color:var(--accent)}
 
   <h3>גובה, שיפוע וסוג מגרש</h3>
   <ul id="reliefCredit">
-    <li class="needs-relief"><b>גובה ושיפוע</b> חושבו בכלי הזה ממודל הגובה ומפוליגוני המגרשים שפורסמו ב-<a href="https://dror.bhsoft.app" target="_blank" rel="noopener">dror.bhsoft.app</a> (BH Software, אתר לא רשמי), לפי העותק מ-06.10.2026.
-      כנראה מדובר בגובה הקרקע הקיים. <b>גובה הפיתוח הסופי לפי תכנית הבינוי</b>, שעדיין לא אושרה סופית, עשוי להיות שונה. המדידה מקורבת (רשת של 4 מ').</li>
+    <li class="needs-relief"><b>גובה ושיפוע</b> חושבו בכלי הזה מפוליגוני המגרשים וממפת גבהים פומבית של <b>הקרקע לפני עבודות הפיתוח</b> (רשת של 4 מ'). מאז השטח עבר פיתוח, ולכן הנתונים לא משקפים את המצב היום, במיוחד השיפוע. אפשר להתייחס אליהם לכל היותר כאינדיקציה כללית.</li>
     <li><b>חד-משפחתי / דו-משפחתי</b> הוסק ממספר המגרש: סיומת A/B = דו-משפחתי. יש לוודא מול חוברת המכרז.</li>
   </ul>
 
@@ -257,7 +258,7 @@ a{color:var(--accent)}
 const $ = id => document.getElementById(id);
 const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'];
 const DEF = {
-  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minArea: 0,
+  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minPrice: 0, minArea: 0,
   hoods: HOODS, types: TYPES, prefType: 'חד', prefHood: 'א', prefSlope: 'flat',
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
@@ -316,7 +317,7 @@ function card(p) {
   return `<div class="plot ${on ? 'pin' : ''}" ${p.taken ? 'style="opacity:.55"' : ''}>${p.rank ? `<span class="rankno" title="דירוג פופולריות משוער בין המגרשים שנשארו">#${p.rank} בביקוש</span>` : ''}
     <div><span class="id">${p.id}</span></div>
     <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר</div>
-    ${p.elev ? `<div class="meta">גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% · הפרש ${p.drop} מ'</div>` : ''}
+    ${p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">לפני פיתוח: גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% ⚠</div>` : ''}
     <div class="pr">${ils(p.price)} <span class="note">(${ils(p.ppm)} למ"ר)</span></div>
     <div style="margin-top:6px">${badge(p.prob, p.taken)} <span class="note">התאמה ${p.score}</span></div>
     <div class="acts no-print">${acts}</div></div>`;
@@ -328,7 +329,7 @@ function mineRow(p, i) {
       <button class="mv" data-pdown="${i}" ${i === S.pinned.length - 1 ? 'disabled' : ''} aria-label="הורד בעדיפות">▼</button></div>
     <span class="num">${i + 1}</span>
     <div class="body"><span class="id">${p.id}</span>${badge(p.prob, p.taken)}
-      <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}%` : ''}</div></div>
+      <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · לפני פיתוח: גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%` : ''}</div></div>
     <button class="btn no-print" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button>
     <input class="noteIn" data-note="${p.id}" value="${esc(S.notes[p.id] || '')}" placeholder="הערה (למשל: צמוד לגן, לבדוק שיפוע מול הרחוב)">
   </li>`;
@@ -343,7 +344,7 @@ function checks(el, list, key, fmt) {
 function fillForm() {
   $('category').innerHTML = CATEGORIES.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
   $('pos').value = S.pos; $('category').value = S.category; $('k').value = S.k; $('use35').checked = S.use35;
-  $('budget').value = S.budget || ''; $('minArea').value = S.minArea || '';
+  $('budget').value = S.budget || ''; $('minPrice').value = S.minPrice || ''; $('minArea').value = S.minArea || '';
   $('prefType').value = S.prefType; $('prefSlope').value = S.prefSlope;
   $('passed').value = S.passed || ''; $('takenInput').value = S.takenText; $('waiting').checked = S.waiting;
   $('prefHood').innerHTML = HOODS.map(h => `<option>${h}</option>`).join(''); $('prefHood').value = S.prefHood;
@@ -368,7 +369,7 @@ document.addEventListener('input', e => {
   const t = e.target, num = v => Number(v) || 0;
   if (t.id === 'pos') S.pos = Math.max(1, num(t.value));
   else if (t.id === 'k') S.k = Math.max(1, num(t.value));
-  else if (['budget', 'minArea'].includes(t.id)) S[t.id] = num(t.value);
+  else if (['budget', 'minPrice', 'minArea'].includes(t.id)) S[t.id] = num(t.value);
   else if (['category', 'prefType', 'prefHood', 'prefSlope'].includes(t.id)) S[t.id] = t.value;
   else if (t.id === 'use35') S.use35 = t.checked;
   else if (t.id === 'waiting') S.waiting = t.checked;
@@ -458,7 +459,7 @@ function render() {
     ? `🗓 לפי רשימת הזוכים של רמ"י, ${S.waiting ? 'ממתין' : 'קדימות'} מס' ${S.pos} מוזמן ל<b>בחירה ב-${slot[0]}/${YEAR} בשעה ${slot[1]}</b> (משרדי רמ"י, באר שבע). יש לוודא מול הזימון האישי.`
     : `⚠ מספר ${S.pos} לא נמצא ב${S.waiting ? 'רשימת ההמתנה (1–' + Object.keys(window.SCHEDULE.wait).length + ')' : 'רשימת הזוכים (1–297)'}.`;
   const on = S.order.filter(k => S.enabled[k]).length;
-  $('settingsSum').textContent = `· ${on} עדיפויות פעילות · ${S.hoods.length}/4 שכונות${S.budget ? ' · תקציב ' + ils(S.budget) : ''}`;
+  $('settingsSum').textContent = `· ${on} עדיפויות פעילות · ${S.hoods.length}/4 שכונות${S.minPrice || S.budget ? ` · מחיר ${S.minPrice ? ils(S.minPrice) : '0'}–${S.budget ? ils(S.budget) : '∞'}` : ''}`;
   renderLive(pinned);
   renderTable();
 }
@@ -517,13 +518,13 @@ function renderLive(pinned) {
 
 const COLS = [
   ['pin', '📌'], ['id', 'מגרש'], ['hood', 'שכונה'], ['type', 'סוג'], ['area', 'שטח'], ['price', 'מחיר כולל'],
-  ['ppm', 'למ"ר'], ['elev', 'גובה'], ['slope', 'שיפוע %'], ['penalty', 'קנס מכירה מוקדמת'], ['rank', 'דירוג ביקוש'], ['prob', 'סיכוי שיישאר'], ['score', 'התאמה לי'],
+  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['penalty', 'קנס מכירה מוקדמת'], ['rank', 'דירוג ביקוש'], ['prob', 'סיכוי שיישאר'], ['score', 'התאמה לי'],
 ].filter(([k]) => !['elev', 'slope'].includes(k) || window.PLOTS[0][k] !== undefined);
 let sort = { key: 'score', dir: -1 };
 function renderTable() {
   $('thead').innerHTML = COLS.map(([k, l]) => `<th data-sort="${k}" class="${sort.key === k ? 'sorted' : ''}">${l}${sort.key === k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('');
   const q = $('q').value.trim(), only = $('onlyPass').checked, s = settings();
-  const ok = p => S.hoods.includes(p.hood) && S.types.includes(p.type) && (!S.budget || p.price <= S.budget) && (!S.minArea || p.area >= S.minArea);
+  const ok = p => S.hoods.includes(p.hood) && S.types.includes(p.type) && (!S.budget || p.price <= S.budget) && (!S.minPrice || p.price >= S.minPrice) && (!S.minArea || p.area >= S.minArea);
   const val = p => (sort.key === 'pin' ? +S.pinned.includes(p.id) : sort.key === 'id' ? parseInt(p.id)
     : sort.key === 'rank' ? (p.rank ?? 1e9) : p[sort.key]);
   const rows = ROWS.filter(p => (!q || p.id.includes(q)) && (!only || ok(p)))
@@ -545,7 +546,7 @@ $('thead').addEventListener('click', e => {
 });
 
 // משקלי הקהל בטופס הם 0–10; המודל מקבל אותם כמו שהם (היחס ביניהם הוא שקובע)
-// גרסה בלי נתוני BH Software (build.py --no-relief) — להסתיר כל מה שמתייחס לגובה/שיפוע
+// גרסה בלי נתוני גובה (build.py --no-relief) — להסתיר כל מה שמתייחס לגובה/שיפוע
 if (window.PLOTS[0].elev === undefined) document.querySelectorAll('.needs-relief').forEach(e => e.classList.add('hidden'));
 fillForm(); renderCrit(); render();
 // בטלפון — ההגדרות מקופלות כדי שהפול יופיע מיד; במחשב — פתוחות

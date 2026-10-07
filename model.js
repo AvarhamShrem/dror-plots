@@ -25,8 +25,8 @@ const CRITERIA = [
   { key: 'ppm', label: 'מחיר למ"ר נמוך', val: (p, s) => priceOf(p, s) / p.area, hb: false },
   { key: 'type', label: 'סוג מגרש מועדף', val: (p, s) => (p.type === s.prefType ? 1 : 0), hb: true },
   { key: 'hood', label: 'שכונה מועדפת', val: (p, s) => (p.hood === s.prefHood ? 1 : 0), hb: true },
-  { key: 'elev', label: 'מגרש גבוה (מעל פני הים)', val: p => p.elev, hb: true, needs: 'elev' },
-  { key: 'slope', label: 'שיפוע המגרש (מישורי / משופע — לפי הבחירה למטה)', val: p => p.slope, hb: s => s.prefSlope === 'sloped', needs: 'slope' },
+  { key: 'elev', label: 'מגרש גבוה (לפי מפת גבהים לפני פיתוח)', val: p => p.elev, hb: true, needs: 'elev' },
+  { key: 'slope', label: 'שיפוע המגרש לפני פיתוח (מישורי / משופע)', val: p => p.slope, hb: s => s.prefSlope === 'sloped', needs: 'slope' },
 ].filter(c => !c.needs || (typeof window !== 'undefined' && window.PLOTS && window.PLOTS[0][c.needs] !== undefined));
 
 function normalizer(vals, hb) {
@@ -87,7 +87,7 @@ function enrich(plots, s) {
 
 function passes(p, s) {
   return s.hoods.includes(p.hood) && s.types.includes(p.type)
-    && (!s.budget || p.price <= s.budget) && (!s.minArea || p.area >= s.minArea);
+    && (!s.budget || p.price <= s.budget) && (!s.minPrice || p.price >= s.minPrice) && (!s.minArea || p.area >= s.minArea);
 }
 
 // הצעות = K (+extra) מגרשים עם הציון האישי הגבוה ביותר מתוך אלה שסיכוי שיישארו ≥50%,
