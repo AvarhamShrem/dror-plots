@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>בחירת מגרש בדרור</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1d2321;--muted:#66706c;--line:#e2e0d8;--accent:#2f6b4f;--accent-ink:#fff;
+  --g:#2e7d4f;--g-bg:#e3f2e8;--y:#9a6a00;--y-bg:#fbf0d4;--r:#b3402e;--r-bg:#f8e1dc}
+@media (prefers-color-scheme:dark){:root{--bg:#141816;--card:#1d2321;--ink:#e8ebe9;--muted:#9aa5a0;--line:#2f3734;--accent:#6fbf94;--accent-ink:#0d1a13;
+  --g:#7fd3a2;--g-bg:#1d3527;--y:#e9c46a;--y-bg:#3a3018;--r:#f0907d;--r-bg:#3d2320}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,"Segoe UI",Arial,sans-serif}
+header{padding:20px 16px 8px;max-width:1000px;margin:auto}
+h1{margin:0;font-size:22px}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+main{max-width:1000px;margin:auto;padding:0 16px 40px}
+.tabs{display:flex;gap:6px;margin:12px 0}
+.tabs button{flex:1;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font:inherit;cursor:pointer}
+.tabs button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.card h2{font-size:16px;margin:0 0 10px}
+.row{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:end}
+label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:150px}
+.big{font-size:20px;width:120px!important;font-weight:600}
+.chk{flex-direction:row;align-items:center;gap:5px;color:var(--ink);font-size:14px}
+.crit{list-style:none;padding:0;margin:0}
+.crit li{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+.crit li:last-child{border:0}
+.crit .n{width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:12px;display:grid;place-items:center}
+.crit li.off .n{background:var(--line);color:var(--muted)}
+.crit li.off .lbl{color:var(--muted)}
+.crit .lbl{flex:1}
+.crit button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;width:30px;height:28px;cursor:pointer}
+.summary{font-size:14px;background:var(--bg);border-radius:8px;padding:10px 12px;margin:0 0 12px}
+.plots{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.plot{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card);position:relative}
+.plot .id{font-size:20px;font-weight:700}
+.plot .meta{color:var(--muted);font-size:13px}
+.plot .pr{font-size:14px;margin-top:4px}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px}
+.b-g{color:var(--g);background:var(--g-bg)}.b-y{color:var(--y);background:var(--y-bg)}.b-r{color:var(--r);background:var(--r-bg)}
+.rankno{position:absolute;top:10px;left:12px;color:var(--muted);font-size:12px}
+.btn{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.acts{display:flex;gap:6px;margin-top:8px}
+.plot.pin{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.mine{list-style:none;padding:0;margin:0}
+.mine li{display:grid;grid-template-columns:auto auto 1fr auto;gap:4px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.mine li:last-child{border:0}
+.mine .arr{display:flex;flex-direction:column;gap:3px}
+.mine .num{font-size:18px;font-weight:700;color:var(--accent);min-width:22px;text-align:center}
+.mine .body .id{font-size:18px;font-weight:700;margin-inline-end:8px}
+.mine .noteIn{grid-column:3/5;margin-top:0}
+.mine li.gone .body{opacity:.55;text-decoration:line-through}
+.tabs button span{font-size:12px}
+.prio{display:inline-block;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;border-radius:99px;padding:1px 8px;margin-inline-end:6px}
+.noteIn{width:100%;margin-top:8px;font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.mv{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;width:30px;height:28px;cursor:pointer}
+#settings>summary{list-style-position:inside}
+.linkbtn{background:none;border:0;color:var(--accent);font:inherit;font-size:12px;cursor:pointer;text-decoration:underline;padding:0}
+h3{font-size:15px;margin:18px 0 8px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line)}
+th{position:sticky;top:0;background:var(--card);cursor:pointer;user-select:none;font-size:13px;color:var(--muted)}
+th.sorted{color:var(--ink)}
+tr.miss td{opacity:.45}
+details summary{cursor:pointer;color:var(--muted);font-size:14px}
+.note{font-size:12px;color:var(--muted)}
+footer{max-width:1000px;margin:auto;padding:0 16px 30px;font-size:13px;color:var(--muted)}
+footer h2{font-size:16px;color:var(--ink);margin:8px 0}
+footer h3{font-size:14px;color:var(--ink);margin:14px 0 4px}
+footer ul{margin:4px 0;padding-inline-start:20px}
+footer li{margin:3px 0}
+a{color:var(--accent)}
+.warn{font-size:13px;background:var(--y-bg);color:var(--ink);border-radius:8px;padding:8px 12px;margin:10px 0 0}
+.hidden{display:none}
+@media print{.tabs,.no-print,#tab-all,footer .no-print{display:none!important}body{background:#fff}.card,.plot{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>בחירת מגרש בדרור (חירן) · מכרז 52/2025</h1>
+  <div class="sub">מזינים מקום בתור ועדיפויות, ומקבלים רשימת מגרשים שכדאי להגיע איתה ליום הבחירה.</div>
+  <p class="warn">⚠ <b>כלי עזר לא רשמי.</b> הוא לא של רמ"י, לא של המועצה ולא של משווק כלשהו, ואינו ייעוץ. הנתונים נאספו ממקורות פומביים ועשויים להכיל טעויות, והסיכויים הם הערכה בלבד.
+    לפני החלטה יש לבדוק מול המקורות הרשמיים. <a href="#about">מקורות המידע וההסתייגויות ↓</a></p>
+</header>
+<main>
+  <div class="tabs no-print">
+    <button data-tab="pool" class="on">בחירת מגרשים</button>
+    <button data-tab="mine">📌 הפול שלי <span id="pinCount"></span></button>
+    <button data-tab="all">כל המגרשים</button>
+    <button data-tab="live">מצב הבחירה</button>
+  </div>
+
+  <section id="tab-pool">
+    <div class="card no-print">
+      <h2>1 · הפרטים שלך</h2>
+      <div class="row">
+        <label title="מספר הקדימות שלך ברשימת הזוכים שפרסמה רמ&quot;י (רשימת הזוכים, סדר קדימות ותאריכי בחירה)">מקום בתור (מספר הקדימות ברשימת הזוכים)<input id="pos" type="number" min="1" class="big"></label>
+        <label>קטגוריית מחיר<select id="category" style="width:auto"></select></label>
+        <label class="chk" id="use35wrap"><input type="checkbox" id="use35"> לממש עכשיו את הנחת המילואים (35%)</label>
+        <label class="chk"><input type="checkbox" id="waiting"> אני ברשימת ההמתנה</label>
+        <label>כמה הצעות להציג<input id="k" type="number" min="1" max="50"></label>
+      </div>
+      <p class="summary" id="mySlot" style="margin-top:10px"></p>
+      <p class="note" id="catNote"></p>
+    </div>
+
+    <details class="card no-print" id="settings">
+      <summary style="font-size:15px;color:var(--ink);font-weight:600">⚙ סינון וסדר עדיפויות <span class="note" id="settingsSum"></span></summary>
+    <div style="margin-top:12px">
+      <h2>2 · מה לא רלוונטי לי בכלל</h2>
+      <div class="row">
+        <label>תקציב מקסימלי (₪)<input id="budget" type="number" step="10000" placeholder="ללא הגבלה"></label>
+        <label>שטח מינימלי (מ"ר)<input id="minArea" type="number" step="10" placeholder="ללא"></label>
+        <div><div class="note">שכונות</div><div class="row" id="hoods"></div></div>
+        <div><div class="note">סוג</div><div class="row" id="types"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px">
+      <h2>3 · סדר העדיפויות שלי</h2>
+      <div class="note" style="margin-bottom:6px">מה שלמעלה שוקל יותר. ✓ = נכלל בחישוב.</div>
+      <ul class="crit" id="crit"></ul>
+      <div class="row" style="margin-top:10px">
+        <label>סוג מועדף<select id="prefType"><option value="חד">חד-משפחתי</option><option value="דו">דו-משפחתי</option></select></label>
+        <label>שכונה מועדפת<select id="prefHood"></select></label>
+        <label class="needs-relief">שיפוע מועדף<select id="prefSlope"><option value="flat">מישורי</option><option value="sloped">משופע</option></select></label>
+      </div>
+      <details class="needs-relief" style="margin-top:10px"><summary>מה זה "גבוה" ו"שיפוע"?</summary>
+        <p class="note"><b>גבוה</b> = גובה ממוצע של המגרש מעל פני הים. ביישוב הטווח הוא 450–503 מ', כך שבפועל זה "גבוה ביחס לשאר היישוב". מגרש גבוה בדרך כלל צופה למרחק.<br>
+        <b>שיפוע</b> = כמה הקרקע נוטה בתוך המגרש (%). <b>מישורי</b> פשוט וזול יותר לבנייה. <b>משופע</b> מתאים למי שרוצה בית מדורג, קומת מרתף או מפלס תחתון עם יציאה לחצר, ולפעמים גם לנוף פתוח.
+        "הפרש" = ההפרש בין הנקודה הגבוהה לנמוכה במגרש. אי אפשר לדעת מהנתונים אם המגרש עולה או יורד ביחס לרחוב. את זה צריך לבדוק במפה.</p></details>
+    </div>
+    </details>
+
+    <div class="card">
+      <p class="summary" id="summary"></p>
+      <details class="note" style="margin:-4px 0 12px"><summary>איך לקרוא כרטיס מגרש?</summary>
+        <ul style="margin:6px 0;padding-inline-start:20px">
+          <li><b>כנראה פנוי / גבולי / כנראה תפוס + %</b>: ההערכה כמה סביר שהמגרש עוד יהיה פנוי כשיגיע תורך. 70% פירושו שבכ-7 מתוך 10 תרחישים דומים הוא יישאר. זו לא התחייבות.</li>
+          <li><b>#N בביקוש</b>: הדירוג המשוער של המגרש בעיני הבוחרים שלפניך (1 = המבוקש ביותר), לפי ההנחות בסעיף "הנחות המודל".</li>
+          <li><b>התאמה 0–100</b>: כמה המגרש מתאים לסדר העדיפויות שלך, יחסית לשאר המגרשים. זה לא ציון איכות מוחלט.</li>
+          <li><b>מחיר</b>: סך התשלום המשוער בקטגוריה שבחרת (קרקע + פיתוח + מבני ציבור, כולל הצמדה ומע"מ). לא כולל בנייה, היטלים, מיסים או עלויות נלוות.</li>
+        </ul></details>
+      <p class="note" id="mineLink"></p>
+      <h2>💡 הצעות בשבילך</h2>
+      <div class="plots" id="pool"></div>
+      <p class="no-print"><button class="btn" data-more="1">➕ הצע לי עוד 5</button></p>
+      <div id="gambleWrap"><h3>הימורים · מגרשים שאתה מעדיף, אבל הסיכוי שיישארו נמוך</h3><div class="plots" id="gambles"></div></div>
+      <p class="note no-print" id="exclNote"></p>
+    </div>
+
+    <details class="card no-print">
+      <summary>הנחות המודל (מתקדם)</summary>
+      <p class="note">ההערכה מניחה שהבוחרים שלפניך לוקחים קודם את המגרשים המבוקשים: חד-משפחתי לפני דו-משפחתי, וגדול לפני קטן.
+        מכאן נגזר "דירוג פופולריות" לכל מגרש. ממספר הבוחרים שלפניך מנכים את מי שלא מגיע, ומגרש שמדורג מתחת למספר הבוחרים בפועל כנראה יישאר.<br>
+        <b>אלה הנחות, לא נתונים.</b> בפועל אנשים בוחרים גם לפי מיקום, שכנים, נוף ומחיר, ולכן ההערכה עלולה לטעות, במיוחד במגרשים "גבוליים". אפשר לשנות את ההנחות כאן ולראות איך ההצעות משתנות.</p>
+      <div class="row">
+        <label>% שלא מגיעים לבחור<input id="noShow" type="number" min="0" max="90" step="5"></label>
+        <label>מרווח אי-ודאות (%)<input id="margin" type="number" min="5" max="80" step="5"></label>
+        <label>משקל "חד לפני דו"<input id="wType" type="number" min="0" max="10" step="1"></label>
+        <label>משקל "גדול לפני קטן"<input id="wArea" type="number" min="0" max="10" step="1"></label>
+      </div>
+    </details>
+  </section>
+
+  <section id="tab-mine" class="hidden">
+    <div class="card">
+      <h2>📌 הפול שלי</h2>
+      <p class="summary" id="mineSlot"></p>
+      <div id="mineAlert"></div>
+      <p class="note no-print" id="pinHint">הרשימה מסודרת לפי סדר העדיפות שלך, ו-▲▼ מזיזים מגרש למעלה או למטה. ביום הבחירה עוברים עליה מלמעלה למטה: אם מגרש נלקח, ממשיכים לבא בתור.</p>
+      <ol class="mine" id="pinned"></ol>
+      <p class="note" id="pinEmpty">עוד לא הוספת מגרשים. בטאב "בחירת מגרשים" לוחצים "📌 הוסף לפול" על הצעה, או "＋" בטאב "כל המגרשים".</p>
+      <p class="no-print acts" style="margin-top:14px"><button class="btn pri" data-share="1">📤 שליחת הפול (ווטסאפ וכו')</button><button class="btn" onclick="print()">🖨 הדפסה / שמירה כ-PDF</button></p>
+      <p class="note" id="shareMsg"></p>
+    </div>
+  </section>
+
+  <section id="tab-live" class="hidden">
+    <div class="card">
+      <h2>מצב הבחירה</h2>
+      <p class="note">ממלאים לפי מה שפורסם (רמ"י, קבוצת הווטסאפ). כל החישובים בכלי מתעדכנים מיד: מגרשים שנבחרו יוצאים מההצעות, והסיכויים מחושבים מחדש לפי מה שבאמת נשאר. הנתונים נשמרים רק אצלך.</p>
+      <div class="row">
+        <label>עד איזה מקום בתור הגיעה הבחירה?<input id="passed" type="number" min="0" placeholder="0" class="big"></label>
+      </div>
+      <p class="note" id="schedHint"></p>
+      <label style="margin-top:12px">מגרשים שכבר נבחרו (אפשר להדביק רשימה: רווח, פסיק או שורה חדשה בין מגרש למגרש)
+        <textarea id="takenInput" rows="5" dir="ltr" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%" placeholder="212, 213, 186B ..."></textarea></label>
+      <p class="note" id="takenParse"></p>
+      <div id="liveAlert"></div>
+      <p class="summary" id="liveStats"></p>
+      <p class="no-print"><button class="btn" data-reset-live="1">🗑 איפוס מצב הבחירה</button></p>
+    </div>
+  </section>
+
+  <section id="tab-all" class="hidden">
+    <div class="card no-print row">
+      <label>חיפוש מגרש<input id="q" type="search" placeholder="מספר מגרש" style="font:inherit;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"></label>
+      <label class="chk"><input type="checkbox" id="onlyPass"> רק מה שעובר את הסינון שלי</label>
+      <span class="note">לחיצה על כותרת עמודה ממיינת · הסיכוי מחושב לפי המקום בתור שהזנת</span>
+    </div>
+    <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
+  </section>
+</main>
+<footer id="about">
+  <div class="card">
+  <h2>מקורות המידע וההסתייגויות</h2>
+
+  <h3>מחירים</h3>
+  <ul>
+    <li><b>מילואים פעיל / לוחם (מחוסר דיור / לא מחוסר דיור):</b> מתוך טבלת חישוב העלויות של <b>אחיעד טבק</b> (צוות קב"ב, גרעין חירן), שנבנתה מחוברת המכרז 52/2025. המחירים כוללים הצמדה למדד ומע"מ, ונכונים ל-23.9.2026.</li>
+    <li><b>כלל הציבור, וגם "בלי הנחת המילואים 35%":</b> <u>חושבו בכלי הזה</u> לפי שיעורי ההנחה בחוברת המכרז (סעיף 8.10) ולפי אותו מקדם הצמדה ומע"מ. החישוב נבדק מול העמודות הגולמיות בטבלה, אבל <b>לא הופיע כך באף מקור רשמי</b>.</li>
+    <li>המחירים ימשיכו להשתנות לפי המדד עד יום התשלום. <b>הסכום המחייב הוא רק זה שתמסור רמ"י.</b></li>
+    <li><b>קנס מכירה מוקדמת</b> (מכירה בתוך 5 שנים מסיום הבנייה) = סך הסבסודים: ערך הקרקע המלא פחות מה ששולם עליה, ועוד הנחת הפיתוח. זו הנוסחה שבטבלת אחיעד. שם היא חושבה לקטגוריית מילואים בלבד, ו<u>בכלי הזה היא מחושבת לפי הקטגוריה שבחרת</u>. הסכום יוצמד למדד עד יום המכירה, והחישוב המחייב הוא של רמ"י.</li>
+    <li><b>לו"ז הבחירה</b> נלקח מ"רשימת הזוכים, סדר קדימות ותאריכי בחירה" שפרסמה רמ"י. מהרשימה נשמרו רק מספר הקדימות, התאריך והשעה, בלי מספרי זהות. הזימון האישי מרמ"י הוא הקובע.</li>
+  </ul>
+
+  <h3>גובה, שיפוע וסוג מגרש</h3>
+  <ul id="reliefCredit">
+    <li class="needs-relief"><b>גובה ושיפוע</b> חושבו בכלי הזה ממודל הגובה ומפוליגוני המגרשים שפורסמו ב-<a href="https://dror.bhsoft.app" target="_blank" rel="noopener">dror.bhsoft.app</a> (BH Software, אתר לא רשמי), לפי העותק מ-06.10.2026.
+      כנראה מדובר בגובה הקרקע הקיים. <b>גובה הפיתוח הסופי לפי תכנית הבינוי</b>, שעדיין לא אושרה סופית, עשוי להיות שונה. המדידה מקורבת (רשת של 4 מ').</li>
+    <li><b>חד-משפחתי / דו-משפחתי</b> הוסק ממספר המגרש: סיומת A/B = דו-משפחתי. יש לוודא מול חוברת המכרז.</li>
+  </ul>
+
+  <h3>הערכת הסיכויים</h3>
+  <ul>
+    <li>מבוססת על <b>הנחות</b> (חד לפני דו, גדול לפני קטן, כ-20% שלא מגיעים) ולא על נתוני בחירה אמיתיים. ב"מצב הבחירה" אפשר לעדכן אותה לפי מה שקורה בפועל.</li>
+    <li>"מקום בתור" הוא מספר הקדימות ברשימת הזוכים. סדר הבחירה בפועל, הימים והשעות נקבעים רק על ידי רמ"י.</li>
+  </ul>
+
+  <h3>מקורות רשמיים לבדיקה</h3>
+  <ul>
+    <li><a href="https://apps.land.gov.il/MichrazimSite/#/michraz/20250052" target="_blank" rel="noopener">אתר המכרזים של רמ"י, מכרז 52/2025</a> (חוברת המכרז, מפות, תשריטים, רשימת הזוכים)</li>
+    <li><a href="https://www.tabanow.co.il/%D7%AA%D7%91%D7%A2/%D7%AA%D7%9E%D7%A8/615-0225235" target="_blank" rel="noopener">תב"ע 615-0225235</a> (שלבים ב'–ד') · <a href="https://www.tabanow.co.il/%D7%AA%D7%91%D7%A2/%D7%AA%D7%9E%D7%A8/107/02/15" target="_blank" rel="noopener">תב"ע 107/02/15</a> (שלב א')</li>
+  </ul>
+
+  <h3>פרטיות</h3>
+  <p>כל מה שמזינים בכלי (מקום בתור, עדיפויות, הפול, מצב הבחירה) נשמר <b>רק בדפדפן שלך</b> ולא נשלח לשום מקום.</p>
+
+  <p class="note">הכלי לא רשמי ואינו מהווה ייעוץ משפטי, כלכלי או תכנוני. השימוש בו על אחריות המשתמש בלבד.</p>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script src="model.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'];
+const DEF = {
+  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minArea: 0,
+  hoods: HOODS, types: TYPES, prefType: 'חד', prefHood: 'א', prefSlope: 'flat',
+  order: CRITERIA.map(c => c.key),
+  enabled: { area: true, price: true, ppm: false, type: false, hood: false },
+  noShow: 0.2, margin: 0.2, crowd: { type: 7, area: 3 }, pinned: [], excluded: [],
+  passed: 0, takenText: '', taken: [], notes: {}, waiting: false,
+};
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const YEAR = 2026;
+// לו"ז מרשימת הזוכים: [dd/mm, hh:mm] -> Date (שעון ישראל = שעון המחשב של המשתמש)
+const slotOf = (pos, waiting) => (window.SCHEDULE[waiting ? 'wait' : 'prio'] || {})[pos];
+const slotDate = ([d, t]) => new Date(YEAR, +d.slice(3, 5) - 1, +d.slice(0, 2), +t.slice(0, 2), +t.slice(3, 5));
+const IDS = new Set(window.PLOTS.map(p => p.id));
+function parseTaken(text) {
+  const toks = text.toUpperCase().split(/[\s,;]+/).filter(Boolean);
+  return { ok: [...new Set(toks.filter(t => IDS.has(t)))], bad: toks.filter(t => !IDS.has(t)) };
+}
+let S;
+try { S = { ...DEF, ...JSON.parse(localStorage.getItem('dror-tool') || '{}') }; } catch { S = { ...DEF }; }
+// הגירה מגרסה קודמת: כוכבים → פול; קטגוריות ישנות
+if (S.stars) { S.pinned = [...new Set([...S.pinned, ...S.stars])]; delete S.stars; }
+S.category = { homeless: 'res_home', other: 'res' }[S.category] || S.category;
+if (!CATEGORIES.some(c => c.key === S.category)) S.category = DEF.category;
+// קריטריון חדש שנוסף אחרי שהמשתמש שמר — מצטרף לסוף הרשימה
+CRITERIA.forEach(c => { if (!S.order.includes(c.key)) S.order.push(c.key); });
+S.order = S.order.filter(k => CRITERIA.some(c => c.key === k));
+const save = () => { try { localStorage.setItem('dror-tool', JSON.stringify(S)); } catch {} };
+
+const ils = n => '₪' + Math.round(n).toLocaleString('he-IL');
+const fullType = t => (t === 'חד' ? 'חד-משפחתי' : 'דו-משפחתי');
+function badge(prob, taken) {
+  if (taken) return '<span class="badge b-r">❌ נבחר כבר</span>';
+  const pc = Math.round(prob * 100);
+  const [cls, txt] = prob >= 0.7 ? ['b-g', 'כנראה פנוי'] : prob >= 0.3 ? ['b-y', 'גבולי'] : ['b-r', 'כנראה תפוס'];
+  return `<span class="badge ${cls}">${txt} · ${pc}%</span>`;
+}
+function card(p) {
+  const on = S.pinned.includes(p.id);
+  const acts = on ? '<span class="note">📌 כבר בפול שלך</span>'
+    : `<button class="btn pri" data-pin="${p.id}">📌 הוסף לפול</button><button class="btn" data-hide="${p.id}">✕ לא מעניין</button>`;
+  return `<div class="plot ${on ? 'pin' : ''}" ${p.taken ? 'style="opacity:.55"' : ''}>${p.rank ? `<span class="rankno" title="דירוג פופולריות משוער בין המגרשים שנשארו">#${p.rank} בביקוש</span>` : ''}
+    <div><span class="id">${p.id}</span></div>
+    <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר</div>
+    ${p.elev ? `<div class="meta">גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% · הפרש ${p.drop} מ'</div>` : ''}
+    <div class="pr">${ils(p.price)} <span class="note">(${ils(p.ppm)} למ"ר)</span></div>
+    <div style="margin-top:6px">${badge(p.prob, p.taken)} <span class="note">התאמה ${p.score}</span></div>
+    <div class="acts no-print">${acts}</div></div>`;
+}
+// שורה בטאב "הפול שלי"
+function mineRow(p, i) {
+  return `<li class="${p.taken ? 'gone' : ''}">
+    <div class="arr no-print"><button class="mv" data-pup="${i}" ${i === 0 ? 'disabled' : ''} aria-label="העלה בעדיפות">▲</button>
+      <button class="mv" data-pdown="${i}" ${i === S.pinned.length - 1 ? 'disabled' : ''} aria-label="הורד בעדיפות">▼</button></div>
+    <span class="num">${i + 1}</span>
+    <div class="body"><span class="id">${p.id}</span>${badge(p.prob, p.taken)}
+      <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}%` : ''}</div></div>
+    <button class="btn no-print" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button>
+    <input class="noteIn" data-note="${p.id}" value="${esc(S.notes[p.id] || '')}" placeholder="הערה (למשל: צמוד לגן, לבדוק שיפוע מול הרחוב)">
+  </li>`;
+}
+
+const settings = () => S;
+
+// ---- טופס ----
+function checks(el, list, key, fmt) {
+  $(el).innerHTML = list.map(v => `<label class="chk"><input type="checkbox" data-${key}="${v}" ${S[key].includes(v) ? 'checked' : ''}>${fmt(v)}</label>`).join('');
+}
+function fillForm() {
+  $('category').innerHTML = CATEGORIES.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
+  $('pos').value = S.pos; $('category').value = S.category; $('k').value = S.k; $('use35').checked = S.use35;
+  $('budget').value = S.budget || ''; $('minArea').value = S.minArea || '';
+  $('prefType').value = S.prefType; $('prefSlope').value = S.prefSlope;
+  $('passed').value = S.passed || ''; $('takenInput').value = S.takenText; $('waiting').checked = S.waiting;
+  $('prefHood').innerHTML = HOODS.map(h => `<option>${h}</option>`).join(''); $('prefHood').value = S.prefHood;
+  $('noShow').value = Math.round(S.noShow * 100); $('margin').value = Math.round(S.margin * 100);
+  $('wType').value = S.crowd.type; $('wArea').value = S.crowd.area;
+  checks('hoods', HOODS, 'hoods', h => h);
+  checks('types', TYPES, 'types', fullType);
+}
+function renderCrit() {
+  const lbl = Object.fromEntries(CRITERIA.map(c => [c.key, c.label]));
+  let n = 0;
+  $('crit').innerHTML = S.order.map((k, i) => {
+    const on = S.enabled[k];
+    return `<li class="${on ? '' : 'off'}"><span class="n">${on ? ++n : '–'}</span>
+      <label class="chk lbl"><input type="checkbox" data-en="${k}" ${on ? 'checked' : ''}>${lbl[k]}</label>
+      <button data-up="${i}" ${i === 0 ? 'disabled' : ''} aria-label="הזז למעלה">▲</button>
+      <button data-down="${i}" ${i === S.order.length - 1 ? 'disabled' : ''} aria-label="הזז למטה">▼</button></li>`;
+  }).join('');
+}
+
+document.addEventListener('input', e => {
+  const t = e.target, num = v => Number(v) || 0;
+  if (t.id === 'pos') S.pos = Math.max(1, num(t.value));
+  else if (t.id === 'k') S.k = Math.max(1, num(t.value));
+  else if (['budget', 'minArea'].includes(t.id)) S[t.id] = num(t.value);
+  else if (['category', 'prefType', 'prefHood', 'prefSlope'].includes(t.id)) S[t.id] = t.value;
+  else if (t.id === 'use35') S.use35 = t.checked;
+  else if (t.id === 'waiting') S.waiting = t.checked;
+  else if (t.dataset.note) { S.notes = { ...S.notes, [t.dataset.note]: t.value }; return save(); }  // בלי render — לא לאבד פוקוס
+  else if (t.id === 'passed') S.passed = Math.max(0, num(t.value));
+  else if (t.id === 'takenInput') { S.takenText = t.value; S.taken = parseTaken(t.value).ok; }
+  else if (['noShow', 'margin'].includes(t.id)) S[t.id] = num(t.value) / 100;
+  else if (t.id === 'wType') S.crowd = { ...S.crowd, type: num(t.value) };
+  else if (t.id === 'wArea') S.crowd = { ...S.crowd, area: num(t.value) };
+  else if (t.dataset.hoods || t.dataset.types) {
+    const key = t.dataset.hoods ? 'hoods' : 'types', v = t.dataset[key];
+    S[key] = t.checked ? [...S[key], v] : S[key].filter(x => x !== v);
+  } else if (t.dataset.en) { S.enabled = { ...S.enabled, [t.dataset.en]: t.checked }; renderCrit(); }
+  else if (t.id === 'q' || t.id === 'onlyPass') return renderTable();
+  else return;
+  save(); render();
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.goto) return document.querySelector(`.tabs [data-tab="${b.dataset.goto}"]`).click();
+  if (b.dataset.tab) {
+    document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+    ['pool', 'mine', 'all', 'live'].forEach(t => $('tab-' + t).classList.toggle('hidden', b.dataset.tab !== t));
+    return;
+  }
+  if (b.dataset.resetLive) {
+    if (!confirm('לאפס את מצב הבחירה (מקום בתור שעבר ורשימת המגרשים שנבחרו)?')) return;
+    S.passed = 0; S.takenText = ''; S.taken = []; fillForm();
+  } else if (b.dataset.useRate) { S.noShow = 1 - Number(b.dataset.useRate); fillForm(); } else
+  if (b.dataset.up || b.dataset.down) {
+    const i = Number(b.dataset.up ?? b.dataset.down), j = b.dataset.up ? i - 1 : i + 1;
+    [S.order[i], S.order[j]] = [S.order[j], S.order[i]];
+    renderCrit();
+  } else if (b.dataset.pup || b.dataset.pdown) {
+    const i = Number(b.dataset.pup ?? b.dataset.pdown), j = b.dataset.pup ? i - 1 : i + 1;
+    [S.pinned[i], S.pinned[j]] = [S.pinned[j], S.pinned[i]];
+  } else if (b.dataset.share) return sharePool();
+  else if (b.dataset.fillPassed) { S.passed = Number(b.dataset.fillPassed); fillForm(); }
+  else if (b.dataset.pin) {
+    S.pinned = [...S.pinned, b.dataset.pin]; S.excluded = S.excluded.filter(x => x !== b.dataset.pin);
+  } else if (b.dataset.unpin) S.pinned = S.pinned.filter(x => x !== b.dataset.unpin);
+  else if (b.dataset.hide) S.excluded = [...S.excluded, b.dataset.hide];
+  else if (b.dataset.unhideAll) S.excluded = [];
+  else if (b.dataset.more) S.extra += 5;
+  else if (b.dataset.fewer) S.extra = 0;
+  else return;
+  save(); render();
+});
+
+// ---- תוצאות ----
+let ROWS = [];
+function render() {
+  ROWS = enrich(window.PLOTS, settings());
+  const { pool, gambles, candidates } = buildPool(ROWS, settings());
+  const E = Math.round(effectiveBefore(S)), W = waitingBefore(S);
+  const remaining = window.PLOTS.length - S.taken.length, left = Math.max(0, remaining - E);
+  const live = S.passed || S.taken.length;
+  $('summary').innerHTML = (live ? `🔴 <b>לפי מצב הבחירה:</b> הבחירה הגיעה עד מקום ${S.passed}, ונבחרו ${S.taken.length} מגרשים. ` : '')
+    + (absPos(S) <= S.passed + 1 && live ? '<b>התור שלך הגיע!</b> כל המגרשים שנשארו פנויים. ' : '')
+    + `לפניך עוד <b>${W}</b> זוכים. בהנחה ש-${Math.round(S.noShow * 100)}% לא מגיעים, יבחרו לפניך בפועל כ-<b>${E}</b>,
+    ויישארו כ-<b>${left}</b> מתוך ${remaining} המגרשים שעדיין פנויים. ${candidates} מגרשים עוברים את הסינון שלך.`
+    + (pool.length < S.k + S.extra ? ` <b>מצאתי רק ${pool.length} הצעות עם סיכוי של 50% ומעלה. נסה להרחיב את הסינון.</b>` : '');
+  // הפול שלי: לפי סדר העדיפות שהמשתמש קבע
+  const byId = Object.fromEntries(ROWS.map(p => [p.id, p]));
+  const pinned = S.pinned.map(id => byId[id]).filter(Boolean);
+  $('pinned').innerHTML = pinned.map(mineRow).join('');
+  $('pinHint').classList.toggle('hidden', !pinned.length);
+  $('pinCount').textContent = pinned.length ? `(${pinned.length})` : '';
+  $('pinEmpty').classList.toggle('hidden', pinned.length > 0);
+  $('mineLink').innerHTML = pinned.length
+    ? `📌 בפול שלך ${pinned.length} מגרשים. את הסדר וההערות קובעים ב<button class="linkbtn" data-goto="mine">טאב "הפול שלי"</button>.` : '';
+  $('pool').innerHTML = pool.map(p => card(p)).join('') || '<p class="note">אין הצעות נוספות. נסה להרחיב את הסינון.</p>';
+  $('gambles').innerHTML = gambles.map(p => card(p)).join('');
+  $('gambleWrap').classList.toggle('hidden', !gambles.length);
+  $('exclNote').innerHTML = (S.excluded.length ? `הסתרת ${S.excluded.length} מגרשים · <button class="linkbtn" data-unhide-all="1">החזר הכל</button> ` : '')
+    + (S.extra ? `· <button class="linkbtn" data-fewer="1">חזור ל-${S.k} הצעות</button>` : '');
+  // ההפרש בין הקטגוריות — רוב המחיר הוא פיתוח
+  const cat = CATEGORIES.find(c => c.key === S.category);
+  $('use35wrap').classList.toggle('hidden', !cat.reservist);
+  const gap = window.PLOTS.map(p => p.prices.pub - p.prices.res_home);
+  $('catNote').textContent = `רוב המחיר הוא פיתוח, וזהה לכולם. ההבדל בין הקטגוריה הזולה ליקרה הוא ₪${Math.min(...gap).toLocaleString('he-IL')}–₪${Math.max(...gap).toLocaleString('he-IL')} למגרש.`
+    + (cat.reservist ? ' הנחת המילואים (35% על הקרקע) ניתנת פעם אחת בחיים. כאן היא שווה רק כמה אלפי ₪, ולכן כדאי לשקול לשמור אותה לרכישה עתידית.' : '');
+  // לו"ז אישי מרשימת הזוכים
+  const slot = slotOf(S.pos, S.waiting);
+  $('mineSlot').innerHTML = $('mySlot').innerHTML = slot
+    ? `🗓 לפי רשימת הזוכים של רמ"י, ${S.waiting ? 'ממתין' : 'קדימות'} מס' ${S.pos} מוזמן ל<b>בחירה ב-${slot[0]}/${YEAR} בשעה ${slot[1]}</b> (משרדי רמ"י, באר שבע). יש לוודא מול הזימון האישי.`
+    : `⚠ מספר ${S.pos} לא נמצא ב${S.waiting ? 'רשימת ההמתנה (1–' + Object.keys(window.SCHEDULE.wait).length + ')' : 'רשימת הזוכים (1–297)'}.`;
+  const on = S.order.filter(k => S.enabled[k]).length;
+  $('settingsSum').textContent = `· ${on} עדיפויות פעילות · ${S.hoods.length}/4 שכונות${S.budget ? ' · תקציב ' + ils(S.budget) : ''}`;
+  renderLive(pinned);
+  renderTable();
+}
+
+// כמה מקומות בתור אמורים כבר לעבור לפי הלו"ז — רק הצעה, המשתמש מאשר
+function schedPassed(now = new Date()) {
+  let n = 0;
+  for (const [pos, sl] of Object.entries(window.SCHEDULE.prio)) if (slotDate(sl).getTime() + 3600e3 <= now) n = Math.max(n, +pos);
+  return n;
+}
+
+async function sharePool() {
+  const byId = Object.fromEntries(ROWS.map(p => [p.id, p]));
+  const line = p => `${p.id} · שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)} · ${p.taken ? 'נבחר כבר' : 'סיכוי ' + Math.round(p.prob * 100) + '%'}`;
+  const slot = slotOf(S.pos, S.waiting);
+  const { pool } = buildPool(ROWS, S);
+  const text = [`הפול שלי · דרור מכרז 52/2025`,
+    `מקום בתור: ${S.waiting ? 'המתנה ' : ''}${S.pos}${slot ? ` (בחירה ${slot[0]} ${slot[1]})` : ''}`, '',
+    ...S.pinned.map((id, i) => byId[id] && `${i + 1}. ${line(byId[id])}${S.notes[id] ? '\n   📝 ' + S.notes[id] : ''}`).filter(Boolean),
+    ...(pool.length ? ['', 'הצעות נוספות: ' + pool.slice(0, 5).map(p => p.id).join(', ')] : []),
+    '', 'הערכה בלבד, כלי לא רשמי. המחיר המחייב הוא של רמ"י.'].join('\n');
+  try {
+    if (navigator.share) await navigator.share({ text });
+    else { await navigator.clipboard.writeText(text); $('shareMsg').textContent = '✓ הרשימה הועתקה. אפשר להדביק בווטסאפ.'; }
+  } catch (e) {
+    if (e.name !== 'AbortError') { $('shareMsg').innerHTML = 'לא הצלחתי להעתיק אוטומטית. סמן והעתק:<br><textarea rows="8" style="width:100%">' + esc(text) + '</textarea>'; }
+  }
+}
+
+function renderLive(pinned) {
+  const { ok, bad } = parseTaken(S.takenText);
+  $('takenParse').innerHTML = (ok.length ? `✓ זוהו ${ok.length} מגרשים.` : '')
+    + (bad.length ? ` <b style="color:var(--r)">⚠ לא זוהו (בדוק את המספר):</b> ${bad.join(', ')}` : '');
+  const sp = schedPassed();
+  $('schedHint').innerHTML = sp && sp !== S.passed
+    ? `לפי הלו"ז של רמ"י, עד עכשיו היו אמורים לבחור כל בעלי הקדימות 1–${sp}. <button class="linkbtn" data-fill-passed="${sp}">מלא ${sp}</button> (רק אם זה תואם את מה שידוע לך)` : '';
+  const lost = pinned.filter(p => p.taken);
+  $('mineAlert').innerHTML = $('liveAlert').innerHTML = lost.length
+    ? `<p class="summary" style="background:var(--r-bg);color:var(--r)">⚠ מהפול שלך כבר נבחרו: <b>${lost.map(p => p.id).join(', ')}</b>. הצעות חלופיות בטאב "בחירת מגרשים".</p>` : '';
+  const rate = observedShowRate(S);
+  $('liveStats').innerHTML = rate === null
+    ? 'כשתמלא עד איזה מקום הגיעה הבחירה וכמה מגרשים נבחרו, אחשב את שיעור ההגעה בפועל.'
+    : `<b>שיעור הגעה בפועל:</b> ${Math.round(rate * 100)}% (${S.taken.length} מגרשים נבחרו ב-${S.passed} מקומות בתור). המודל מניח כרגע ${Math.round((1 - S.noShow) * 100)}%.
+       ${Math.abs(rate - (1 - S.noShow)) >= 0.02 ? `<button class="btn" data-use-rate="${rate.toFixed(3)}">השתמש בשיעור בפועל</button>` : '✓ תואם.'}`;
+}
+
+const COLS = [
+  ['pin', '📌'], ['id', 'מגרש'], ['hood', 'שכונה'], ['type', 'סוג'], ['area', 'שטח'], ['price', 'מחיר כולל'],
+  ['ppm', 'למ"ר'], ['elev', 'גובה'], ['slope', 'שיפוע %'], ['penalty', 'קנס מכירה מוקדמת'], ['rank', 'דירוג ביקוש'], ['prob', 'סיכוי שיישאר'], ['score', 'התאמה לי'],
+].filter(([k]) => !['elev', 'slope'].includes(k) || window.PLOTS[0][k] !== undefined);
+let sort = { key: 'score', dir: -1 };
+function renderTable() {
+  $('thead').innerHTML = COLS.map(([k, l]) => `<th data-sort="${k}" class="${sort.key === k ? 'sorted' : ''}">${l}${sort.key === k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('');
+  const q = $('q').value.trim(), only = $('onlyPass').checked, s = settings();
+  const ok = p => S.hoods.includes(p.hood) && S.types.includes(p.type) && (!S.budget || p.price <= S.budget) && (!S.minArea || p.area >= S.minArea);
+  const val = p => (sort.key === 'pin' ? +S.pinned.includes(p.id) : sort.key === 'id' ? parseInt(p.id)
+    : sort.key === 'rank' ? (p.rank ?? 1e9) : p[sort.key]);
+  const rows = ROWS.filter(p => (!q || p.id.includes(q)) && (!only || ok(p)))
+    .sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * sort.dir);
+  const cell = {
+    pin: p => (S.pinned.includes(p.id)
+      ? `<button class="btn pri" data-unpin="${p.id}" title="הוצא מהפול">📌</button>`
+      : `<button class="btn" data-pin="${p.id}" title="הוסף לפול">＋</button>`),
+    id: p => `<b>${p.id}</b>`, price: p => ils(p.price), ppm: p => ils(p.ppm), penalty: p => ils(p.penalty),
+    elev: p => Math.round(p.elev), prob: p => badge(p.prob, p.taken), rank: p => p.rank ?? '—',
+  };
+  $('tbody').innerHTML = rows.map(p => `<tr class="${ok(p) ? '' : 'miss'}">`
+    + COLS.map(([k]) => `<td>${cell[k] ? cell[k](p) : p[k]}</td>`).join('') + '</tr>').join('');
+}
+$('thead').addEventListener('click', e => {
+  const k = e.target.closest('th')?.dataset.sort; if (!k) return;
+  sort = { key: k, dir: sort.key === k ? -sort.dir : (['price', 'ppm', 'rank', 'penalty', 'id'].includes(k) ? 1 : -1) };
+  renderTable();
+});
+
+// משקלי הקהל בטופס הם 0–10; המודל מקבל אותם כמו שהם (היחס ביניהם הוא שקובע)
+// גרסה בלי נתוני BH Software (build.py --no-relief) — להסתיר כל מה שמתייחס לגובה/שיפוע
+if (window.PLOTS[0].elev === undefined) document.querySelectorAll('.needs-relief').forEach(e => e.classList.add('hidden'));
+fillForm(); renderCrit(); render();
+// בטלפון — ההגדרות מקופלות כדי שהפול יופיע מיד; במחשב — פתוחות
+if (matchMedia('(min-width: 800px)').matches) $('settings').open = true;
+</script>
+</body>
+</html>
