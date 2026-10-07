@@ -141,7 +141,8 @@ a{color:var(--accent)}
       <details class="needs-relief" style="margin-top:6px"><summary>מה זה "גבוה" ו"שיפוע"?</summary>
         <p class="note"><b>גבוה</b> = גובה ממוצע של המגרש מעל פני הים. ביישוב הטווח הוא 450–503 מ', כך שבפועל זה "גבוה ביחס לשאר היישוב". מגרש גבוה בדרך כלל צופה למרחק.<br>
         <b>שיפוע</b> = כמה הקרקע נוטה בתוך המגרש (%). <b>מישורי</b> פשוט וזול יותר לבנייה. <b>משופע</b> מתאים למי שרוצה בית מדורג, קומת מרתף או מפלס תחתון עם יציאה לחצר, ולפעמים גם לנוף פתוח.
-        "הפרש" = ההפרש בין הנקודה הגבוהה לנמוכה במגרש. אי אפשר לדעת מהנתונים אם המגרש עולה או יורד ביחס לרחוב. את זה צריך לבדוק במפה.</p></details>
+        "הפרש" = ההפרש בין הנקודה הגבוהה לנמוכה במגרש.<br>
+        <b>עולה / יורד מהרחוב</b> = גובה השליש האחורי של המגרש פחות הגובה לאורך החזית לרחוב. עולה: הבית מעל הרחוב (מדרגות מהכניסה, נוף מהחצר). יורד: הבית מתחת לרחוב (לרוב כניסה בקומה העליונה ומפלס תחתון לחצר). עד מטר לכל כיוון נחשב מישורי. בפינה או ברחוב שלא מסומן במפה, החזית שנבחרה עשויה להיות לא זו שתהיה הכניסה בפועל.</p></details>
     </div>
     </details>
 
@@ -206,7 +207,7 @@ a{color:var(--accent)}
     <div class="card no-print row">
       <label>חיפוש מגרש<input id="q" type="search" placeholder="מספר מגרש" style="font:inherit;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"></label>
       <label class="chk"><input type="checkbox" id="onlyPass"> רק מה שעובר את הסינון שלי</label>
-      <span class="note">* גובה, שיפוע והפרש גובה (במטרים, בין הנקודה הגבוהה לנמוכה במגרש) לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום · דירוג שטח: 1 = הגדול ביותר · דירוג מחיר: 1 = הזול ביותר · לחיצה על כותרת עמודה ממיינת</span>
+      <span class="note">* גובה, שיפוע, הפרש גובה (במטרים, בין הנקודה הגבוהה לנמוכה במגרש) ועולה/יורד מהרחוב לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום · דירוג שטח: 1 = הגדול ביותר · דירוג מחיר: 1 = הזול ביותר · לחיצה על כותרת עמודה ממיינת</span>
     </div>
     <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
   </section>
@@ -227,7 +228,8 @@ a{color:var(--accent)}
   <h3>גובה, שיפוע וסוג מגרש</h3>
   <ul id="reliefCredit">
     <li class="needs-relief"><b>גובה ושיפוע</b> חושבו בכלי הזה מפוליגוני המגרשים וממפת הגבהים שפורסמו באתר <a href="https://dror.bhsoft.app" target="_blank" rel="noopener">dror.bhsoft.app</a> של <b>BH Software</b>, בעותק מ-06/10/2026 ובאישורו.
-      מפת הגבהים מתארת את <b>הקרקע לפני עבודות הפיתוח</b> (רשת של 4 מ'). מאז השטח עבר פיתוח, ולכן הנתונים לא משקפים את המצב היום, במיוחד השיפוע. אפשר להתייחס אליהם לכל היותר כאינדיקציה כללית.</li>
+      מפת הגבהים מתארת את <b>הקרקע לפני עבודות הפיתוח</b> (רשת של 4 מ'). מאז השטח עבר פיתוח, ולכן הנתונים לא משקפים את המצב היום, במיוחד השיפוע. אפשר להתייחס אליהם לכל היותר כאינדיקציה כללית.<br>
+      <b>עולה/יורד מהרחוב:</b> החזית היא החלק בגבול המגרש שנוגע בדרך במפת BH. ב-78 מגרשים הרחוב לא מסומן כחלקה, והחזית זוהתה כרצועה ריקה בין שורות מגרשים. במגרש 384B לא זוהתה חזית.</li>
     <li class="needs-edge"><b>מיקום ביישוב</b> (על הגדר / פונה לשטח פתוח פנימי / פנימי) חושב בכלי הזה מפוליגוני המגרשים של BH Software, לפי <b>תכנית היישוב המלאה, כולל שלבים שעוד לא שווקו</b>. "על הגדר" = המגרש נוגע בקו החיצוני של כל היישוב המתוכנן. "פונה לשטח פתוח פנימי" = נוגע בשטח פתוח בין שכונות. זה חישוב גאומטרי מקורב: יש לבדוק במפה מה בדיוק נמצא מעבר למגרש (ואדי, כביש, גן), ולזכור שתכנית הבינוי עוד לא סופית.</li>
     <li><b>"🗺 במפה"</b> פותח את המגרש באתר של BH Software, שם רואים את המיקום שלו, השכנים, המידות, תצלום אוויר ותכנית הבינוי. גם זה אתר לא רשמי.</li>
     <li><b>חד-משפחתי / דו-משפחתי</b> הוסק ממספר המגרש: סיומת A/B = דו-משפחתי. יש לוודא מול חוברת המכרז.</li>
@@ -346,6 +348,8 @@ function syncAnon() {
       .catch(() => { $('anonStatus').textContent = '⚠ השרת לא זמין כרגע. ננסה שוב בשינוי הבא.'; });
   }, 800);
 }
+// מול הרחוב: גובה החלק האחורי פחות גובה החזית (לפני פיתוח); עד מטר לכל כיוון = מישורי
+const riseText = p => p.rise === undefined ? '' : p.rise > 1 ? `עולה מהרחוב ${p.rise} מ'` : p.rise < -1 ? `יורד מהרחוב ${-p.rise} מ'` : 'מישורי מול הרחוב';
 const takenBadge = p => (p.taken ? '<span class="badge b-r">❌ נבחר כבר</span>' : '');
 const facts = p => `שטח: ${p.areaRank}/297 · בשכונה ${p.hood} ${p.type}: ${p.groupRank}/${p.groupSize} · מחיר: ${p.priceRank}/297`;
 function card(p) {
@@ -355,7 +359,7 @@ function card(p) {
   return `<div class="plot ${on ? 'pin' : ''}" ${p.taken ? 'style="opacity:.55"' : ''}>
     <div><span class="id">${p.id}</span> ${mapLink(p.id)}</div>
     <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר${p.edge ? ` · 📍 ${EDGE_LABEL[p.edge]}` : ''}</div>
-    ${p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">לפני פיתוח: גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% · הפרש גובה במגרש ${p.drop} מ' ⚠</div>` : ''}
+    ${p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">לפני פיתוח: גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% · הפרש גובה במגרש ${p.drop} מ'${p.rise !== undefined ? ' · ' + riseText(p) : ''} ⚠</div>` : ''}
     <div class="pr">${ils(p.price)} <span class="note">(${ils(p.ppm)} למ"ר)</span></div>
     <div class="note" style="margin-top:4px" title="דירוג עובדתי מול כל המגרשים: 1 = הגדול / הזול ביותר">📊 ${facts(p)}</div>
     <div style="margin-top:6px">${takenBadge(p)} <span class="note">התאמה לעדיפויות שלך: ${p.score}</span> ${savedBy(p)}</div>
@@ -377,7 +381,7 @@ function mineRow(p, i) {
       <button class="mv" data-pdown="${i}" ${i === S.pinned.length - 1 ? 'disabled' : ''} aria-label="הורד בעדיפות">▼</button></div>
     <span class="num">${i + 1}</span>
     <div class="body"><span class="id">${p.id}</span>${takenBadge(p)} ${mapLink(p.id)}
-      <div class="meta">${savedBy(p)} שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · לפני פיתוח: גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%, הפרש גובה ${p.drop} מ'` : ''}</div></div>
+      <div class="meta">${savedBy(p)} שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · לפני פיתוח: גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%, הפרש גובה ${p.drop} מ'${p.rise !== undefined ? ', ' + riseText(p) : ''}` : ''}</div></div>
     <span class="acts no-print" style="margin:0"><button class="btn" data-sim="${p.id}" aria-expanded="${openSim === p.id}">🔍 דומים</button><button class="btn" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button></span>
     ${openSim === p.id ? simList(p) : ''}
     <input class="noteIn" data-note="${p.id}" value="${esc(S.notes[p.id] || '')}" placeholder="הערה (למשל: צמוד לגן, לבדוק שיפוע מול הרחוב)">
@@ -561,8 +565,8 @@ function renderLive(pinned) {
 
 const COLS = [
   ['pin', '📌'], ['id', 'מגרש'], ['hood', 'שכונה'], ['type', 'סוג'], ['edge', 'מיקום'], ['area', 'שטח'], ['price', 'מחיר כולל'],
-  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['drop', 'הפרש גובה*'], ['penalty', 'קנס מכירה מוקדמת'], ['areaRank', 'דירוג שטח'], ['priceRank', 'דירוג מחיר'], ['taken', 'סטטוס'], ['saved', '👥 שמרו'], ['score', 'התאמה לי'],
-].filter(([k]) => !['elev', 'slope', 'drop', 'edge'].includes(k) || window.PLOTS[0][k] !== undefined);
+  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['drop', 'הפרש גובה*'], ['rise', 'מול הרחוב*'], ['penalty', 'קנס מכירה מוקדמת'], ['areaRank', 'דירוג שטח'], ['priceRank', 'דירוג מחיר'], ['taken', 'סטטוס'], ['saved', '👥 שמרו'], ['score', 'התאמה לי'],
+].filter(([k]) => !['elev', 'slope', 'drop', 'rise', 'edge'].includes(k) || window.PLOTS[0][k] !== undefined);
 let sort = { key: 'score', dir: -1 };
 function renderTable() {
   $('thead').innerHTML = COLS.map(([k, l]) => `<th data-sort="${k}" class="${sort.key === k ? 'sorted' : ''}">${l}${sort.key === k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('');
@@ -577,7 +581,7 @@ function renderTable() {
       ? `<button class="btn pri" data-unpin="${p.id}" title="הוצא מהפול">📌</button>`
       : `<button class="btn" data-pin="${p.id}" title="הוסף לפול">＋</button>`),
     id: p => `<b>${p.id}</b> ${mapLink(p.id)}`, price: p => ils(p.price), ppm: p => ils(p.ppm), penalty: p => ils(p.penalty),
-    elev: p => Math.round(p.elev), edge: p => EDGE_LABEL[p.edge], taken: p => takenBadge(p) || 'פנוי', saved: p => countsFailed ? 'אין חיבור' : (COUNTS && COUNTS[p.id]) ? COUNTS[p.id] + (savedBefore(p.id) ? ` (${savedBefore(p.id)} לפניך)` : '') : '',
+    elev: p => Math.round(p.elev), rise: riseText, edge: p => EDGE_LABEL[p.edge], taken: p => takenBadge(p) || 'פנוי', saved: p => countsFailed ? 'אין חיבור' : (COUNTS && COUNTS[p.id]) ? COUNTS[p.id] + (savedBefore(p.id) ? ` (${savedBefore(p.id)} לפניך)` : '') : '',
   };
   $('tbody').innerHTML = rows.map(p => `<tr class="${ok(p) ? '' : 'miss'}">`
     + COLS.map(([k]) => `<td>${cell[k] ? cell[k](p) : p[k]}</td>`).join('') + '</tr>').join('');
