@@ -171,6 +171,13 @@ a{color:var(--accent)}
       <p class="note" id="pinEmpty">עוד לא הוספת מגרשים. בטאב "בחירת מגרשים" לוחצים "📌 הוסף לפול" על הצעה, או "＋" בטאב "כל המגרשים".</p>
       <p class="no-print acts" style="margin-top:14px;flex-wrap:wrap"><button class="btn pri" data-share="1">📤 שליחת הפול (ווטסאפ וכו')</button><button class="btn" data-mylink="1">🔗 קישור אישי לפול שלי</button><button class="btn" onclick="print()">🖨 הדפסה / שמירה כ-PDF</button></p>
       <p class="note" id="shareMsg"></p>
+      <div class="summary no-print" id="anonBox" style="margin-top:14px">
+        <b>👥 כמה משתמשים שמרו כל מגרש</b>
+        <label class="chk" style="margin:6px 0"><input type="checkbox" id="shareAnon"> לשתף את הפול שלי אנונימית, כדי לעזור לאחרים</label>
+        <div class="note">נשלחים <b>רק מספרי המגרשים שבפול שלך</b> וקוד אקראי שהדפדפן יוצר (כדי ששמירה חוזרת תחליף את הקודמת ולא תיספר פעמיים).
+          <b>לא נשלחים</b> מקומך בתור, שמך, ההערות או כל פרט אחר. ביטול הסימון מוחק את הפול שלך מהמאגר.</div>
+        <div class="note" id="anonStatus"></div>
+      </div>
       <p class="note no-print">💾 <b>שמירה:</b> כל מה שמזינים נשמר אוטומטית בדפדפן הזה, וכשחוזרים לדף הכל נמצא במקום.
         כדאי לפתוח את הכלי בדפדפן הרגיל (ספארי או כרום, ולא מתוך ווטסאפ) ולהוסיף אותו למסך הבית.
         כדי לעבור למכשיר אחר, למשל מהמחשב לטלפון ביום הבחירה, לוחצים <b>"🔗 קישור אישי"</b>, שולחים את הקישור לעצמך ופותחים אותו במכשיר השני.</p>
@@ -233,6 +240,8 @@ a{color:var(--accent)}
 
   <h3>פרטיות</h3>
   <p>כל מה שמזינים בכלי (מקום בתור, עדיפויות, הפול, מצב הבחירה) נשמר <b>רק בדפדפן שלך</b> ולא נשלח לשום מקום.
+    <b>חריג אחד, רק בהסכמה:</b> מי שמסמן "לשתף את הפול שלי אנונימית" שולח לשרת את רשימת מספרי המגרשים שבפול שלו, יחד עם קוד אקראי. השרת לא שומר מקום בתור, שם, הערות או כתובת IP. ביטול הסימון מוחק את הרשומה.
+    המספר "👥 N שמרו" מייצג רק משתמשים בכלי שבחרו לשתף, ולא את כל הזוכים.
     ה"קישור האישי" מכיל את הנתונים האלה בתוך הקישור עצמו, והם לא עוברים דרך שרת. מי שמקבל את הקישור יראה את הפול שלך, ולכן כדאי לשלוח אותו רק לעצמך.</p>
 
   <p class="note">הכלי לא רשמי ואינו מהווה ייעוץ משפטי, כלכלי או תכנוני. השימוש בו על אחריות המשתמש בלבד.</p>
@@ -251,7 +260,7 @@ const DEF = {
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
   pinned: [], excluded: [],
-  takenText: '', taken: [], notes: {}, waiting: false,
+  takenText: '', taken: [], notes: {}, waiting: false, shareAnon: false, anonToken: '',
 };
 // קישור למגרש על המפה באתר של BH Software (נתיב /m/<מזהה>, מזהה = מכרז:מספר)
 const mapUrl = id => `https://dror.bhsoft.app/m/20250052%3A${encodeURIComponent(id)}`;
@@ -295,6 +304,24 @@ if (imported) save();
 
 const ils = n => '₪' + Math.round(n).toLocaleString('he-IL');
 const fullType = t => (t === 'חד' ? 'חד-משפחתי' : 'דו-משפחתי');
+// ---- מונה אנונימי (רק בהסכמה) ----
+const API = location.hostname === 'localhost' ? 'http://127.0.0.1:8810/dror' : 'https://avraham-tasks.duckdns.org:8443/dror';
+let COUNTS = null, anonUsers = 0, lastSent = null, sendTimer = null;
+const applyCounts = r => { COUNTS = r.counts; anonUsers = r.users; };
+fetch(API + '/counts').then(r => r.json()).then(r => { applyCounts(r); render(); }).catch(() => {});
+const savedBy = p => (COUNTS && COUNTS[p.id] ? `<span class="note" title="משתמשים בכלי ששיתפו את הפול שלהם ושמרו את המגרש הזה (כולל אותך, אם שיתפת)">👥 ${COUNTS[p.id]} שמרו</span>` : '');
+function syncAnon() {
+  const plots = S.shareAnon ? S.pinned : [];
+  const key = JSON.stringify(plots);
+  if (key === lastSent || (!S.shareAnon && lastSent === null)) return;
+  clearTimeout(sendTimer);
+  sendTimer = setTimeout(() => {
+    if (!S.anonToken) { S.anonToken = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join(''); save(); }
+    fetch(API + '/pool', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: S.anonToken, plots }) })
+      .then(r => r.json()).then(r => { lastSent = key; applyCounts(r); render(); })
+      .catch(() => { $('anonStatus').textContent = '⚠ השרת לא זמין כרגע. ננסה שוב בשינוי הבא.'; });
+  }, 800);
+}
 const takenBadge = p => (p.taken ? '<span class="badge b-r">❌ נבחר כבר</span>' : '');
 const facts = p => `שטח: ${p.areaRank}/297 · בשכונה ${p.hood} ${p.type}: ${p.groupRank}/${p.groupSize} · מחיר: ${p.priceRank}/297`;
 function card(p) {
@@ -307,7 +334,7 @@ function card(p) {
     ${p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">לפני פיתוח: גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% ⚠</div>` : ''}
     <div class="pr">${ils(p.price)} <span class="note">(${ils(p.ppm)} למ"ר)</span></div>
     <div class="note" style="margin-top:4px" title="דירוג עובדתי מול כל המגרשים: 1 = הגדול / הזול ביותר">📊 ${facts(p)}</div>
-    <div style="margin-top:6px">${takenBadge(p)} <span class="note">התאמה לעדיפויות שלך: ${p.score}</span></div>
+    <div style="margin-top:6px">${takenBadge(p)} <span class="note">התאמה לעדיפויות שלך: ${p.score}</span> ${savedBy(p)}</div>
     <div class="acts no-print">${acts}</div></div>`;
 }
 // מגרשים דומים לשורה בפול — רשימה מתקפלת (פתוחה אחת בכל פעם)
@@ -326,7 +353,7 @@ function mineRow(p, i) {
       <button class="mv" data-pdown="${i}" ${i === S.pinned.length - 1 ? 'disabled' : ''} aria-label="הורד בעדיפות">▼</button></div>
     <span class="num">${i + 1}</span>
     <div class="body"><span class="id">${p.id}</span>${takenBadge(p)} ${mapLink(p.id)}
-      <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · לפני פיתוח: גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%` : ''}</div></div>
+      <div class="meta">${savedBy(p)} שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · לפני פיתוח: גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%` : ''}</div></div>
     <span class="acts no-print" style="margin:0"><button class="btn" data-sim="${p.id}" aria-expanded="${openSim === p.id}">🔍 דומים</button><button class="btn" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button></span>
     ${openSim === p.id ? simList(p) : ''}
     <input class="noteIn" data-note="${p.id}" value="${esc(S.notes[p.id] || '')}" placeholder="הערה (למשל: צמוד לגן, לבדוק שיפוע מול הרחוב)">
@@ -375,6 +402,7 @@ document.addEventListener('input', e => {
   else if (['category', 'prefType', 'prefHood', 'prefSlope'].includes(t.id)) S[t.id] = t.value;
   else if (t.id === 'use35') S.use35 = t.checked;
   else if (t.id === 'waiting') S.waiting = t.checked;
+  else if (t.id === 'shareAnon') { S.shareAnon = t.checked; if (!t.checked) lastSent = lastSent ?? 'force-delete'; }
   else if (t.dataset.note) { S.notes = { ...S.notes, [t.dataset.note]: t.value }; return save(); }  // בלי render — לא לאבד פוקוס
   else if (t.id === 'takenInput') { S.takenText = t.value; S.taken = parseTaken(t.value).ok; }
   else if (t.dataset.hoods || t.dataset.types || t.dataset.edges) {
@@ -455,6 +483,10 @@ function render() {
     : `⚠ מספר ${S.pos} לא נמצא ב${S.waiting ? 'רשימת ההמתנה (1–' + Object.keys(window.SCHEDULE.wait).length + ')' : 'רשימת הזוכים (1–297)'}.`;
   const on = S.order.filter(k => S.enabled[k]).length;
   $('settingsSum').textContent = `· ${on} עדיפויות פעילות · ${S.hoods.length}/4 שכונות${S.minPrice || S.budget ? ` · מחיר ${S.minPrice ? ils(S.minPrice) : '0'}–${S.budget ? ils(S.budget) : '∞'}` : ''}`;
+  $('shareAnon').checked = S.shareAnon;
+  $('anonStatus').textContent = COUNTS ? `${anonUsers} משתמשים שיתפו עד כה.${S.shareAnon ? ' ✓ הפול שלך משותף.' : ''}` : '';
+  $('anonBox').classList.toggle('hidden', COUNTS === null && !S.shareAnon);
+  syncAnon();
   renderLive(pinned);
   renderTable();
 }
@@ -498,7 +530,7 @@ function renderLive(pinned) {
 
 const COLS = [
   ['pin', '📌'], ['id', 'מגרש'], ['hood', 'שכונה'], ['type', 'סוג'], ['edge', 'מיקום'], ['area', 'שטח'], ['price', 'מחיר כולל'],
-  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['penalty', 'קנס מכירה מוקדמת'], ['areaRank', 'דירוג שטח'], ['priceRank', 'דירוג מחיר'], ['taken', 'סטטוס'], ['score', 'התאמה לי'],
+  ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['penalty', 'קנס מכירה מוקדמת'], ['areaRank', 'דירוג שטח'], ['priceRank', 'דירוג מחיר'], ['taken', 'סטטוס'], ['saved', '👥 שמרו'], ['score', 'התאמה לי'],
 ].filter(([k]) => !['elev', 'slope', 'edge'].includes(k) || window.PLOTS[0][k] !== undefined);
 let sort = { key: 'score', dir: -1 };
 function renderTable() {
@@ -506,7 +538,7 @@ function renderTable() {
   const q = $('q').value.trim(), only = $('onlyPass').checked, s = settings();
   const ok = passesUI;
   const val = p => (sort.key === 'pin' ? +S.pinned.includes(p.id) : sort.key === 'id' ? parseInt(p.id)
-    : sort.key === 'taken' ? +p.taken : p[sort.key]);
+    : sort.key === 'taken' ? +p.taken : sort.key === 'saved' ? ((COUNTS && COUNTS[p.id]) || 0) : p[sort.key]);
   const rows = ROWS.filter(p => (!q || p.id.includes(q)) && (!only || ok(p)))
     .sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * sort.dir);
   const cell = {
@@ -514,7 +546,7 @@ function renderTable() {
       ? `<button class="btn pri" data-unpin="${p.id}" title="הוצא מהפול">📌</button>`
       : `<button class="btn" data-pin="${p.id}" title="הוסף לפול">＋</button>`),
     id: p => `<b>${p.id}</b> ${mapLink(p.id)}`, price: p => ils(p.price), ppm: p => ils(p.ppm), penalty: p => ils(p.penalty),
-    elev: p => Math.round(p.elev), edge: p => EDGE_LABEL[p.edge], taken: p => takenBadge(p) || 'פנוי',
+    elev: p => Math.round(p.elev), edge: p => EDGE_LABEL[p.edge], taken: p => takenBadge(p) || 'פנוי', saved: p => (COUNTS && COUNTS[p.id]) || '',
   };
   $('tbody').innerHTML = rows.map(p => `<tr class="${ok(p) ? '' : 'miss'}">`
     + COLS.map(([k]) => `<td>${cell[k] ? cell[k](p) : p[k]}</td>`).join('') + '</tr>').join('');
