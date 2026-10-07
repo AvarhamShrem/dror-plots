@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://avraham-tasks.duckdns.org:8443 http://127.0.0.1:8810; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
 <title>בחירת מגרש בדרור</title>
 <style>
 :root{--bg:#f6f5f1;--card:#fff;--ink:#1d2321;--muted:#66706c;--line:#e2e0d8;--accent:#2f6b4f;--accent-ink:#fff;
@@ -285,13 +287,22 @@ const encodeState = st => btoa(String.fromCharCode(...new TextEncoder().encode(J
   .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const decodeState = s => JSON.parse(new TextDecoder().decode(
   Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))));
+// קישור יכול להגיע מכל אחד: מקבלים רק שדות מוכרים, בטיפוס של ברירת המחדל (חוסם הזרקת קוד דרך קישור)
+const clean = imp => Object.fromEntries(Object.keys(DEF).filter(k => k in imp && k !== 'anonToken').map(k => {
+  const d = DEF[k], v = imp[k];
+  if (typeof d === 'number') return [k, Number.isFinite(+v) ? +v : d];
+  if (typeof d === 'boolean') return [k, !!v];
+  if (typeof d === 'string') return [k, String(v)];
+  if (Array.isArray(d)) return [k, Array.isArray(v) ? v.map(String) : d];
+  return [k, v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([a, b]) => [a, typeof b === 'string' ? b : !!b])) : d];
+}));
 let imported = false;
 if (location.hash.startsWith('#s=')) {
   try {
     const imp = decodeState(location.hash.slice(3));
     if (!imp || typeof imp !== 'object' || !Array.isArray(imp.pinned)) throw new Error('bad');
     const hasLocal = S.pinned.length || S.takenText;
-    if (!hasLocal || confirm(`לטעון את הפול מהקישור (${imp.pinned.length} מגרשים)? זה יחליף את מה ששמור כרגע במכשיר הזה.`)) { S = { ...DEF, ...imp }; imported = true; }
+    if (!hasLocal || confirm(`לטעון את הפול מהקישור (${imp.pinned.length} מגרשים)? זה יחליף את מה ששמור כרגע במכשיר הזה.`)) { S = { ...DEF, ...clean(imp), anonToken: S.anonToken }; imported = true; }
   } catch { alert('הקישור האישי פגום או חלקי. ייתכן שהוא נחתך בהעתקה.'); }
   history.replaceState(null, '', location.pathname);  // לא להשאיר את הנתונים בשורת הכתובת
 }
@@ -508,7 +519,7 @@ function render() {
 }
 
 async function shareMyLink() {
-  const url = location.origin + location.pathname + '#s=' + encodeState(S);
+  const url = location.origin + location.pathname + '#s=' + encodeState({ ...S, anonToken: undefined });  // הקוד האנונימי נשאר במכשיר
   try {
     if (navigator.share) await navigator.share({ title: 'הפול שלי · דרור', url });
     else { await navigator.clipboard.writeText(url); $('shareMsg').textContent = '✓ הקישור האישי הועתק. שלח אותו לעצמך ופתח אותו במכשיר השני.'; }
@@ -538,7 +549,7 @@ async function sharePool() {
 function renderLive(pinned) {
   const { ok, bad } = parseTaken(S.takenText);
   $('takenParse').innerHTML = (ok.length ? `✓ זוהו ${ok.length} מגרשים.` : '')
-    + (bad.length ? ` <b style="color:var(--r)">⚠ לא זוהו (בדוק את המספר):</b> ${bad.join(', ')}` : '');
+    + (bad.length ? ` <b style="color:var(--r)">⚠ לא זוהו (בדוק את המספר):</b> ${esc(bad.join(', '))}` : '');
   const lost = pinned.filter(p => p.taken);
   $('mineAlert').innerHTML = $('liveAlert').innerHTML = lost.length
     ? `<p class="summary" style="background:var(--r-bg);color:var(--r)">⚠ מהפול שלך כבר נבחרו: <b>${lost.map(p => p.id).join(', ')}</b>. לחלופות קרובות: <b>🔍 דומים</b> ליד המגרש בטאב "הפול שלי".</p>` : '';
