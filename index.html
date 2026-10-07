@@ -127,10 +127,20 @@ a{color:var(--accent)}
         <label>מחיר מינימלי (₪)<input id="minPrice" type="number" step="10000" placeholder="ללא"></label>
         <label>מחיר מקסימלי (₪)<input id="budget" type="number" step="10000" placeholder="ללא הגבלה"></label>
         <label>שטח מינימלי (מ"ר)<input id="minArea" type="number" step="10" placeholder="ללא"></label>
+        <label>שטח מקסימלי (מ"ר)<input id="maxArea" type="number" step="10" placeholder="ללא"></label>
         <div><div class="note">שכונות</div><div class="row" id="hoods"></div></div>
         <div><div class="note">סוג</div><div class="row" id="types"></div></div>
-        <div class="needs-edge"><div class="note">מיקום ביישוב <span title="מחושב מתכנית היישוב המלאה, כולל שלבים עתידיים. ראה מקורות המידע למטה">ⓘ</span></div><div class="row" id="edges"></div></div>
       </div>
+      <details class="more" id="advFilters" style="margin-top:10px"><summary>סינון מתקדם <span id="advSum"></span></summary>
+      <div class="row" style="margin-top:8px">
+        <div class="needs-edge"><div class="note">מיקום ביישוב <span title="מחושב מתכנית היישוב המלאה, כולל שלבים עתידיים. ראה מקורות המידע למטה">ⓘ</span></div><div class="row" id="edges"></div></div>
+        <div class="needs-relief"><div class="note">מול הרחוב (לפני פיתוח)</div><div class="row" id="rises"></div></div>
+        <label class="needs-relief">שיפוע מקסימלי (%)<input id="maxSlope" type="number" step="1" placeholder="ללא"></label>
+        <label class="needs-relief">הפרש גובה מקסימלי במגרש (מ')<input id="maxDrop" type="number" step="0.5" placeholder="ללא"></label>
+        <label class="needs-relief">גובה מינימלי מעל פני הים (מ')<input id="minElev" type="number" step="5" placeholder="ללא"></label>
+        <label>מחיר מקסימלי למ"ר (₪)<input id="maxPpm" type="number" step="50" placeholder="ללא"></label>
+        <label>קנס מכירה מוקדמת מקסימלי (₪)<input id="maxPenalty" type="number" step="10000" placeholder="ללא"></label>
+      </div></details>
     </div>
 
     <div style="margin-top:18px">
@@ -262,10 +272,13 @@ a{color:var(--accent)}
 <script src="model.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'];
+const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'], RISES = ['up', 'flat', 'down'];
+const RISE_LABEL = { up: 'עולה', flat: 'מישורי', down: 'יורד' };
+const NUM_FILTERS = ['budget', 'minPrice', 'minArea', 'maxArea', 'maxPpm', 'maxPenalty', 'minElev', 'maxSlope', 'maxDrop'];
+const ADV = ['maxPpm', 'maxPenalty', 'minElev', 'maxSlope', 'maxDrop'];
 const EDGE_LABEL = { fence: 'על גדר היישוב', open: 'פונה לשטח פתוח פנימי', inner: 'פנימי' };
 const DEF = {
-  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minPrice: 0, minArea: 0,
+  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minPrice: 0, minArea: 0, maxArea: 0, maxPpm: 0, maxPenalty: 0, minElev: 0, maxSlope: 0, maxDrop: 0, rises: RISES,
   hoods: HOODS, types: TYPES, edges: EDGES, prefType: 'חד', prefHood: 'א', prefSlope: 'flat',
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
@@ -403,11 +416,12 @@ function checks(el, list, key, fmt) {
 function fillForm() {
   $('category').innerHTML = CATEGORIES.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
   $('pos').value = S.pos; $('category').value = S.category; $('k').value = S.k; $('use35').checked = S.use35;
-  $('budget').value = S.budget || ''; $('minPrice').value = S.minPrice || ''; $('minArea').value = S.minArea || '';
+  NUM_FILTERS.forEach(k => { $(k).value = S[k] || ''; });
   $('takenInput').value = S.takenText; $('waiting').checked = S.waiting;
   checks('hoods', HOODS, 'hoods', h => h);
   checks('types', TYPES, 'types', fullType);
   checks('edges', EDGES, 'edges', e => EDGE_LABEL[e]);
+  checks('rises', RISES, 'rises', r => RISE_LABEL[r]);
 }
 // בחירת ההעדפה צמודה לקריטריון שלה (סוג / שכונה / שיפוע)
 const opts = (id, list, cur) => `<select id="${id}" class="inl">${list.map(([v, t]) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
@@ -432,7 +446,7 @@ document.addEventListener('input', e => {
   const t = e.target, num = v => Number(v) || 0;
   if (t.id === 'pos') S.pos = Math.max(1, num(t.value));
   else if (t.id === 'k') S.k = Math.max(1, num(t.value));
-  else if (['budget', 'minPrice', 'minArea'].includes(t.id)) S[t.id] = num(t.value);
+  else if (NUM_FILTERS.includes(t.id)) S[t.id] = num(t.value);
   else if (['category', 'prefType', 'prefHood', 'prefSlope'].includes(t.id)) S[t.id] = t.value;
   else if (t.id === 'use35') S.use35 = t.checked;
   else if (t.id === 'waiting') S.waiting = t.checked;
@@ -440,8 +454,8 @@ document.addEventListener('input', e => {
   else if (t.id === 'sharePool') { S.sharePool = t.checked; if (!t.checked) lastSent = lastSent ?? 'force-delete'; }
   else if (t.dataset.note) { S.notes = { ...S.notes, [t.dataset.note]: t.value }; return save(); }  // בלי render — לא לאבד פוקוס
   else if (t.id === 'takenInput') { S.takenText = t.value; S.taken = parseTaken(t.value).ok; }
-  else if (t.dataset.hoods || t.dataset.types || t.dataset.edges) {
-    const key = t.dataset.hoods ? 'hoods' : t.dataset.types ? 'types' : 'edges', v = t.dataset[key];
+  else if (t.dataset.hoods || t.dataset.types || t.dataset.edges || t.dataset.rises) {
+    const key = ['hoods', 'types', 'edges', 'rises'].find(k => t.dataset[k]), v = t.dataset[key];
     S[key] = t.checked ? [...S[key], v] : S[key].filter(x => x !== v);
   } else if (t.dataset.en) { S.enabled = { ...S.enabled, [t.dataset.en]: t.checked }; renderCrit(); }
   else if (t.id === 'q' || t.id === 'onlyPass') return renderTable();
@@ -482,7 +496,7 @@ document.addEventListener('click', e => {
 });
 
 // ---- תוצאות ----
-const passesUI = p => S.hoods.includes(p.hood) && S.types.includes(p.type) && (p.edge === undefined || S.edges.includes(p.edge)) && (!S.budget || p.price <= S.budget) && (!S.minPrice || p.price >= S.minPrice) && (!S.minArea || p.area >= S.minArea);
+const passesUI = p => passes(p, S);
 let ROWS = [];
 function render() {
   ROWS = enrich(window.PLOTS, settings());
@@ -519,7 +533,9 @@ function render() {
     ? `🗓 לפי רשימת הזוכים של רמ"י, ${S.waiting ? 'ממתין' : 'קדימות'} מס' ${S.pos} מוזמן ל<b>בחירה ב-${slot[0]}/${YEAR} בשעה ${slot[1]}</b> (משרדי רמ"י, באר שבע). יש לוודא מול הזימון האישי.`
     : `⚠ מספר ${S.pos} לא נמצא ב${S.waiting ? 'רשימת ההמתנה (1–' + Object.keys(window.SCHEDULE.wait).length + ')' : 'רשימת הזוכים (1–297)'}.`;
   const on = S.order.filter(k => S.enabled[k]).length;
-  $('settingsSum').textContent = `· ${on} עדיפויות פעילות · ${S.hoods.length}/4 שכונות${S.minPrice || S.budget ? ` · מחיר ${S.minPrice ? ils(S.minPrice) : '0'}–${S.budget ? ils(S.budget) : '∞'}` : ''}`;
+  const adv = ADV.filter(k => S[k]).length + (S.edges.length < EDGES.length) + (S.rises.length < RISES.length);
+  $('advSum').textContent = adv ? `· ${adv} פעילים` : '';
+  $('settingsSum').textContent =`· ${on} עדיפויות פעילות · ${S.hoods.length}/4 שכונות${S.minPrice || S.budget ? ` · מחיר ${S.minPrice ? ils(S.minPrice) : '0'}–${S.budget ? ils(S.budget) : '∞'}` : ''}`;
   $('sharePool').checked = S.sharePool;
   $('shareDay').checked = S.shareDay; $('shareDay').disabled = !S.sharePool || !myDay();
   $('shareDayLbl').textContent = myDay() ? `לשתף גם את יום הבחירה שלי (${myDay()}) כדי שאחרים יראו כמה מהבוחרים לפניהם שמרו כל מגרש` : 'לשתף גם את יום הבחירה (צריך מקום בתור תקין)';

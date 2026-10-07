@@ -70,10 +70,19 @@ function enrich(plots, s) {
   });
 }
 
+// טווחים: שדה בהגדרות → [שדה במגרש, 1 = מינימום / -1 = מקסימום]. 0 / ריק = בלי הגבלה.
+const RANGES = {
+  minPrice: ['price', 1], budget: ['price', -1], minArea: ['area', 1], maxArea: ['area', -1],
+  maxPpm: ['ppm', -1], maxPenalty: ['penalty', -1], minElev: ['elev', 1], maxSlope: ['slope', -1], maxDrop: ['drop', -1],
+};
+// מול הרחוב: עד מטר לכל כיוון = מישורי
+const riseDir = p => (p.rise === undefined ? undefined : p.rise > 1 ? 'up' : p.rise < -1 ? 'down' : 'flat');
+
 function passes(p, s) {
   return s.hoods.includes(p.hood) && s.types.includes(p.type)
-    && (!s.budget || p.price <= s.budget) && (!s.minPrice || p.price >= s.minPrice) && (!s.minArea || p.area >= s.minArea)
-    && (!s.edges || p.edge === undefined || s.edges.includes(p.edge));
+    && Object.entries(RANGES).every(([k, [f, d]]) => !s[k] || p[f] === undefined || (d > 0 ? p[f] >= s[k] : p[f] <= s[k]))
+    && (!s.edges || p.edge === undefined || s.edges.includes(p.edge))
+    && (!s.rises || s.rises.length === 3 || s.rises.includes(riseDir(p)));  // סינון כיוון פעיל → מגרש בלי חזית מזוהה לא עובר
 }
 
 // הצעות = K (+extra) המגרשים עם הציון האישי הגבוה ביותר שעוברים את הסינון ולא נבחרו.
@@ -94,4 +103,4 @@ function similar(p, rows, n = 4) {
     .sort((a, b) => a.d - b.d).slice(0, n).map(x => x.q);
 }
 
-if (typeof module !== 'undefined') module.exports = { CATEGORIES, CRITERIA, absPos, waitingBefore, enrich, buildPool, similar };
+if (typeof module !== 'undefined') module.exports = { CATEGORIES, CRITERIA, absPos, waitingBefore, enrich, buildPool, similar, passes, riseDir };
