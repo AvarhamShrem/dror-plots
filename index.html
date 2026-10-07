@@ -60,6 +60,7 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .noteIn{width:100%;margin-top:8px;font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 .mv{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;width:30px;height:28px;cursor:pointer}
 #settings>summary{list-style-position:inside}
+.maplink{font-size:12px;text-decoration:none;white-space:nowrap;margin-inline-start:6px}
 .linkbtn{background:none;border:0;color:var(--accent);font:inherit;font-size:12px;cursor:pointer;text-decoration:underline;padding:0}
 h3{font-size:15px;margin:18px 0 8px}
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
@@ -120,6 +121,7 @@ a{color:var(--accent)}
         <label>שטח מינימלי (מ"ר)<input id="minArea" type="number" step="10" placeholder="ללא"></label>
         <div><div class="note">שכונות</div><div class="row" id="hoods"></div></div>
         <div><div class="note">סוג</div><div class="row" id="types"></div></div>
+        <div class="needs-edge"><div class="note">מיקום ביישוב <span title="מחושב מתכנית היישוב המלאה, כולל שלבים עתידיים. ראה מקורות המידע למטה">ⓘ</span></div><div class="row" id="edges"></div></div>
       </div>
     </div>
 
@@ -228,7 +230,10 @@ a{color:var(--accent)}
 
   <h3>גובה, שיפוע וסוג מגרש</h3>
   <ul id="reliefCredit">
-    <li class="needs-relief"><b>גובה ושיפוע</b> חושבו בכלי הזה מפוליגוני המגרשים וממפת גבהים פומבית של <b>הקרקע לפני עבודות הפיתוח</b> (רשת של 4 מ'). מאז השטח עבר פיתוח, ולכן הנתונים לא משקפים את המצב היום, במיוחד השיפוע. אפשר להתייחס אליהם לכל היותר כאינדיקציה כללית.</li>
+    <li class="needs-relief"><b>גובה ושיפוע</b> חושבו בכלי הזה מפוליגוני המגרשים וממפת הגבהים שפורסמו באתר <a href="https://dror.bhsoft.app" target="_blank" rel="noopener">dror.bhsoft.app</a> של <b>BH Software</b>, בעותק מ-06/10/2026 ובאישורו.
+      מפת הגבהים מתארת את <b>הקרקע לפני עבודות הפיתוח</b> (רשת של 4 מ'). מאז השטח עבר פיתוח, ולכן הנתונים לא משקפים את המצב היום, במיוחד השיפוע. אפשר להתייחס אליהם לכל היותר כאינדיקציה כללית.</li>
+    <li class="needs-edge"><b>מיקום ביישוב</b> (על הגדר / פונה לשטח פתוח פנימי / פנימי) חושב בכלי הזה מפוליגוני המגרשים של BH Software, לפי <b>תכנית היישוב המלאה, כולל שלבים שעוד לא שווקו</b>. "על הגדר" = המגרש נוגע בקו החיצוני של כל היישוב המתוכנן. "פונה לשטח פתוח פנימי" = נוגע בשטח פתוח בין שכונות. זה חישוב גאומטרי מקורב: יש לבדוק במפה מה בדיוק נמצא מעבר למגרש (ואדי, כביש, גן), ולזכור שתכנית הבינוי עוד לא סופית.</li>
+    <li><b>"🗺 במפה"</b> פותח את המגרש באתר של BH Software, שם רואים את המיקום שלו, השכנים, המידות, תצלום אוויר ותכנית הבינוי. גם זה אתר לא רשמי.</li>
     <li><b>חד-משפחתי / דו-משפחתי</b> הוסק ממספר המגרש: סיומת A/B = דו-משפחתי. יש לוודא מול חוברת המכרז.</li>
   </ul>
 
@@ -256,15 +261,19 @@ a{color:var(--accent)}
 <script src="model.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'];
+const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'];
+const EDGE_LABEL = { fence: 'על גדר היישוב', open: 'פונה לשטח פתוח פנימי', inner: 'פנימי' };
 const DEF = {
   pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minPrice: 0, minArea: 0,
-  hoods: HOODS, types: TYPES, prefType: 'חד', prefHood: 'א', prefSlope: 'flat',
+  hoods: HOODS, types: TYPES, edges: EDGES, prefType: 'חד', prefHood: 'א', prefSlope: 'flat',
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
   noShow: 0.2, margin: 0.2, crowd: { type: 7, area: 3 }, pinned: [], excluded: [],
   passed: 0, takenText: '', taken: [], notes: {}, waiting: false,
 };
+// קישור למגרש על המפה באתר של BH Software (נתיב /m/<מזהה>, מזהה = מכרז:מספר)
+const mapUrl = id => `https://dror.bhsoft.app/m/20250052%3A${encodeURIComponent(id)}`;
+const mapLink = id => `<a class="maplink no-print" href="${mapUrl(id)}" target="_blank" rel="noopener" title="פתח את מגרש ${id} על המפה (dror.bhsoft.app)">🗺 במפה</a>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const YEAR = 2026;
 // לו"ז מרשימת הזוכים: [dd/mm, hh:mm] -> Date (שעון ישראל = שעון המחשב של המשתמש)
@@ -315,8 +324,8 @@ function card(p) {
   const acts = on ? '<span class="note">📌 כבר בפול שלך</span>'
     : `<button class="btn pri" data-pin="${p.id}">📌 הוסף לפול</button><button class="btn" data-hide="${p.id}">✕ לא מעניין</button>`;
   return `<div class="plot ${on ? 'pin' : ''}" ${p.taken ? 'style="opacity:.55"' : ''}>${p.rank ? `<span class="rankno" title="דירוג פופולריות משוער בין המגרשים שנשארו">#${p.rank} בביקוש</span>` : ''}
-    <div><span class="id">${p.id}</span></div>
-    <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר</div>
+    <div><span class="id">${p.id}</span> ${mapLink(p.id)}</div>
+    <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר${p.edge ? ` · 📍 ${EDGE_LABEL[p.edge]}` : ''}</div>
     ${p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">לפני פיתוח: גובה ${Math.round(p.elev)} מ' · שיפוע ${p.slope}% ⚠</div>` : ''}
     <div class="pr">${ils(p.price)} <span class="note">(${ils(p.ppm)} למ"ר)</span></div>
     <div style="margin-top:6px">${badge(p.prob, p.taken)} <span class="note">התאמה ${p.score}</span></div>
@@ -328,7 +337,7 @@ function mineRow(p, i) {
     <div class="arr no-print"><button class="mv" data-pup="${i}" ${i === 0 ? 'disabled' : ''} aria-label="העלה בעדיפות">▲</button>
       <button class="mv" data-pdown="${i}" ${i === S.pinned.length - 1 ? 'disabled' : ''} aria-label="הורד בעדיפות">▼</button></div>
     <span class="num">${i + 1}</span>
-    <div class="body"><span class="id">${p.id}</span>${badge(p.prob, p.taken)}
+    <div class="body"><span class="id">${p.id}</span>${badge(p.prob, p.taken)} ${mapLink(p.id)}
       <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${p.elev ? ` · לפני פיתוח: גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%` : ''}</div></div>
     <button class="btn no-print" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button>
     <input class="noteIn" data-note="${p.id}" value="${esc(S.notes[p.id] || '')}" placeholder="הערה (למשל: צמוד לגן, לבדוק שיפוע מול הרחוב)">
@@ -352,6 +361,7 @@ function fillForm() {
   $('wType').value = S.crowd.type; $('wArea').value = S.crowd.area;
   checks('hoods', HOODS, 'hoods', h => h);
   checks('types', TYPES, 'types', fullType);
+  checks('edges', EDGES, 'edges', e => EDGE_LABEL[e]);
 }
 function renderCrit() {
   const lbl = Object.fromEntries(CRITERIA.map(c => [c.key, c.label]));
@@ -379,8 +389,8 @@ document.addEventListener('input', e => {
   else if (['noShow', 'margin'].includes(t.id)) S[t.id] = num(t.value) / 100;
   else if (t.id === 'wType') S.crowd = { ...S.crowd, type: num(t.value) };
   else if (t.id === 'wArea') S.crowd = { ...S.crowd, area: num(t.value) };
-  else if (t.dataset.hoods || t.dataset.types) {
-    const key = t.dataset.hoods ? 'hoods' : 'types', v = t.dataset[key];
+  else if (t.dataset.hoods || t.dataset.types || t.dataset.edges) {
+    const key = t.dataset.hoods ? 'hoods' : t.dataset.types ? 'types' : 'edges', v = t.dataset[key];
     S[key] = t.checked ? [...S[key], v] : S[key].filter(x => x !== v);
   } else if (t.dataset.en) { S.enabled = { ...S.enabled, [t.dataset.en]: t.checked }; renderCrit(); }
   else if (t.id === 'q' || t.id === 'onlyPass') return renderTable();
@@ -517,14 +527,14 @@ function renderLive(pinned) {
 }
 
 const COLS = [
-  ['pin', '📌'], ['id', 'מגרש'], ['hood', 'שכונה'], ['type', 'סוג'], ['area', 'שטח'], ['price', 'מחיר כולל'],
+  ['pin', '📌'], ['id', 'מגרש'], ['hood', 'שכונה'], ['type', 'סוג'], ['edge', 'מיקום'], ['area', 'שטח'], ['price', 'מחיר כולל'],
   ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['penalty', 'קנס מכירה מוקדמת'], ['rank', 'דירוג ביקוש'], ['prob', 'סיכוי שיישאר'], ['score', 'התאמה לי'],
-].filter(([k]) => !['elev', 'slope'].includes(k) || window.PLOTS[0][k] !== undefined);
+].filter(([k]) => !['elev', 'slope', 'edge'].includes(k) || window.PLOTS[0][k] !== undefined);
 let sort = { key: 'score', dir: -1 };
 function renderTable() {
   $('thead').innerHTML = COLS.map(([k, l]) => `<th data-sort="${k}" class="${sort.key === k ? 'sorted' : ''}">${l}${sort.key === k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('');
   const q = $('q').value.trim(), only = $('onlyPass').checked, s = settings();
-  const ok = p => S.hoods.includes(p.hood) && S.types.includes(p.type) && (!S.budget || p.price <= S.budget) && (!S.minPrice || p.price >= S.minPrice) && (!S.minArea || p.area >= S.minArea);
+  const ok = p => S.hoods.includes(p.hood) && S.types.includes(p.type) && (p.edge === undefined || S.edges.includes(p.edge)) && (!S.budget || p.price <= S.budget) && (!S.minPrice || p.price >= S.minPrice) && (!S.minArea || p.area >= S.minArea);
   const val = p => (sort.key === 'pin' ? +S.pinned.includes(p.id) : sort.key === 'id' ? parseInt(p.id)
     : sort.key === 'rank' ? (p.rank ?? 1e9) : p[sort.key]);
   const rows = ROWS.filter(p => (!q || p.id.includes(q)) && (!only || ok(p)))
@@ -533,8 +543,8 @@ function renderTable() {
     pin: p => (S.pinned.includes(p.id)
       ? `<button class="btn pri" data-unpin="${p.id}" title="הוצא מהפול">📌</button>`
       : `<button class="btn" data-pin="${p.id}" title="הוסף לפול">＋</button>`),
-    id: p => `<b>${p.id}</b>`, price: p => ils(p.price), ppm: p => ils(p.ppm), penalty: p => ils(p.penalty),
-    elev: p => Math.round(p.elev), prob: p => badge(p.prob, p.taken), rank: p => p.rank ?? '—',
+    id: p => `<b>${p.id}</b> ${mapLink(p.id)}`, price: p => ils(p.price), ppm: p => ils(p.ppm), penalty: p => ils(p.penalty),
+    elev: p => Math.round(p.elev), edge: p => EDGE_LABEL[p.edge], prob: p => badge(p.prob, p.taken), rank: p => p.rank ?? '—',
   };
   $('tbody').innerHTML = rows.map(p => `<tr class="${ok(p) ? '' : 'miss'}">`
     + COLS.map(([k]) => `<td>${cell[k] ? cell[k](p) : p[k]}</td>`).join('') + '</tr>').join('');
@@ -548,6 +558,7 @@ $('thead').addEventListener('click', e => {
 // משקלי הקהל בטופס הם 0–10; המודל מקבל אותם כמו שהם (היחס ביניהם הוא שקובע)
 // גרסה בלי נתוני גובה (build.py --no-relief) — להסתיר כל מה שמתייחס לגובה/שיפוע
 if (window.PLOTS[0].elev === undefined) document.querySelectorAll('.needs-relief').forEach(e => e.classList.add('hidden'));
+if (window.PLOTS[0].edge === undefined) document.querySelectorAll('.needs-edge').forEach(e => e.classList.add('hidden'));
 fillForm(); renderCrit(); render();
 // בטלפון — ההגדרות מקופלות כדי שהפול יופיע מיד; במחשב — פתוחות
 if (matchMedia('(min-width: 800px)').matches) $('settings').open = true;

@@ -87,7 +87,8 @@ function enrich(plots, s) {
 
 function passes(p, s) {
   return s.hoods.includes(p.hood) && s.types.includes(p.type)
-    && (!s.budget || p.price <= s.budget) && (!s.minPrice || p.price >= s.minPrice) && (!s.minArea || p.area >= s.minArea);
+    && (!s.budget || p.price <= s.budget) && (!s.minPrice || p.price >= s.minPrice) && (!s.minArea || p.area >= s.minArea)
+    && (!s.edges || p.edge === undefined || s.edges.includes(p.edge));
 }
 
 // הצעות = K (+extra) מגרשים עם הציון האישי הגבוה ביותר מתוך אלה שסיכוי שיישארו ≥50%,
