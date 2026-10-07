@@ -320,13 +320,13 @@ const ils = n => '₪' + Math.round(n).toLocaleString('he-IL');
 const fullType = t => (t === 'חד' ? 'חד-משפחתי' : 'דו-משפחתי');
 // ---- מונה אנונימי (רק בהסכמה) ----
 const API = location.hostname === 'localhost' ? 'http://127.0.0.1:8810/dror' : 'https://avraham-tasks.duckdns.org:8443/dror';
-let COUNTS = null, BYDAY = {}, anonUsers = 0, lastSent = null, sendTimer = null;
+let countsFailed = false, COUNTS = null, BYDAY = {}, anonUsers = 0, lastSent = null, sendTimer = null;
 const applyCounts = r => { COUNTS = r.counts; BYDAY = r.byDay || {}; anonUsers = r.users; };
 const DAYS = ['11/10', '12/10', '13/10', '14/10', '15/10', '18/10', '19/10'];
 const myDay = () => (slotOf(S.pos, S.waiting) || [])[0] || null;
 // כמה ממי ששיתפו יום בחירה מוקדם משלי שמרו את המגרש (בימים קודמים בלבד — באותו יום אין סדר)
 const savedBefore = id => { const d = DAYS.indexOf(myDay()); return d < 0 ? 0 : DAYS.slice(0, d).reduce((a, x) => a + ((BYDAY[x] || {})[id] || 0), 0); };
-fetch(API + '/counts').then(r => r.json()).then(r => { applyCounts(r); render(); }).catch(() => {});
+fetch(API + '/counts').then(r => r.json()).then(r => { applyCounts(r); render(); }).catch(() => { countsFailed = true; render(); });
 const savedBy = p => {
   if (!COUNTS || !COUNTS[p.id]) return '';
   const b = savedBefore(p.id);
@@ -482,7 +482,8 @@ function render() {
       const ok = ROWS.filter(p => !p.taken && passesUI(p)), pin = ok.filter(p => S.pinned.includes(p.id)).length, hid = ok.filter(p => S.excluded.includes(p.id)).length;
       return pin || hid ? ` (${[pin && `${pin} כבר בפול שלך`, hid && `${hid} הסתרת`].filter(Boolean).join(', ')}, ולכן לא מופיעים בהצעות)` : '';
     })()}.`
-    + (COUNTS ? `<br>👥 ${anonUsers} משתמשים שיתפו את הפול שלהם. ליד מגרש שמישהו שמר מופיע "👥 N שמרו". מגרש בלי הסימון: אף אחד עוד לא שמר אותו.` : '');
+    + (COUNTS ? `<br>👥 ${anonUsers} משתמשים שיתפו את הפול שלהם. ליד מגרש שמישהו שמר מופיע "👥 N שמרו". מגרש בלי הסימון: אף אחד עוד לא שמר אותו.`
+      : countsFailed ? '<br>⚠ אין חיבור לשרת המונה מהרשת הזו (נפוץ ברשתות של מקומות עבודה), ולכן לא מוצג כמה שמרו כל מגרש. מהבית או מהסלולרי זה יעבוד.' : '');
   // הפול שלי: לפי סדר העדיפות שהמשתמש קבע
   const byId = Object.fromEntries(ROWS.map(p => [p.id, p]));
   const pinned = S.pinned.map(id => byId[id]).filter(Boolean);
@@ -574,7 +575,7 @@ function renderTable() {
       ? `<button class="btn pri" data-unpin="${p.id}" title="הוצא מהפול">📌</button>`
       : `<button class="btn" data-pin="${p.id}" title="הוסף לפול">＋</button>`),
     id: p => `<b>${p.id}</b> ${mapLink(p.id)}`, price: p => ils(p.price), ppm: p => ils(p.ppm), penalty: p => ils(p.penalty),
-    elev: p => Math.round(p.elev), edge: p => EDGE_LABEL[p.edge], taken: p => takenBadge(p) || 'פנוי', saved: p => (COUNTS && COUNTS[p.id]) ? COUNTS[p.id] + (savedBefore(p.id) ? ` (${savedBefore(p.id)} לפניך)` : '') : '',
+    elev: p => Math.round(p.elev), edge: p => EDGE_LABEL[p.edge], taken: p => takenBadge(p) || 'פנוי', saved: p => countsFailed ? 'אין חיבור' : (COUNTS && COUNTS[p.id]) ? COUNTS[p.id] + (savedBefore(p.id) ? ` (${savedBefore(p.id)} לפניך)` : '') : '',
   };
   $('tbody').innerHTML = rows.map(p => `<tr class="${ok(p) ? '' : 'miss'}">`
     + COLS.map(([k]) => `<td>${cell[k] ? cell[k](p) : p[k]}</td>`).join('') + '</tr>').join('');
