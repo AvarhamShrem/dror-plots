@@ -168,8 +168,11 @@ a{color:var(--accent)}
       <div class="summary no-print" id="anonBox" style="border:1px solid var(--line)">
         <b>👥 שיתוף אנונימי</b>
         <label class="chk" style="margin:6px 0"><input type="checkbox" id="sharePool"> הפול שלי משותף אנונימית, כדי לעזור לאחרים לראות כמה שמרו כל מגרש</label>
+        <label class="chk" style="margin:6px 0" id="shareDayWrap"><input type="checkbox" id="shareDay"> <span id="shareDayLbl">לשתף גם את יום הבחירה שלי</span></label>
         <div class="note">כברירת מחדל נשלחים <b>רק מספרי המגרשים שבפול שלך</b>, יחד עם קוד אקראי שהדפדפן יוצר. <b>לא נשלחים</b> מקומך בתור, שמך, ההערות או כל פרט אחר.
-          אפשר לבטל בכל רגע, והביטול מוחק את הפול שלך מהמאגר.</div>
+          אפשר לבטל בכל רגע, והביטול מוחק את הפול שלך מהמאגר.<br>
+          <b>יום הבחירה נשלח רק אם תסמן זאת.</b> בכל יום בוחרים כ-50 זוכים, כך שיום הבחירה לא מזהה אותך, אבל הוא מאפשר לאחרים לראות כמה מהבוחרים <i>לפניהם</i> שמרו כל מגרש.
+          מספר הקדימות המדויק לא נשלח אף פעם, כי ברשימת הזוכים של רמ"י הוא מקושר לתעודת זהות.</div>
         <div class="note" id="anonStatus"></div>
       </div>
       <p class="note no-print" id="pinHint">הרשימה מסודרת לפי סדר העדיפות שלך, ו-▲▼ מזיזים מגרש למעלה או למטה. ביום הבחירה עוברים עליה מלמעלה למטה: אם מגרש נלקח, ממשיכים לבא בתור.
@@ -240,7 +243,7 @@ a{color:var(--accent)}
 
   <h3>פרטיות</h3>
   <p>כל מה שמזינים בכלי (מקום בתור, עדיפויות, הפול, מצב הבחירה) נשמר <b>רק בדפדפן שלך</b> ולא נשלח לשום מקום.
-    <b>חריג אחד:</b> כברירת מחדל, רשימת מספרי המגרשים שבפול שלך נשלחת לשרת יחד עם קוד אקראי, כדי להציג "👥 N שמרו". אפשר לבטל בטאב "הפול שלי". השרת לא שומר מקום בתור, שם, הערות או כתובת IP. ביטול הסימון מוחק את הרשומה.
+    <b>חריג אחד:</b> כברירת מחדל, רשימת מספרי המגרשים שבפול שלך נשלחת לשרת יחד עם קוד אקראי, כדי להציג "👥 N שמרו". אפשר לבטל בטאב "הפול שלי". <b>יום הבחירה</b> נשלח רק למי שמסמן זאת במפורש. <b>מספר הקדימות המדויק לא נשלח אף פעם</b>, כי ברשימת הזוכים הפומבית הוא מקושר לתעודת זהות. השרת לא שומר מקום בתור, שם, הערות או כתובת IP. ביטול הסימון מוחק את הרשומה.
     המספר "👥 N שמרו" מייצג רק משתמשים בכלי שבחרו לשתף, ולא את כל הזוכים.
     ה"קישור האישי" מכיל את הנתונים האלה בתוך הקישור עצמו, והם לא עוברים דרך שרת. מי שמקבל את הקישור יראה את הפול שלך, ולכן כדאי לשלוח אותו רק לעצמך.</p>
 
@@ -260,7 +263,7 @@ const DEF = {
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
   pinned: [], excluded: [],
-  takenText: '', taken: [], notes: {}, waiting: false, sharePool: true, anonToken: '',
+  takenText: '', taken: [], notes: {}, waiting: false, sharePool: true, shareDay: false, anonToken: '',
 };
 // קישור למגרש על המפה באתר של BH Software (נתיב /m/<מזהה>, מזהה = מכרז:מספר)
 const mapUrl = id => `https://dror.bhsoft.app/m/20250052%3A${encodeURIComponent(id)}`;
@@ -306,18 +309,27 @@ const ils = n => '₪' + Math.round(n).toLocaleString('he-IL');
 const fullType = t => (t === 'חד' ? 'חד-משפחתי' : 'דו-משפחתי');
 // ---- מונה אנונימי (רק בהסכמה) ----
 const API = location.hostname === 'localhost' ? 'http://127.0.0.1:8810/dror' : 'https://avraham-tasks.duckdns.org:8443/dror';
-let COUNTS = null, anonUsers = 0, lastSent = null, sendTimer = null;
-const applyCounts = r => { COUNTS = r.counts; anonUsers = r.users; };
+let COUNTS = null, BYDAY = {}, anonUsers = 0, lastSent = null, sendTimer = null;
+const applyCounts = r => { COUNTS = r.counts; BYDAY = r.byDay || {}; anonUsers = r.users; };
+const DAYS = ['11/10', '12/10', '13/10', '14/10', '15/10', '18/10', '19/10'];
+const myDay = () => (slotOf(S.pos, S.waiting) || [])[0] || null;
+// כמה ממי ששיתפו יום בחירה מוקדם משלי שמרו את המגרש (בימים קודמים בלבד — באותו יום אין סדר)
+const savedBefore = id => { const d = DAYS.indexOf(myDay()); return d < 0 ? 0 : DAYS.slice(0, d).reduce((a, x) => a + ((BYDAY[x] || {})[id] || 0), 0); };
 fetch(API + '/counts').then(r => r.json()).then(r => { applyCounts(r); render(); }).catch(() => {});
-const savedBy = p => (COUNTS && COUNTS[p.id] ? `<span class="note" title="משתמשים בכלי ששיתפו את הפול שלהם ושמרו את המגרש הזה (כולל אותך, אם שיתפת)">👥 ${COUNTS[p.id]} שמרו</span>` : '');
+const savedBy = p => {
+  if (!COUNTS || !COUNTS[p.id]) return '';
+  const b = savedBefore(p.id);
+  return `<span class="note" title="משתמשים בכלי ששיתפו את הפול שלהם ושמרו את המגרש (כולל אותך, אם שיתפת). 'לפניך' = מי ששיתף יום בחירה מוקדם משלך">👥 ${COUNTS[p.id]} שמרו${b ? ` · <b>${b} מהם בוחרים בימים שלפניך</b>` : ''}</span>`;
+};
 function syncAnon() {
   const plots = S.sharePool ? S.pinned : [];
-  const key = JSON.stringify(plots);
+  const day = S.sharePool && S.shareDay ? myDay() : null;
+  const key = JSON.stringify([plots, day]);
   if (key === lastSent || (lastSent === null && !plots.length)) return;  // לא לשלוח כלום כשאין מה לשתף או למחוק
   clearTimeout(sendTimer);
   sendTimer = setTimeout(() => {
     if (!S.anonToken) { S.anonToken = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join(''); save(); }
-    fetch(API + '/pool', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: S.anonToken, plots }) })
+    fetch(API + '/pool', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: S.anonToken, plots, day }) })
       .then(r => r.json()).then(r => { lastSent = key; applyCounts(r); render(); })
       .catch(() => { $('anonStatus').textContent = '⚠ השרת לא זמין כרגע. ננסה שוב בשינוי הבא.'; });
   }, 800);
@@ -402,6 +414,7 @@ document.addEventListener('input', e => {
   else if (['category', 'prefType', 'prefHood', 'prefSlope'].includes(t.id)) S[t.id] = t.value;
   else if (t.id === 'use35') S.use35 = t.checked;
   else if (t.id === 'waiting') S.waiting = t.checked;
+  else if (t.id === 'shareDay') S.shareDay = t.checked;
   else if (t.id === 'sharePool') { S.sharePool = t.checked; if (!t.checked) lastSent = lastSent ?? 'force-delete'; }
   else if (t.dataset.note) { S.notes = { ...S.notes, [t.dataset.note]: t.value }; return save(); }  // בלי render — לא לאבד פוקוס
   else if (t.id === 'takenInput') { S.takenText = t.value; S.taken = parseTaken(t.value).ok; }
@@ -484,6 +497,8 @@ function render() {
   const on = S.order.filter(k => S.enabled[k]).length;
   $('settingsSum').textContent = `· ${on} עדיפויות פעילות · ${S.hoods.length}/4 שכונות${S.minPrice || S.budget ? ` · מחיר ${S.minPrice ? ils(S.minPrice) : '0'}–${S.budget ? ils(S.budget) : '∞'}` : ''}`;
   $('sharePool').checked = S.sharePool;
+  $('shareDay').checked = S.shareDay; $('shareDay').disabled = !S.sharePool || !myDay();
+  $('shareDayLbl').textContent = myDay() ? `לשתף גם את יום הבחירה שלי (${myDay()}) כדי שאחרים יראו כמה מהבוחרים לפניהם שמרו כל מגרש` : 'לשתף גם את יום הבחירה (צריך מקום בתור תקין)';
   $('anonStatus').textContent = COUNTS
     ? `${anonUsers} משתמשים שיתפו עד כה.${S.sharePool && S.pinned.length ? ' ✓ הפול שלך משותף.' : ''}`
     : '⚠ אין חיבור לשרת המונה מהרשת הזו. ברשתות ארגוניות, למשל במקום עבודה, חומת האש חוסמת אותו לפעמים. מרשת אחרת או מהסלולרי זה יעבוד, ושאר הכלי עובד כרגיל.';
@@ -547,7 +562,7 @@ function renderTable() {
       ? `<button class="btn pri" data-unpin="${p.id}" title="הוצא מהפול">📌</button>`
       : `<button class="btn" data-pin="${p.id}" title="הוסף לפול">＋</button>`),
     id: p => `<b>${p.id}</b> ${mapLink(p.id)}`, price: p => ils(p.price), ppm: p => ils(p.ppm), penalty: p => ils(p.penalty),
-    elev: p => Math.round(p.elev), edge: p => EDGE_LABEL[p.edge], taken: p => takenBadge(p) || 'פנוי', saved: p => (COUNTS && COUNTS[p.id]) || '',
+    elev: p => Math.round(p.elev), edge: p => EDGE_LABEL[p.edge], taken: p => takenBadge(p) || 'פנוי', saved: p => (COUNTS && COUNTS[p.id]) ? COUNTS[p.id] + (savedBefore(p.id) ? ` (${savedBefore(p.id)} לפניך)` : '') : '',
   };
   $('tbody').innerHTML = rows.map(p => `<tr class="${ok(p) ? '' : 'miss'}">`
     + COLS.map(([k]) => `<td>${cell[k] ? cell[k](p) : p[k]}</td>`).join('') + '</tr>').join('');
