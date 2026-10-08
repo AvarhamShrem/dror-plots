@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://avraham-tasks.duckdns.org:8443 http://127.0.0.1:8810; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>בחירת מגרש בדרור</title>
 <style>
@@ -252,7 +252,7 @@ a{color:var(--accent)}
 
   <details class="more"><summary><b>פרטיות</b></summary>
   <p>כל מה שמזינים בכלי (מקום בתור, עדיפויות, הפול, המגרשים שסימנת כנבחרו) נשמר <b>רק בדפדפן שלך</b> ולא נשלח לשום מקום.
-    <b>שיתוף פולים (הופסק ב-08/10/2026):</b> בגרסה קודמת, משתמשים שלא ביטלו את האפשרות שלחו לשרת את מספרי המגרשים שבפול שלהם יחד עם קוד אקראי, ומי שסימן זאת גם את יום הבחירה שלו. מקום בתור, שם, הערות או כתובת IP לא נשלחו. הנתונים שכבר נאספו נשמרים בשרת ואינם מוצגים באתר. מהגרסה הנוכחית לא נשלח שום דבר.
+    <b>שיתוף פולים (הופסק ב-08/10/2026):</b> בגרסה קודמת, משתמשים שלא ביטלו את האפשרות שלחו לשרת את מספרי המגרשים שבפול שלהם יחד עם קוד אקראי, ומי שסימן זאת גם את יום הבחירה שלו. מקום בתור, שם, הערות או כתובת IP לא נשלחו. הנתונים שכבר נאספו נשמרים בשרת ואינם מוצגים באתר. <b>ספירת מבקרים:</b> כדי לדעת כמה אנשים שונים משתמשים בכלי, הדפדפן יוצר קוד אקראי ושולח אותו לשרת פעם ביום. נשמרים רק הקוד והתאריך, בלי כתובת IP, עוגיות או שום פרט אחר. זה הדבר היחיד שהכלי שולח.
     ה"קישור האישי" מכיל את הנתונים האלה בתוך הקישור עצמו, והם לא עוברים דרך שרת. מי שמקבל את הקישור יראה את הפול שלך, ולכן כדאי לשלוח אותו רק לעצמך.</p></details>
 
   <p class="note">הכלי לא רשמי ואינו מהווה ייעוץ משפטי, כלכלי או תכנוני. השימוש בו על אחריות המשתמש בלבד.</p>
@@ -324,6 +324,17 @@ if (!CATEGORIES.some(c => c.key === S.category)) S.category = DEF.category;
 CRITERIA.forEach(c => { if (!S.order.includes(c.key)) S.order.push(c.key); });
 S.order = S.order.filter(k => CRITERIA.some(c => c.key === k));
 const save = () => { try { localStorage.setItem('dror-tool', JSON.stringify(S)); } catch {} };
+// ספירת מבקרים: קוד אקראי (בנפרד מההגדרות, כדי שלא ייכנס לקישור האישי), נשלח פעם ביום. כישלון — בשקט.
+try {
+  const day = new Date().toISOString().slice(0, 10);
+  if (localStorage.getItem('dror-vid-day') !== day) {
+    let vid = localStorage.getItem('dror-vid');
+    if (!vid) { vid = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join(''); localStorage.setItem('dror-vid', vid); }
+    fetch((location.hostname === 'localhost' ? 'http://127.0.0.1:8810' : 'https://avraham-tasks.duckdns.org:8443') + '/dror/visit',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vid }) })
+      .then(r => { if (r.ok) localStorage.setItem('dror-vid-day', day); }).catch(() => {});
+  }
+} catch {}
 if (imported) save();
 
 const ils = n => '₪' + Math.round(n).toLocaleString('he-IL');
