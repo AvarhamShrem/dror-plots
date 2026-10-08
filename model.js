@@ -76,15 +76,22 @@ const RANGES = {
   minPpm: ['ppm', 1], maxPpm: ['ppm', -1], minPenalty: ['penalty', 1], maxPenalty: ['penalty', -1],
   minElev: ['elev', 1], maxElev: ['elev', -1], minSlope: ['slope', 1], maxSlope: ['slope', -1], minDrop: ['drop', 1], maxDrop: ['drop', -1],
   minRatio: ['ratio', 1], maxRatio: ['ratio', -1], minFront: ['front', 1], maxFront: ['front', -1],
+  minPub: ['pubDist', 1], maxPub: ['pubDist', -1],
 };
-// מול הרחוב: עד מטר לכל כיוון = מישורי
-const riseDir = p => (p.rise === undefined ? undefined : p.rise > 1 ? 'up' : p.rise < -1 ? 'down' : 'flat');
+const STRICT = new Set(['pubDist']);  // נתון חלקי (שכונה א' בלבד): כשהסינון פעיל, מגרש בלי נתון לא עובר
+// מול הרחוב: לפי תכנית הבינוי כשיש (שכונה א'), אחרת לפי מפת הגבהים — עד מטר לכל כיוון = מישורי
+const riseDir = p => p.planDir || (p.rise === undefined ? undefined : p.rise > 1 ? 'up' : p.rise < -1 ? 'down' : 'flat');
+// רשימת בחירה פעילה (לא כל האפשרויות מסומנות) → מגרש בלי ערך לא עובר
+const inList = (list, all, v) => !list || list.length === all || list.includes(v);
 
 function passes(p, s) {
   return s.hoods.includes(p.hood) && s.types.includes(p.type)
-    && Object.entries(RANGES).every(([k, [f, d]]) => !s[k] || p[f] === undefined || (d > 0 ? p[f] >= s[k] : p[f] <= s[k]))
+    && Object.entries(RANGES).every(([k, [f, d]]) => !s[k] || (p[f] === undefined ? !STRICT.has(f) : d > 0 ? p[f] >= s[k] : p[f] <= s[k]))
     && (!s.edges || p.edge === undefined || s.edges.includes(p.edge))
-    && (!s.rises || s.rises.length === 3 || s.rises.includes(riseDir(p)));  // סינון כיוון פעיל → מגרש בלי חזית מזוהה לא עובר
+    && inList(s.rises, 3, riseDir(p))
+    && inList(s.lvls, 4, p.lvl === undefined ? undefined : String(p.lvl))
+    && inList(s.streets, 2, p.street)
+    && (!s.onlyGreen || p.green === true);
 }
 
 // הצעות = K (+extra) המגרשים עם הציון האישי הגבוה ביותר שעוברים את הסינון ולא נבחרו.
