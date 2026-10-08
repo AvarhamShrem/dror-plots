@@ -52,6 +52,12 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .acts{display:flex;gap:6px;margin-top:8px}
 .more{margin-top:6px;font-size:13px;color:var(--muted)}.more summary{cursor:pointer}.rng input{width:7.5em}
+.pm-wrap{direction:ltr;overflow:auto;max-height:75vh;margin-top:8px;border:1px solid var(--line);border-radius:8px}.pm{display:block;background:var(--bg)}
+.pm path{stroke:var(--card);stroke-width:.6}.pm .pm-o{fill:var(--line);opacity:.5}.pm .pm-r{fill:none;stroke:var(--muted);stroke-width:.4;opacity:.6}
+.pm-g{fill:var(--g-bg)}.pm-f{fill:var(--card);stroke:var(--muted)!important}.pm-t{fill:var(--r-bg)}.pm-p{fill:var(--accent);stroke:var(--accent)!important;stroke-width:3!important}.pm-pt{fill:var(--r);stroke:var(--r)!important;stroke-width:3!important}
+.pm text{fill:var(--ink);paint-order:stroke;stroke:var(--card);stroke-width:.25em;text-anchor:middle;dominant-baseline:middle;font-weight:600;pointer-events:none}
+.pm-k{display:inline-block;width:12px;height:12px;border:1px solid var(--muted);border-radius:3px;vertical-align:-1px;background:var(--card)}
+.pm-k.pm-p{background:var(--accent)}.pm-k.pm-pt{background:var(--r)}.pm-k.pm-t{background:var(--r-bg)}.pm-k.pm-g{background:var(--g-bg)}
 .mapbox iframe{width:100%;height:340px;border:1px solid var(--line);border-radius:8px;margin-top:8px;background:var(--bg)}
 table.cmp th:first-child{position:sticky;inset-inline-start:0;background:var(--card);text-align:start;white-space:nowrap}table.cmp td{vertical-align:top;min-width:9em}
 .gl{text-decoration:none;font-size:12px;opacity:.75;margin-inline-end:2px}.kv{list-style:none;padding-inline-start:0}.kv li{margin:3px 0}
@@ -198,6 +204,7 @@ a{color:var(--accent)}
       <div id="mineAlert"></div>
       <details class="more no-print" id="pinHint"><summary>איך משתמשים ברשימה?</summary><p class="note">הרשימה מסודרת לפי סדר העדיפות שלך, ו-▲▼ מזיזים מגרש למעלה או למטה. ביום הבחירה עוברים עליה מלמעלה למטה: אם מגרש נלקח, ממשיכים לבא בתור.
         כדאי שהרשימה תהיה ארוכה ככל שמקומך בתור רחוק יותר. <b>🔍 דומים</b> מציג מגרשים קרובים באותה שכונה ובאותו סוג, כדי להרחיב את הרשימה מנקודת מוצא.</p></details>
+      <details class="more no-print" id="poolMap"><summary>🗺 הפול שלי על המפה</summary><div id="poolMapBox"><p class="note">טוען…</p></div></details>
       <div id="compare"></div>
       <ol class="mine" id="pinned"></ol>
       <p class="note" id="pinEmpty">עוד לא הוספת מגרשים. בטאב "הצעות מגרשים" לוחצים "📌 הוסף לפול" על הצעה, או "＋" בטאב "כל המגרשים".</p>
@@ -277,8 +284,8 @@ a{color:var(--accent)}
   </div>
 </footer>
 
-<script src="data.js?v=20261008c"></script>
-<script src="model.js?v=20261008c"></script>
+<script src="data.js?v=20261008d"></script>
+<script src="model.js?v=20261008d"></script>
 <script>
 const $ = id => document.getElementById(id);
 const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'], RISES = ['up', 'flat', 'down'];
@@ -434,6 +441,45 @@ function compareTable(list) {
   return `<div class="tablewrap" style="margin:8px 0 14px"><table class="cmp"><thead><tr><th></th>${list.map(p => `<th>${p.id} ${mapLink(p.id)}</th>`).join('')}</tr></thead>
     <tbody>${CMP_ROWS.map(([l, f]) => `<tr><th>${l}</th>${list.map(p => `<td>${f(p)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
+// מפת הפול: map.js (קווי מתאר מ-BH, mapgeo.py) נטען רק כשפותחים
+let mapAll = false, mapZoom = 1;
+function poolMap(pinned) {
+  const G = window.MAPGEO, box = $('poolMapBox');
+  if (!G || !$('poolMap').open) return;
+  const pin = new Map(pinned.map((p, i) => [p.id, i + 1])), taken = new Set(S.taken);
+  // תצוגה: סביב מגרשי הפול (לפחות 300 מ'), או כל היישוב
+  let [x0, y0, x1, y1] = [0, 0, G.w, G.h];
+  if (!mapAll && pin.size) {
+    const pts = [...pin.keys()].map(id => G.label[id]).filter(Boolean);
+    const xs = pts.map(q => q[0]), ys = pts.map(q => q[1]), cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const half = Math.max(150, (Math.max(...xs) - Math.min(...xs)) / 2 + 60, (Math.max(...ys) - Math.min(...ys)) / 2 + 60);
+    [x0, y0, x1, y1] = [cx - half, cy - half, cx + half, cy + half];
+  }
+  const fs = Math.max(x1 - x0, y1 - y0) / 70 / Math.sqrt(mapZoom);
+  const shape = id => { const n = pin.get(id), t = taken.has(id);
+    return `<path d="${G.plots[id]}" class="${n ? (t ? 'pm-pt' : 'pm-p') : t ? 'pm-t' : 'pm-f'}"><title>מגרש ${id}${n ? ` · מקום ${n} בפול` : ''}${t ? ' · נבחר כבר' : ''}</title></path>`; };
+  const old = box.querySelector('.pm-wrap'), keep = old && old.dataset.z == mapZoom && [old.scrollLeft, old.scrollTop];
+  box.innerHTML = `<div class="pm-wrap" data-z="${mapZoom}"><svg style="width:${mapZoom * 100}%" viewBox="${x0} ${y0} ${x1 - x0} ${y1 - y0}" class="pm" role="img" aria-label="מפת מגרשי הפול">
+    <path d="${G.other}" class="pm-o"/><path d="${G.green}" class="pm-g"/><path d="${G.roads}" class="pm-r"/>
+    ${Object.keys(G.plots).map(shape).join('')}
+    ${[...pin].map(([id, n]) => G.label[id] ? `<text x="${G.label[id][0]}" y="${G.label[id][1] - fs * 1.1}" font-size="${fs}">${id}</text>` : '').join('')}</svg></div>
+    <p class="note"><span class="pm-k pm-p"></span> בפול שלך <span class="pm-k pm-pt"></span> בפול ונבחר כבר <span class="pm-k pm-t"></span> נבחר כבר <span class="pm-k pm-f"></span> פנוי <span class="pm-k pm-g"></span> שטח ירוק ·
+    <button class="btn" data-mapzoom="2" aria-label="הגדלה">＋</button><button class="btn" data-mapzoom="0.5" aria-label="הקטנה" ${mapZoom === 1 ? 'disabled' : ''}>－</button>
+    <button class="linkbtn" data-mapall="1">${mapAll ? 'התמקד בפול' : 'הצג את כל היישוב'}</button> · קווי המגרשים מ-<a href="https://dror.bhsoft.app" target="_blank" rel="noopener">BH Software</a></p>`;
+  // אחרי הגדלה: למרכז הכובד של מגרשי הפול; בעדכון רגיל: איפה שהיה
+  const w = box.querySelector('.pm-wrap'), pts = [...pin.keys()].map(id => G.label[id]).filter(Boolean);
+  const fx = pts.length ? (pts.reduce((a, q) => a + q[0], 0) / pts.length - x0) / (x1 - x0) : 0.5;
+  const fy = pts.length ? (pts.reduce((a, q) => a + q[1], 0) / pts.length - y0) / (y1 - y0) : 0.5;
+  [w.scrollLeft, w.scrollTop] = keep || [fx * w.scrollWidth - w.clientWidth / 2, fy * w.scrollHeight - w.clientHeight / 2];
+}
+$('poolMap').addEventListener('toggle', () => {
+  if (window.MAPGEO || !$('poolMap').open) return render();
+  const sc = document.createElement('script');
+  sc.src = 'map.js?v=20261008d'; sc.onload = render;
+  sc.onerror = () => { $('poolMapBox').innerHTML = '<p class="note">המפה לא נטענה. נסו לרענן את הדף.</p>'; };
+  document.head.append(sc);
+});
+
 // שורה בטאב "הפול שלי"
 function mineRow(p, i) {
   return `<li class="${p.taken ? 'gone' : ''}">
@@ -517,6 +563,8 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.mapall) { mapAll = !mapAll; mapZoom = 1; return render(); }
+  if (b.dataset.mapzoom) { mapZoom = Math.min(8, Math.max(1, mapZoom * b.dataset.mapzoom)); return render(); }
   if (b.dataset.mapframe) {
     const box = b.closest('.plot, li').querySelector('.mapbox');
     box.innerHTML = box.innerHTML ? '' : `<iframe src="${mapUrl(b.dataset.mapframe)}" title="מגרש ${b.dataset.mapframe} על המפה (dror.bhsoft.app)" loading="lazy" referrerpolicy="no-referrer"></iframe><div class="note">המפה של BH Software. הטעינה לוקחת כמה שניות, ובכניסה הראשונה צריך לאשר את חלון ההסבר שלהם · <a href="${mapUrl(b.dataset.mapframe)}" target="_blank" rel="noopener">פתיחה בחלון מלא</a></div>`;
@@ -571,6 +619,8 @@ function render() {
   S.compare = S.compare.filter(id => S.pinned.includes(id));
   $('compare').innerHTML = pinned.length >= 2 ? compareTable(S.compare.map(id => byId[id]).filter(Boolean)) : '';
   $('pinned').innerHTML = pinned.map(mineRow).join('');
+  $('poolMap').classList.toggle('hidden', !pinned.length);
+  poolMap(pinned);
   $('pinHint').classList.toggle('hidden', !pinned.length);
   $('pinCount').textContent = pinned.length ? `(${pinned.length})` : '';
   $('pinEmpty').classList.toggle('hidden', pinned.length > 0);
