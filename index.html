@@ -51,7 +51,9 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .btn{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
 .btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .acts{display:flex;gap:6px;margin-top:8px}
-.more{margin-top:6px;font-size:13px;color:var(--muted)}.more summary{cursor:pointer}.rng input{width:7.5em}footer .more{color:var(--ink);font-size:inherit;margin-top:8px}.more ul{margin:4px 0;padding-inline-start:18px}
+.more{margin-top:6px;font-size:13px;color:var(--muted)}.more summary{cursor:pointer}.rng input{width:7.5em}
+.gl{text-decoration:none;font-size:12px;opacity:.75;margin-inline-end:2px}.kv{list-style:none;padding-inline-start:0}.kv li{margin:3px 0}
+.gloss dt{font-weight:600;margin-top:8px}.gloss dd{margin:2px 0 0}.gloss dt.flash{background:var(--y-bg)}footer .more{color:var(--ink);font-size:inherit;margin-top:8px}.more ul{margin:4px 0;padding-inline-start:18px}
 .plot.pin{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .mine{list-style:none;padding:0;margin:0}
 .mine li{display:grid;grid-template-columns:auto auto 1fr auto;gap:4px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -164,15 +166,19 @@ a{color:var(--accent)}
 
     <div class="card">
       <p class="summary" id="summary"></p>
-      <details class="note" style="margin:-4px 0 12px"><summary>איך לקרוא כרטיס מגרש?</summary>
-        <ul style="margin:6px 0;padding-inline-start:20px">
-          <li><b>מחיר</b>: סך התשלום המשוער בקטגוריה שבחרת (קרקע + פיתוח + מבני ציבור, כולל הצמדה ומע"מ). לא כולל בנייה, היטלים, מיסים או עלויות נלוות.</li>
-          <li><b>⛰ עולה / יורד מהרחוב והפרש גובה</b>: מהשטח שלפני הפיתוח. ההסבר המלא נמצא בהגדרות, תחת "גובה ושיפוע".</li>
-          <li>תחת <b>עוד פרטים</b>:</li>
-          <li><b>שטח: 45/297</b>: המגרש הוא ה-45 בגודלו מתוך כל 297 המגרשים (1 = הגדול ביותר). <b>בשכונה א' חד: 12/227</b> = אותו דירוג, רק מול מגרשים מאותה שכונה ומאותו סוג. <b>מחיר: 30/297</b> = 1 הוא הזול ביותר בקטגוריה שבחרת.
-            אלה עובדות על המגרש, לא תחזית. הכלי לא יודע מה יבחרו אחרים, אבל הדירוג עוזר להעריך את זה בעצמך. למשל, למי שבמקום 180, מגרש שהוא ה-20 בגודלו כנראה יילקח לפני שיגיע תורו.</li>
-          <li><b>התאמה 0–100</b>: כמה המגרש מתאים לסדר העדיפויות שלך, יחסית לשאר המגרשים. זה לא ציון איכות מוחלט. ההצעות ממוינות לפיה.</li>
-        </ul></details>
+      <details class="note" id="glossary" style="margin:-4px 0 12px"><summary>📖 מה אומר כל נתון בכרטיס?</summary>
+        <dl class="gloss">
+          <dt id="g-price">מחיר ושטח</dt><dd>סך התשלום המשוער בקטגוריה שבחרת: קרקע, פיתוח ומבני ציבור, כולל הצמדה ומע"מ. לא כולל בנייה, היטלים ומיסים. רוב המחיר הוא עלות פיתוח שגדלה עם השטח, ולכן מגרש גדול יקר יותר בערך באותו יחס.</dd>
+          <dt id="g-type">שכונה · סוג · מיקום</dt><dd><b>חד-משפחתי</b> = בית עומד לבד. <b>דו-משפחתי</b> (מגרשי A/B) = קיר משותף עם שכן. <b>פנימי</b> = יש בתים מכל הצדדים. <b>על גדר היישוב</b> = בקצה, בדרך כלל עם נוף פתוח. <b>פונה לשטח פתוח פנימי</b> = גובל בשטח פתוח בין שכונות. <b>🌳 גובל בשטח ירוק</b> = צמוד לפארק, שטח ציבורי פתוח או נחל.</dd>
+          <dt id="g-terrain">⛰ מפלסים מול הרחוב</dt><dd>קובע איזה בית אפשר לבנות. <b>מפלס אחד</b>: הכול בגובה הרחוב; הכי פשוט וזול לבנייה, ונגיש. <b>מדורג, יורד</b>: נכנסים מהרחוב, והחצר או קומה תחתונה נמוכות יותר; מתאים לבית בשני מפלסים, ועולה יותר (קירות תומכים, מדרגות). <b>מדורג, עולה</b>: הבית מעל הרחוב; מדרגות בכניסה, יותר פרטיות ולפעמים נוף. בשכונה א' הנתון מטיוטת תכנית הבינוי, ועשוי להשתנות.</dd>
+          <dt id="g-rank">גודל ומחיר: הדירוג</dt><dd>1 = הגדול / היקר ביותר מבין 297 המגרשים. "בשכונה א חד" = אותו דירוג, רק מול מגרשים מאותה שכונה ומאותו סוג. "מהגדולים" / "מהזולים" = בין 10% הקיצוניים. זו עובדה ולא תחזית, אבל היא עוזרת להעריך: מגרש שהוא מהגדולים במכרז כנראה ייבחר מוקדם, ולכן למי שרחוק בתור כדאי שיהיו ברשימה גם חלופות. <b>מחיר למ"ר</b> כמעט אחיד בשכונה א' (1,200–1,250 ₪), ובשכונות ב' וד' נע בין כ-1,030 ל-1,340 ₪.</dd>
+          <dt id="g-street">רחוב</dt><dd><b>רחוב משולב</b> = רחוב צר שבו רכב והולכי רגל חולקים מרחב; שקט ומתאים לילדים. <b>כביש</b> = רחוב רגיל, עם יותר תנועה.</dd>
+          <dt id="g-pub">מבני ציבור</dt><dd>מרחק באוויר לשטח הציבורי הקרוב (גנים, בית ספר, בית כנסת), לפי תשריט רמ"י. קרוב = נוח ללכת ברגל, אבל עלול להיות רועש בשעות פעילות. קיים רק לשכונה א'.</dd>
+          <dt id="g-shape">צורה וחזית</dt><dd><b>ריבועי</b> (יחס קרוב ל-1) = הכי גמיש לתכנון. <b>מוארך</b> (2 ומעלה) = מכתיב בית צר וארוך. <b>לא סדיר</b> = משולש, טרפז או קשת; קשה יותר לנצל. <b>חזית לרחוב</b> = אורך הצד שפונה לרחוב; רחבה = יותר גמישות לכניסה ולחניה, ופחות פרטיות. במגרש פינתי היא כוללת שני צדדים.</dd>
+          <dt id="g-entry">מפלס הכניסה</dt><dd>גובה הכניסה מעל פני הים לפי תכנית הבינוי (בשכונה א' בערך 455–493 מ'). גבוה יותר = בדרך כלל יותר נוף ורוח. נתון משני.</dd>
+          <dt id="g-predev">נתונים מלפני הפיתוח</dt><dd>בשכונות ב'–ד' אין תכנית בינוי, ולכן הגובה, השיפוע, הפרש הגובה והכיוון מול הרחוב מחושבים ממפת השטח <b>לפני</b> עבודות העפר. השטח השתנה מאז, ולכן זו אינדיקציה בלבד. הפרש גובה = בין הנקודה הגבוהה לנמוכה במגרש.</dd>
+          <dt id="g-score">התאמה לעדיפויות שלך</dt><dd>ציון 0–100 של כמה המגרש מתאים לסדר העדיפויות שהגדרת בהגדרות. קובע רק את סדר ההצעות, ולא אומר אם המגרש טוב.</dd>
+        </dl></details>
       <p class="note" id="mineLink"></p>
       <h2>💡 הצעות בשבילך</h2>
       <div class="plots" id="pool"></div>
@@ -215,7 +221,7 @@ a{color:var(--accent)}
     <div class="card no-print row">
       <label>חיפוש מגרש<input id="q" type="search" placeholder="מספר מגרש" style="font:inherit;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"></label>
       <label class="chk"><input type="checkbox" id="onlyPass"> רק מה שעובר את הסינון שלי</label>
-      <details class="more"><summary>מקרא לטבלה</summary><span class="note">* גובה, שיפוע, הפרש גובה (במטרים, בין הנקודה הגבוהה לנמוכה במגרש) ועולה/יורד מהרחוב לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום · דירוג שטח: 1 = הגדול ביותר · דירוג מחיר: 1 = הזול ביותר · לחיצה על כותרת עמודה ממיינת</span></details>
+      <details class="more"><summary>מקרא לטבלה</summary><span class="note">* גובה, שיפוע, הפרש גובה (במטרים, בין הנקודה הגבוהה לנמוכה במגרש) לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום. "מול הרחוב" בשכונה א' לפי טיוטת תכנית הבינוי · דירוג שטח: 1 = הגדול ביותר · דירוג מחיר: 1 = היקר ביותר · הסבר מפורט על כל נתון: "📖 מה אומר כל נתון בכרטיס?" בטאב ההצעות · לחיצה על כותרת עמודה ממיינת</span></details>
     </div>
     <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
   </section>
@@ -267,8 +273,8 @@ a{color:var(--accent)}
   </div>
 </footer>
 
-<script src="data.js?v=20261008"></script>
-<script src="model.js?v=20261008"></script>
+<script src="data.js?v=20261008b"></script>
+<script src="model.js?v=20261008b"></script>
 <script>
 const $ = id => document.getElementById(id);
 const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'], RISES = ['up', 'flat', 'down'];
@@ -357,7 +363,23 @@ const terrainShort = p => p.lvl !== undefined ? planText(p) : riseText(p);
 // צורה: יחס אורך/רוחב של המלבן החוסם; מילוי מתחת ל-80% = לא סדיר (משולש, טרפז, קשת)
 const shapeText = p => p.ratio === undefined ? '' : `${p.ratio < 1.3 ? 'ריבועי' : p.ratio < 1.8 ? 'רגיל' : p.ratio < 2.5 ? 'מוארך' : 'צר וארוך'} (יחס ${p.ratio})${p.fill < 0.8 ? ', לא סדיר' : ''}`;
 const takenBadge = p => (p.taken ? '<span class="badge b-r">❌ נבחר כבר</span>' : '');
-const facts = p => `שטח: ${p.areaRank}/297 · בשכונה ${p.hood} ${p.type}: ${p.groupRank}/${p.groupSize} · מחיר: ${p.priceRank}/297`;
+// דירוג במילים (1 = הגדול / היקר ביותר): 10% הקיצוניים מקבלים שם, השאר "בינוני"
+const rankWord = (r, n, [top, high, mid, low, bottom]) => r === 1 ? top : r === n ? bottom : r <= n * 0.1 ? high : r > n * 0.9 ? low : mid;
+const SIZE_W = ['הגדול ביותר', 'מהגדולים', 'בגודל בינוני', 'מהקטנים', 'הקטן ביותר'];
+const PRICE_W = ['היקר ביותר', 'מהיקרים', 'במחיר בינוני', 'מהזולים', 'הזול ביותר'];
+// מחיר למ"ר מול החציון (בשכונה א' כמעט אחיד; בב'/ד' נע בין כ-1,030 ל-1,340)
+let medCache = null;
+const medianPpm = () => {
+  const key = S.category + S.use35;
+  if (!medCache || medCache.key !== key) { const v = ROWS.map(q => q.ppm).sort((a, b) => a - b); medCache = { key, v: v[v.length >> 1] }; }
+  return medCache.v;
+};
+const ppmText = p => {
+  const d = Math.round((p.ppm / medianPpm() - 1) * 100);
+  return `${ils(p.ppm)} למ"ר` + (Math.abs(d) < 3 ? ' (כמו רוב המגרשים)' : ` (${Math.abs(d)}% ${d < 0 ? 'מתחת' : 'מעל'} לחציון)`);
+};
+// שורה ב"עוד פרטים" עם קישור להסבר במילון (#g-...)
+const row = (g, label, value) => `<li><a class="gl" href="#g-${g}" data-gl="${g}" aria-label="מה זה ${label}?">ⓘ</a> <b>${label}:</b> ${value}</li>`;
 function card(p) {
   const on = S.pinned.includes(p.id);
   const acts = on ? '<span class="note">📌 כבר בפול שלך</span>'
@@ -366,17 +388,18 @@ function card(p) {
     <div><span class="id">${p.id}</span> ${mapLink(p.id)}</div>
     <div class="pr">${ils(p.price)} · ${p.area} מ"ר</div>
     <div class="meta">שכונה ${p.hood} · ${fullType(p.type)}${p.edge ? ` · ${EDGE_LABEL[p.edge]}` : ''}${p.green ? ' · 🌳 גובל בשטח ירוק' : ''}</div>
-    ${p.lvl !== undefined ? `<div class="meta" title="לפי טיוטת תכנית הבינוי של שכונה א' — עשוי להשתנות">⛰ לפי תכנית הבינוי: ${planText(p)}</div>`
-      : p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">⛰ ${p.rise !== undefined ? riseText(p) + ' · ' : ''}הפרש גובה ${p.drop} מ' ⚠</div>` : ''}
+    ${p.lvl !== undefined ? `<div class="meta" title="לפי טיוטת תכנית הבינוי של שכונה א' — עשוי להשתנות">⛰ לפי תכנית הבינוי: ${planText(p)} <a class="gl" href="#g-terrain" data-gl="terrain" aria-label="מה זה?">ⓘ</a></div>`
+      : p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">⛰ ${p.rise !== undefined ? riseText(p) + ' · ' : ''}הפרש גובה ${p.drop} מ' <a class="gl" href="#g-predev" data-gl="predev" aria-label="מה זה?">⚠</a></div>` : ''}
     ${p.taken ? `<div style="margin-top:4px">${takenBadge(p)}</div>` : ''}
-    <details class="more"><summary>עוד פרטים</summary><ul>
-      <li>מחיר למ"ר: ${ils(p.ppm)}</li>
-      ${p.street || p.pubDist !== undefined ? `<li>${p.street ? 'רחוב: ' + STREET_LABEL[p.street] : ''}${p.street && p.pubDist !== undefined ? ' · ' : ''}${p.pubDist !== undefined ? `מבני ציבור: כ-${p.pubDist} מ'` : ''}</li>` : ''}
-      ${p.entry !== undefined ? `<li>מפלס הכניסה לפי תכנית הבינוי: ${p.entry} מ' מעל פני הים</li>` : ''}
-      ${p.ratio !== undefined ? `<li>צורה: ${shapeText(p)}${p.front ? ` · חזית לרחוב כ-${p.front} מ'` : ''}</li>` : ''}
-      ${p.elev ? `<li>לפני פיתוח: גובה ${Math.round(p.elev)} מ' מעל פני הים, שיפוע ${p.slope}%</li>` : ''}
-      <li title="1 = הגדול / הזול ביותר">${facts(p)}</li>
-      <li>התאמה לעדיפויות שלך: ${p.score}</li></ul></details>
+    <details class="more"><summary>עוד פרטים</summary><ul class="kv">
+      ${row('rank', 'גודל', `${rankWord(p.areaRank, 297, SIZE_W)} (${p.areaRank} מתוך 297; בשכונה ${p.hood} ${p.type}: ${p.groupRank} מתוך ${p.groupSize})`)}
+      ${row('rank', 'מחיר', `${rankWord(p.priceRank, 297, PRICE_W)} (${p.priceRank} מתוך 297) · ${ppmText(p)}`)}
+      ${p.street ? row('street', 'רחוב', STREET_LABEL[p.street]) : ''}
+      ${p.pubDist !== undefined ? row('pub', 'מבני ציבור', `כ-${p.pubDist} מ'`) : ''}
+      ${p.ratio !== undefined ? row('shape', 'צורה', `${shapeText(p)}${p.front ? ` · חזית לרחוב כ-${p.front} מ'` : ''}`) : ''}
+      ${p.entry !== undefined ? row('entry', 'מפלס הכניסה', `${p.entry} מ' מעל פני הים`)
+        : p.elev ? row('predev', 'לפני פיתוח', `גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%, הפרש גובה ${p.drop} מ'`) : ''}
+      ${row('score', 'התאמה לעדיפויות שלך', p.score)}</ul></details>
     <div class="acts no-print">${acts}</div></div>`;
 }
 // מגרשים דומים לשורה בפול — רשימה מתקפלת (פתוחה אחת בכל פעם)
@@ -458,6 +481,14 @@ document.addEventListener('input', e => {
   else if (t.id === 'q' || t.id === 'onlyPass') return renderTable();
   else return;
   save(); render();
+});
+// ⓘ בכרטיס → פותח את המילון בהסבר המתאים ומדגיש אותו
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[data-gl]'); if (!a) return;
+  e.preventDefault();
+  const dt = $('g-' + a.dataset.gl); $('glossary').open = true;
+  dt.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  dt.classList.add('flash'); setTimeout(() => dt.classList.remove('flash'), 1800);
 });
 document.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;

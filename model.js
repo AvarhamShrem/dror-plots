@@ -48,7 +48,7 @@ function enrich(plots, s) {
   const crit = Object.fromEntries(CRITERIA.map(c => [c.key, c]));
   const wsum = active.reduce((a, _, i) => a + (active.length - i), 0);
   const areaRank = rankBy(plots, p => p.area, (a, b) => a > b);
-  const priceRank = rankBy(plots, p => priceOf(p, s), (a, b) => a < b);
+  const priceRank = rankBy(plots, p => priceOf(p, s), (a, b) => a > b);   // באותו כיוון כמו השטח
   const groups = {};
   for (const p of plots) (groups[p.hood + p.type] ||= []).push(p);
   return plots.map(p => {
@@ -64,7 +64,7 @@ function enrich(plots, s) {
       taken: taken.has(p.id),
       areaRank: areaRank(p),                                           // 1 = הגדול ביותר מ-297
       groupRank: rankBy(g, q => q.area, (a, b) => a > b)(p), groupSize: g.length,  // בשכונה+סוג
-      priceRank: priceRank(p),                                         // 1 = הזול ביותר
+      priceRank: priceRank(p),                                         // 1 = היקר ביותר (כמו שטח: 1 = הגדול)
       score: Math.round(score * 100),
     };
   });
@@ -98,7 +98,7 @@ function passes(p, s) {
 // מגרשים שכבר בפול (pinned) או הוסתרו (excluded) לא מוצעים — וההצעות מתמלאות מחדש.
 function buildPool(rows, s) {
   const skip = new Set([...(s.pinned || []), ...(s.excluded || [])]);
-  const cand = rows.filter(p => !p.taken && passes(p, s)).sort((a, b) => b.score - a.score || a.priceRank - b.priceRank);
+  const cand = rows.filter(p => !p.taken && passes(p, s)).sort((a, b) => b.score - a.score || b.priceRank - a.priceRank);
   const pool = cand.filter(p => !skip.has(p.id)).slice(0, s.k + (s.extra || 0));
   return { pool, candidates: cand.length };
 }
