@@ -211,6 +211,7 @@ a{color:var(--accent)}
       <p class="note" id="pinEmpty">עוד לא הוספת מגרשים. בטאב "הצעות מגרשים" לוחצים "📌 הוסף לפול" על הצעה, או "＋" בטאב "כל המגרשים".</p>
       <p class="no-print acts" style="margin-top:14px;flex-wrap:wrap"><button class="btn pri" data-share="1">📤 שליחת הפול (ווטסאפ וכו')</button><button class="btn" data-mylink="1">🔗 קישור אישי לפול שלי</button><button class="btn" onclick="print()">🖨 הדפסה / שמירה כ-PDF</button></p>
       <p class="note" id="shareMsg"></p>
+      <label class="chk no-print note" style="margin:6px 0"><input type="checkbox" id="sharePool"> לשלוח אנונימית את מספרי המגרשים שבפול שלי, לסטטיסטיקה בלבד. בלי שם, מקום בתור או הערות, ובלי הצגה באתר. פירוט ב"פרטיות" בתחתית הדף</label>
       <details class="more no-print"><summary>💾 איך הפול נשמר, ואיך עוברים למכשיר אחר?</summary><p class="note">כל מה שמזינים נשמר אוטומטית בדפדפן הזה, וכשחוזרים לדף הכל נמצא במקום.
         כדאי לפתוח את הכלי בדפדפן הרגיל (ספארי או כרום, ולא מתוך ווטסאפ) ולהוסיף אותו למסך הבית.
         כדי לעבור למכשיר אחר, למשל מהמחשב לטלפון ביום הבחירה, לוחצים <b>"🔗 קישור אישי"</b>, שולחים את הקישור לעצמך ופותחים אותו במכשיר השני.</p></details>
@@ -278,15 +279,15 @@ a{color:var(--accent)}
 
   <details class="more"><summary><b>פרטיות</b></summary>
   <p>כל מה שמזינים בכלי (מקום בתור, עדיפויות, הפול, המגרשים שסימנת כנבחרו) נשמר <b>רק בדפדפן שלך</b> ולא נשלח לשום מקום.
-    <b>שיתוף פולים (הופסק ב-08/10/2026):</b> בגרסה קודמת, משתמשים שלא ביטלו את האפשרות שלחו לשרת את מספרי המגרשים שבפול שלהם יחד עם קוד אקראי, ומי שסימן זאת גם את יום הבחירה שלו. מקום בתור, שם, הערות או כתובת IP לא נשלחו. הנתונים שכבר נאספו נשמרים בשרת ואינם מוצגים באתר. <b>ספירת מבקרים:</b> כדי לדעת כמה אנשים שונים משתמשים בכלי, הדפדפן יוצר קוד אקראי ושולח אותו לשרת פעם ביום. נשמרים רק הקוד והתאריך, בלי כתובת IP, עוגיות או שום פרט אחר. זה הדבר היחיד שהכלי שולח.
+    <b>איסוף פולים אנונימי:</b> כברירת מחדל, מספרי המגרשים שבפול שלך נשלחים לשרת יחד עם הקוד האקראי של ספירת המבקרים, לסטטיסטיקה בלבד, ולא מוצגים באתר. לא נשלחים מקום בתור, יום בחירה, שם, הערות או כתובת IP. אפשר לבטל בטאב "הפול שלי", והביטול מוחק את הרשומה. (בגרסה שעד 08/10/2026 נשלח גם יום הבחירה, למי שסימן זאת; הנתונים האלה נשמרים בשרת ואינם מוצגים.) <b>ספירת מבקרים:</b> כדי לדעת כמה אנשים שונים משתמשים בכלי, הדפדפן יוצר קוד אקראי ושולח אותו לשרת פעם ביום. נשמרים רק הקוד והתאריך, בלי כתובת IP, עוגיות או שום פרט אחר. מלבד הפול והקוד הזה הכלי לא שולח דבר.
     ה"קישור האישי" מכיל את הנתונים האלה בתוך הקישור עצמו, והם לא עוברים דרך שרת. מי שמקבל את הקישור יראה את הפול שלך, ולכן כדאי לשלוח אותו רק לעצמך.</p></details>
 
   <p class="note">הכלי לא רשמי ואינו מהווה ייעוץ משפטי, כלכלי או תכנוני. השימוש בו על אחריות המשתמש בלבד.</p>
   </div>
 </footer>
 
-<script src="data.js?v=20261008e"></script>
-<script src="model.js?v=20261008e"></script>
+<script src="data.js?v=20261008f"></script>
+<script src="model.js?v=20261008f"></script>
 <script>
 const $ = id => document.getElementById(id);
 const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'], RISES = ['up', 'flat', 'down'];
@@ -302,7 +303,7 @@ const DEF = {
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
   pinned: [], excluded: [],
-  takenText: '', taken: [], notes: {}, waiting: false,
+  takenText: '', taken: [], notes: {}, waiting: false, sharePool: true,
 };
 // קישור למגרש על המפה באתר של BH Software (נתיב /m/<מזהה>, מזהה = מכרז:מספר)
 const mapUrl = id => `https://dror.bhsoft.app/m/20250052%3A${encodeURIComponent(id)}`;
@@ -344,7 +345,7 @@ if (location.hash.startsWith('#s=')) {
   history.replaceState(null, '', location.pathname);  // לא להשאיר את הנתונים בשורת הכתובת
 }
 // הגירה מגרסה קודמת: כוכבים → פול; קטגוריות ישנות
-delete S.anonToken; delete S.sharePool; delete S.shareDay;  // שיתוף הפולים הוסר 08/10/2026
+delete S.anonToken; delete S.shareDay;  // שאריות מגרסת השיתוף הקודמת (עד 08/10/2026)
 if (S.stars) { S.pinned = [...new Set([...S.pinned, ...S.stars])]; delete S.stars; }
 S.category = { homeless: 'res_home', other: 'res' }[S.category] || S.category;
 if (!CATEGORIES.some(c => c.key === S.category)) S.category = DEF.category;
@@ -364,6 +365,19 @@ try {
   }
 } catch {}
 if (imported) save();
+// איסוף פולים אנונימי (מ-08/10/2026): רק מספרי המגרשים, לשרת, בלי הצגה באתר. ביטול → רשימה ריקה מוחקת את הרשומה.
+let poolTimer;
+function syncPool() {
+  try {
+    const vid = localStorage.getItem('dror-vid'), plots = S.sharePool ? S.pinned : [], key = JSON.stringify(plots);
+    const last = localStorage.getItem('dror-pool-sent');
+    if (!vid || key === last || (last === null && !plots.length)) return;
+    clearTimeout(poolTimer);
+    poolTimer = setTimeout(() => fetch((location.hostname === 'localhost' ? 'http://127.0.0.1:8810' : 'https://avraham-tasks.duckdns.org:8443') + '/dror/pool',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: vid, plots, day: null }) })
+      .then(r => { if (r.ok) localStorage.setItem('dror-pool-sent', key); }).catch(() => {}), 1500);
+  } catch {}
+}
 
 const ils = n => '₪' + Math.round(n).toLocaleString('he-IL');
 const fullType = t => (t === 'חד' ? 'חד-משפחתי' : 'דו-משפחתי');
@@ -477,7 +491,7 @@ function poolMap(pinned) {
 $('poolMap').addEventListener('toggle', () => {
   if (window.MAPGEO || !$('poolMap').open) return render();
   const sc = document.createElement('script');
-  sc.src = 'map.js?v=20261008e'; sc.onload = render;
+  sc.src = 'map.js?v=20261008f'; sc.onload = render;
   sc.onerror = () => { $('poolMapBox').innerHTML = '<p class="note">המפה לא נטענה. נסו לרענן את הדף.</p>'; };
   document.head.append(sc);
 });
@@ -546,6 +560,7 @@ document.addEventListener('input', e => {
   else if (t.dataset.note) { S.notes = { ...S.notes, [t.dataset.note]: t.value }; return save(); }  // בלי render — לא לאבד פוקוס
   else if (t.id === 'takenInput') { S.takenText = t.value; S.taken = parseTaken(t.value).ok; }
   else if (t.id === 'onlyGreen') S.onlyGreen = t.checked;
+  else if (t.id === 'sharePool') S.sharePool = t.checked;
   else if (t.dataset.cmp) S.compare = t.checked ? [...S.compare, t.dataset.cmp].slice(0, 4) : S.compare.filter(x => x !== t.dataset.cmp);
   else if (t.dataset.hoods || t.dataset.types || t.dataset.edges || t.dataset.rises || t.dataset.lvls || t.dataset.streets) {
     const key = ['hoods', 'types', 'edges', 'rises', 'lvls', 'streets'].find(k => t.dataset[k]), v = t.dataset[key];
@@ -652,6 +667,8 @@ function render() {
   $('settingsSum').textContent =`· ${on} עדיפויות פעילות · ${S.hoods.length}/4 שכונות${S.minPrice || S.budget ? ` · מחיר ${S.minPrice ? ils(S.minPrice) : '0'}–${S.budget ? ils(S.budget) : '∞'}` : ''}`;
   renderLive(pinned);
   renderTable();
+  $('sharePool').checked = S.sharePool;
+  syncPool();
 }
 
 async function shareMyLink() {
