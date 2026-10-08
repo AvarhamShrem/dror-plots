@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://avraham-tasks.duckdns.org:8443 http://127.0.0.1:8810; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://avraham-tasks.duckdns.org:8443 http://127.0.0.1:8810; frame-src https://dror.bhsoft.app; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>בחירת מגרש בדרור</title>
 <style>
@@ -52,6 +52,8 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .acts{display:flex;gap:6px;margin-top:8px}
 .more{margin-top:6px;font-size:13px;color:var(--muted)}.more summary{cursor:pointer}.rng input{width:7.5em}
+.mapbox iframe{width:100%;height:340px;border:1px solid var(--line);border-radius:8px;margin-top:8px;background:var(--bg)}
+table.cmp th:first-child{position:sticky;inset-inline-start:0;background:var(--card);text-align:start;white-space:nowrap}table.cmp td{vertical-align:top;min-width:9em}
 .gl{text-decoration:none;font-size:12px;opacity:.75;margin-inline-end:2px}.kv{list-style:none;padding-inline-start:0}.kv li{margin:3px 0}
 .gloss dt{font-weight:600;margin-top:8px}.gloss dd{margin:2px 0 0}.gloss dt.flash{background:var(--y-bg)}footer .more{color:var(--ink);font-size:inherit;margin-top:8px}.more ul{margin:4px 0;padding-inline-start:18px}
 .plot.pin{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
@@ -62,6 +64,7 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .mine .num{font-size:18px;font-weight:700;color:var(--accent);min-width:22px;text-align:center}
 .mine .body .id{font-size:18px;font-weight:700;margin-inline-end:8px}
 .mine .noteIn{grid-column:3/5;margin-top:0}
+.mine .mapbox{grid-column:1/5}
 .simbox{grid-column:1/5;background:var(--bg);border-radius:8px;padding:8px 10px;margin-top:4px}
 .simrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:5px 0;border-top:1px solid var(--line)}
 .mine li.gone .body{opacity:.55;text-decoration:line-through}
@@ -195,6 +198,7 @@ a{color:var(--accent)}
       <div id="mineAlert"></div>
       <details class="more no-print" id="pinHint"><summary>איך משתמשים ברשימה?</summary><p class="note">הרשימה מסודרת לפי סדר העדיפות שלך, ו-▲▼ מזיזים מגרש למעלה או למטה. ביום הבחירה עוברים עליה מלמעלה למטה: אם מגרש נלקח, ממשיכים לבא בתור.
         כדאי שהרשימה תהיה ארוכה ככל שמקומך בתור רחוק יותר. <b>🔍 דומים</b> מציג מגרשים קרובים באותה שכונה ובאותו סוג, כדי להרחיב את הרשימה מנקודת מוצא.</p></details>
+      <div id="compare"></div>
       <ol class="mine" id="pinned"></ol>
       <p class="note" id="pinEmpty">עוד לא הוספת מגרשים. בטאב "הצעות מגרשים" לוחצים "📌 הוסף לפול" על הצעה, או "＋" בטאב "כל המגרשים".</p>
       <p class="no-print acts" style="margin-top:14px;flex-wrap:wrap"><button class="btn pri" data-share="1">📤 שליחת הפול (ווטסאפ וכו')</button><button class="btn" data-mylink="1">🔗 קישור אישי לפול שלי</button><button class="btn" onclick="print()">🖨 הדפסה / שמירה כ-PDF</button></p>
@@ -273,8 +277,8 @@ a{color:var(--accent)}
   </div>
 </footer>
 
-<script src="data.js?v=20261008b"></script>
-<script src="model.js?v=20261008b"></script>
+<script src="data.js?v=20261008c"></script>
+<script src="model.js?v=20261008c"></script>
 <script>
 const $ = id => document.getElementById(id);
 const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'], RISES = ['up', 'flat', 'down'];
@@ -285,7 +289,7 @@ const ADV = ['minPpm', 'maxPpm', 'minPenalty', 'maxPenalty', 'minElev', 'maxElev
 const NUM_FILTERS = ['budget', 'minPrice', 'minArea', 'maxArea', ...ADV];
 const EDGE_LABEL = { fence: 'על גדר היישוב', open: 'פונה לשטח פתוח פנימי', inner: 'פנימי' };
 const DEF = {
-  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minPrice: 0, minArea: 0, maxArea: 0, minPpm: 0, maxPpm: 0, minPenalty: 0, maxPenalty: 0, minElev: 0, maxElev: 0, minSlope: 0, maxSlope: 0, minDrop: 0, maxDrop: 0, minRatio: 0, maxRatio: 0, minFront: 0, maxFront: 0, minPub: 0, maxPub: 0, rises: RISES, lvls: LVLS, streets: STREETS, onlyGreen: false,
+  pos: 120, category: 'res_home', use35: true, k: 10, extra: 0, budget: 0, minPrice: 0, minArea: 0, maxArea: 0, minPpm: 0, maxPpm: 0, minPenalty: 0, maxPenalty: 0, minElev: 0, maxElev: 0, minSlope: 0, maxSlope: 0, minDrop: 0, maxDrop: 0, minRatio: 0, maxRatio: 0, minFront: 0, maxFront: 0, minPub: 0, maxPub: 0, rises: RISES, lvls: LVLS, streets: STREETS, onlyGreen: false, compare: [],
   hoods: HOODS, types: TYPES, edges: EDGES, prefType: 'חד', prefHood: 'א', prefSlope: 'flat',
   order: CRITERIA.map(c => c.key),
   enabled: { area: true, price: true, ppm: false, type: false, hood: false },
@@ -389,7 +393,7 @@ function card(p) {
     <div class="pr">${ils(p.price)} · ${p.area} מ"ר</div>
     <div class="meta">שכונה ${p.hood} · ${fullType(p.type)}${p.edge ? ` · ${EDGE_LABEL[p.edge]}` : ''}${p.green ? ' · 🌳 גובל בשטח ירוק' : ''}</div>
     ${p.lvl !== undefined ? `<div class="meta" title="לפי טיוטת תכנית הבינוי של שכונה א' — עשוי להשתנות">⛰ לפי תכנית הבינוי: ${planText(p)} <a class="gl" href="#g-terrain" data-gl="terrain" aria-label="מה זה?">ⓘ</a></div>`
-      : p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">⛰ ${p.rise !== undefined ? riseText(p) + ' · ' : ''}הפרש גובה ${p.drop} מ' <a class="gl" href="#g-predev" data-gl="predev" aria-label="מה זה?">⚠</a></div>` : ''}
+      : p.elev ? `<div class="meta" title="ממפת גבהים לפני עבודות הפיתוח — לא משקף את המצב היום">⛰ <b>אין תכנית בינוי</b>, כדאי לבדוק בשטח · לפי מפת השטח: ${p.rise !== undefined ? riseText(p) + ' · ' : ''}הפרש גובה ${p.drop} מ' <a class="gl" href="#g-predev" data-gl="predev" aria-label="מה זה?">⚠</a></div>` : ''}
     ${p.taken ? `<div style="margin-top:4px">${takenBadge(p)}</div>` : ''}
     <details class="more"><summary>עוד פרטים</summary><ul class="kv">
       ${row('rank', 'גודל', `${rankWord(p.areaRank, 297, SIZE_W)} (${p.areaRank} מתוך 297; בשכונה ${p.hood} ${p.type}: ${p.groupRank} מתוך ${p.groupSize})`)}
@@ -399,7 +403,8 @@ function card(p) {
       ${p.ratio !== undefined ? row('shape', 'צורה', `${shapeText(p)}${p.front ? ` · חזית לרחוב כ-${p.front} מ'` : ''}`) : ''}
       ${p.entry !== undefined ? row('entry', 'מפלס הכניסה', `${p.entry} מ' מעל פני הים`)
         : p.elev ? row('predev', 'לפני פיתוח', `גובה ${Math.round(p.elev)} מ', שיפוע ${p.slope}%, הפרש גובה ${p.drop} מ'`) : ''}
-      ${row('score', 'התאמה לעדיפויות שלך', p.score)}</ul></details>
+      ${row('score', 'התאמה לעדיפויות שלך', p.score)}</ul>
+      <button class="btn no-print" data-mapframe="${p.id}">🗺 הצג את המגרש על המפה כאן</button><div class="mapbox"></div></details>
     <div class="acts no-print">${acts}</div></div>`;
 }
 // מגרשים דומים לשורה בפול — רשימה מתקפלת (פתוחה אחת בכל פעם)
@@ -411,6 +416,24 @@ function simList(p) {
       ${S.pinned.includes(q.id) ? '<span class="note">📌 בפול</span>' : `<button class="btn" data-pin="${q.id}">＋ לפול</button>`}</div>`).join('')
     : '<div class="note">לא נמצאו מגרשים דומים פנויים (אותה שכונה ואותו סוג, שטח ±15%).</div>'}</div>`;
 }
+// טבלת השוואה: עד 4 מגרשים מהפול, נתון בכל שורה
+const CMP_ROWS = [
+  ['מחיר', p => ils(p.price)], ['שטח', p => `${p.area} מ"ר`],
+  ['גודל', p => `${rankWord(p.areaRank, 297, SIZE_W)} (${p.areaRank})`], ['דירוג מחיר', p => `${rankWord(p.priceRank, 297, PRICE_W)} (${p.priceRank})`],
+  ['מחיר למ"ר', ppmText], ['שכונה וסוג', p => `${p.hood} · ${fullType(p.type)}`],
+  ['מיקום', p => (p.edge ? EDGE_LABEL[p.edge] : '') + (p.green ? ' · 🌳 שטח ירוק' : '')],
+  ['מפלסים', p => (p.lvl !== undefined ? planText(p) : `⚠ אין תכנית · ${riseText(p) || '—'}`)],
+  ['רחוב', p => STREET_LABEL[p.street] || '—'], ['מבני ציבור', p => (p.pubDist !== undefined ? `${p.pubDist} מ'` : '—')],
+  ['צורה', p => shapeText(p) || '—'], ['חזית לרחוב', p => (p.front ? `${p.front} מ'` : '—')],
+  ['גובה', p => (p.entry !== undefined ? `${p.entry} מ' (כניסה)` : p.elev ? `${Math.round(p.elev)} מ' (לפני פיתוח)` : '—')],
+  ['קנס מכירה מוקדמת', p => ils(p.penalty)], ['סטטוס', p => (p.taken ? '❌ נבחר כבר' : 'פנוי')],
+  ['הערה שלי', p => esc(S.notes[p.id] || '')],
+];
+function compareTable(list) {
+  if (list.length < 2) return `<p class="note no-print">📊 ${list.length ? 'סמנו עוד מגרש' : 'סמנו "השוואה" ליד 2–4 מגרשים'} כדי להשוות ביניהם בטבלה.</p>`;
+  return `<div class="tablewrap" style="margin:8px 0 14px"><table class="cmp"><thead><tr><th></th>${list.map(p => `<th>${p.id} ${mapLink(p.id)}</th>`).join('')}</tr></thead>
+    <tbody>${CMP_ROWS.map(([l, f]) => `<tr><th>${l}</th>${list.map(p => `<td>${f(p)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
 // שורה בטאב "הפול שלי"
 function mineRow(p, i) {
   return `<li class="${p.taken ? 'gone' : ''}">
@@ -419,7 +442,8 @@ function mineRow(p, i) {
     <span class="num">${i + 1}</span>
     <div class="body"><span class="id">${p.id}</span>${takenBadge(p)} ${mapLink(p.id)}
       <div class="meta">שכונה ${p.hood} · ${fullType(p.type)} · ${p.area} מ"ר · ${ils(p.price)}${terrainShort(p) ? ` · ⛰ ${terrainShort(p)}` : ''}</div></div>
-    <span class="acts no-print" style="margin:0"><button class="btn" data-sim="${p.id}" aria-expanded="${openSim === p.id}">🔍 דומים</button><button class="btn" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button></span>
+    <span class="acts no-print" style="margin:0"><label class="chk" style="margin:0 4px" title="סמן 2–4 מגרשים להשוואה בטבלה"><input type="checkbox" data-cmp="${p.id}" ${S.compare.includes(p.id) ? 'checked' : S.compare.length >= 4 ? 'disabled' : ''}> השוואה</label><button class="btn" data-mapframe="${p.id}" aria-label="הצג על המפה">🗺</button><button class="btn" data-sim="${p.id}" aria-expanded="${openSim === p.id}">🔍 דומים</button><button class="btn" data-unpin="${p.id}" aria-label="הוצא מהפול">✕</button></span>
+    <div class="mapbox"></div>
     ${openSim === p.id ? simList(p) : ''}
     <input class="noteIn" data-note="${p.id}" value="${esc(S.notes[p.id] || '')}" placeholder="הערה (למשל: צמוד לגן, לבדוק שיפוע מול הרחוב)">
   </li>`;
@@ -474,6 +498,7 @@ document.addEventListener('input', e => {
   else if (t.dataset.note) { S.notes = { ...S.notes, [t.dataset.note]: t.value }; return save(); }  // בלי render — לא לאבד פוקוס
   else if (t.id === 'takenInput') { S.takenText = t.value; S.taken = parseTaken(t.value).ok; }
   else if (t.id === 'onlyGreen') S.onlyGreen = t.checked;
+  else if (t.dataset.cmp) S.compare = t.checked ? [...S.compare, t.dataset.cmp].slice(0, 4) : S.compare.filter(x => x !== t.dataset.cmp);
   else if (t.dataset.hoods || t.dataset.types || t.dataset.edges || t.dataset.rises || t.dataset.lvls || t.dataset.streets) {
     const key = ['hoods', 'types', 'edges', 'rises', 'lvls', 'streets'].find(k => t.dataset[k]), v = t.dataset[key];
     S[key] = t.checked ? [...S[key], v] : S[key].filter(x => x !== v);
@@ -492,6 +517,11 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.mapframe) {
+    const box = b.closest('.plot, li').querySelector('.mapbox');
+    box.innerHTML = box.innerHTML ? '' : `<iframe src="${mapUrl(b.dataset.mapframe)}" title="מגרש ${b.dataset.mapframe} על המפה (dror.bhsoft.app)" loading="lazy" referrerpolicy="no-referrer"></iframe><div class="note">המפה של BH Software. הטעינה לוקחת כמה שניות, ובכניסה הראשונה צריך לאשר את חלון ההסבר שלהם · <a href="${mapUrl(b.dataset.mapframe)}" target="_blank" rel="noopener">פתיחה בחלון מלא</a></div>`;
+    return;
+  }
   if (b.dataset.goto) return document.querySelector(`.tabs [data-tab="${b.dataset.goto}"]`).click();
   if (b.dataset.tab) {
     document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
@@ -538,6 +568,8 @@ function render() {
   // הפול שלי: לפי סדר העדיפות שהמשתמש קבע
   const byId = Object.fromEntries(ROWS.map(p => [p.id, p]));
   const pinned = S.pinned.map(id => byId[id]).filter(Boolean);
+  S.compare = S.compare.filter(id => S.pinned.includes(id));
+  $('compare').innerHTML = pinned.length >= 2 ? compareTable(S.compare.map(id => byId[id]).filter(Boolean)) : '';
   $('pinned').innerHTML = pinned.map(mineRow).join('');
   $('pinHint').classList.toggle('hidden', !pinned.length);
   $('pinCount').textContent = pinned.length ? `(${pinned.length})` : '';
