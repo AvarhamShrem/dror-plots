@@ -221,8 +221,9 @@ a{color:var(--accent)}
   <section id="tab-live" class="hidden">
     <div class="card">
       <h2>❌ מגרשים שכבר נבחרו</h2>
-      <p class="note">ממלאים לפי מה שפורסם (רמ"י, קבוצת הווטסאפ). מגרשים שנבחרו יוצאים מההצעות, ובפול שלך הם מסומנים "נבחר כבר". הנתונים נשמרים רק אצלך.</p>
-      <label style="margin-top:12px">מגרשים שכבר נבחרו (אפשר להדביק רשימה: רווח, פסיק או שורה חדשה בין מגרש למגרש)
+      <p class="note">מגרשים שנבחרו יוצאים מההצעות, ובפול שלך הם מסומנים "נבחר כבר". הרשימה המשותפת מתעדכנת פעם ביום. מה שתוסיף כאן נשמר רק אצלך.</p>
+      <p class="summary" id="centralNote"></p>
+      <label style="margin-top:12px">מגרשים נוספים שנבחרו ועוד לא ברשימה המשותפת (אפשר להדביק רשימה: רווח, פסיק או שורה חדשה בין מגרש למגרש)
         <textarea id="takenInput" rows="5" dir="ltr" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%" placeholder="212, 213, 186B ..."></textarea></label>
       <p class="note" id="takenParse"></p>
       <div id="liveAlert"></div>
@@ -461,7 +462,7 @@ let mapAll = false, mapZoom = 1;
 function poolMap(pinned) {
   const G = window.MAPGEO, box = $('poolMapBox');
   if (!G || !$('poolMap').open) return;
-  const pin = new Map(pinned.map((p, i) => [p.id, i + 1])), taken = new Set(S.taken);
+  const pin = new Map(pinned.map((p, i) => [p.id, i + 1])), taken = new Set(allTaken());
   // תצוגה: סביב מגרשי הפול (לפחות 300 מ'), או כל היישוב
   let [x0, y0, x1, y1] = [0, 0, G.w, G.h];
   if (!mapAll && pin.size) {
@@ -511,7 +512,11 @@ function mineRow(p, i) {
   </li>`;
 }
 
-const settings = () => S;
+// רשימה מרכזית של מגרשים שנבחרו (taken.json, מעודכנת ע"י מפעיל האתר) + מה שהמשתמש הוסיף בעצמו
+let CENTRAL = { updated: '', plots: [] };
+const allTaken = () => [...new Set([...CENTRAL.plots, ...S.taken])];
+fetch('taken.json', { cache: 'no-cache' }).then(r => r.json()).then(j => { CENTRAL = j; render(); }).catch(() => {});
+const settings = () => ({ ...S, taken: allTaken() });
 
 // ---- טופס ----
 function checks(el, list, key, fmt) {
@@ -628,8 +633,8 @@ let ROWS = [];
 function render() {
   ROWS = enrich(window.PLOTS, settings());
   const { pool, candidates } = buildPool(ROWS, settings());
-  const W = waitingBefore(S), remaining = window.PLOTS.length - S.taken.length;
-  $('summary').innerHTML = (S.taken.length ? `🔴 <b>לפי "מה כבר נבחר":</b> נבחרו עד כה ${S.taken.length} מגרשים, ונשארו ${remaining}. ` : '')
+  const T = allTaken(), W = waitingBefore(S), remaining = window.PLOTS.length - T.length;
+  $('summary').innerHTML = (T.length ? `🔴 <b>לפי "מה כבר נבחר":</b> נבחרו עד כה ${T.length} מגרשים, ונשארו ${remaining}. ` : '')
     + `לפניך בתור <b>${W}</b> זוכים. ${candidates} מגרשים עוברים את הסינון שלך${(() => {
       const ok = ROWS.filter(p => !p.taken && passesUI(p)), pin = ok.filter(p => S.pinned.includes(p.id)).length, hid = ok.filter(p => S.excluded.includes(p.id)).length;
       return pin || hid ? ` (${[pin && `${pin} כבר בפול שלך`, hid && `${hid} הסתרת`].filter(Boolean).join(', ')}, ולכן לא מופיעים בהצעות)` : '';
@@ -701,6 +706,8 @@ async function sharePool() {
 
 function renderLive(pinned) {
   const { ok, bad } = parseTaken(S.takenText);
+  $('centralNote').innerHTML = CENTRAL.plots.length
+    ? `✅ <b>הרשימה המשותפת</b> (עודכנה ${esc(CENTRAL.updated)}): ${CENTRAL.plots.length} מגרשים כבר מסומנים אצל כולם, בלי שתצטרך להקליד.` : '';
   $('takenParse').innerHTML = (ok.length ? `✓ זוהו ${ok.length} מגרשים.` : '')
     + (bad.length ? ` <b style="color:var(--r)">⚠ לא זוהו (בדוק את המספר):</b> ${esc(bad.join(', '))}` : '');
   const lost = pinned.filter(p => p.taken);
