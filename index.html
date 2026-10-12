@@ -246,19 +246,19 @@ a{color:var(--accent)}
   </section>
 
   <section id="tab-faq" class="hidden">
+    <div class="card no-print">
+      <h2>🤖 שאלו את ה-AI שלכם</h2>
+      <p class="note">כתבו שאלה ובחרו כלי. הוא ייפתח בחשבון שלכם, עם הוראה לקרוא את מאגר הידע של האתר ולענות רק לפיו.</p>
+      <textarea id="aiQ" rows="2" placeholder="למשל: אני מחוסר דיור במכרז 52/2025. מתי מותר לי למכור?" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%"></textarea>
+      <p class="acts" style="flex-wrap:wrap"><button class="btn pri" data-ai="claude">Claude</button><button class="btn pri" data-ai="chatgpt">ChatGPT</button><button class="btn" data-ai="copy">📋 העתקת השאלה עם כל המאגר</button></p>
+      <p class="note" id="aiMsg">אם הכלי לא מצליח לקרוא את הקישור, לחצו "העתקת השאלה עם כל המאגר" והדביקו בכל צ'אט. <a href="knowledge.txt" target="_blank" rel="noopener">מאגר הידע כקובץ טקסט</a></p>
+    </div>
     <div class="card">
       <h2>❓ שאלות ותשובות</h2>
       <p class="note">תשובות לשאלות שחוזרות בקבוצות הרוכשים, מוצלבות מול חוברת המכרז והתב"ע. ליד כל תשובה מופיע על מה היא מבוססת ומתי. <b>זה לא ייעוץ משפטי</b>, והמחייב הוא של רמ"י וחברת ערים.</p>
       <input id="faqQ" type="search" placeholder="חיפוש: קנס, מסירה, טאבו, ערבות..." aria-label="חיפוש בשאלות" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;margin:6px 0">
       <div class="faqcats" id="faqCats"></div>
       <div id="faqList"><p class="note">טוען…</p></div>
-    </div>
-    <div class="card no-print">
-      <h2>🤖 שאלו את ה-AI שלכם</h2>
-      <p class="note">לא מצאתם תשובה? כתבו את השאלה ובחרו כלי. הוא ייפתח בחשבון שלכם, עם הוראה לקרוא את מאגר הידע של האתר ולענות רק לפיו.</p>
-      <textarea id="aiQ" rows="2" placeholder="למשל: אני מחוסר דיור במכרז 52/2025. מתי מותר לי למכור?" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%"></textarea>
-      <p class="acts" style="flex-wrap:wrap"><button class="btn pri" data-ai="claude">Claude</button><button class="btn pri" data-ai="chatgpt">ChatGPT</button><button class="btn pri" data-ai="gemini">Gemini</button><button class="btn" data-ai="copy">📋 העתקת השאלה עם כל המאגר</button></p>
-      <p class="note" id="aiMsg">אם הכלי לא מצליח לקרוא את הקישור, לחצו "העתקת השאלה עם כל המאגר" והדביקו בכל צ'אט. <a href="knowledge.txt" target="_blank" rel="noopener">מאגר הידע כקובץ טקסט</a></p>
     </div>
     <div class="card">
       <h2>📚 מסמכים וקישורים</h2>
@@ -495,7 +495,7 @@ function renderFaq() {
     <span class="faqb">${d.level === 'official' ? '📄 רשמי' : '🧰 כלי עזר'}</span><div class="note">${esc(d.about)}</div></li>`).join('');
 }
 $('faqQ').addEventListener('input', renderFaq);
-// "שאלו את ה-AI שלכם": כל אחד בחשבון שלו. Claude ו-ChatGPT מקבלים את השאלה בכתובת; Gemini לא, אז מעתיקים ופותחים
+// "שאלו את ה-AI שלכם": כל אחד בחשבון שלו. Claude ו-ChatGPT מקבלים את השאלה בכתובת (Gemini לא תומך בזה, ולכן הוסר)
 const KB_URL = new URL('knowledge.txt', location.href).href;
 const aiPrompt = full => `אתה עוזר לרוכשי מגרשים ביישוב דרור (חירן), מכרזי "בנה ביתך" של רמ"י. `
   + (full ? 'מאגר הידע מופיע למטה.' : `קרא את מאגר הידע בכתובת ${KB_URL}`)
@@ -504,11 +504,6 @@ async function askAi(kind) {
   const copy = async text => { try { await navigator.clipboard.writeText(text); return true; } catch { return false; } };
   if (kind === 'claude') return open('https://claude.ai/new?q=' + encodeURIComponent(aiPrompt()), '_blank', 'noopener');
   if (kind === 'chatgpt') return open('https://chatgpt.com/?q=' + encodeURIComponent(aiPrompt()), '_blank', 'noopener');
-  if (kind === 'gemini') {
-    const ok = await copy(aiPrompt());
-    $('aiMsg').textContent = ok ? '✓ ההוראה הועתקה. הדביקו אותה ב-Gemini שנפתח.' : 'ההעתקה נחסמה. העתיקו את השאלה ידנית.';
-    return open('https://gemini.google.com/app', '_blank', 'noopener');
-  }
   const kb = await fetch('knowledge.txt').then(r => r.text()).catch(() => '');
   $('aiMsg').textContent = kb && await copy(aiPrompt(true) + '\n\n' + kb) ? '✓ השאלה וכל המאגר הועתקו. הדביקו בכל צ\'אט AI.' : 'ההעתקה נכשלה. נסו שוב.';
 }
