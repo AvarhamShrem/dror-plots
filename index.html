@@ -253,6 +253,13 @@ a{color:var(--accent)}
       <div class="faqcats" id="faqCats"></div>
       <div id="faqList"><p class="note">טוען…</p></div>
     </div>
+    <div class="card no-print">
+      <h2>🤖 שאלו את ה-AI שלכם</h2>
+      <p class="note">לא מצאתם תשובה? כתבו את השאלה ובחרו כלי. הוא ייפתח בחשבון שלכם, עם הוראה לקרוא את מאגר הידע של האתר ולענות רק לפיו.</p>
+      <textarea id="aiQ" rows="2" placeholder="למשל: אני מחוסר דיור במכרז 52/2025. מתי מותר לי למכור?" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%"></textarea>
+      <p class="acts" style="flex-wrap:wrap"><button class="btn pri" data-ai="claude">Claude</button><button class="btn pri" data-ai="chatgpt">ChatGPT</button><button class="btn pri" data-ai="gemini">Gemini</button><button class="btn" data-ai="copy">📋 העתקת השאלה עם כל המאגר</button></p>
+      <p class="note" id="aiMsg">אם הכלי לא מצליח לקרוא את הקישור, לחצו "העתקת השאלה עם כל המאגר" והדביקו בכל צ'אט. <a href="knowledge.txt" target="_blank" rel="noopener">מאגר הידע כקובץ טקסט</a></p>
+    </div>
     <div class="card">
       <h2>📚 מסמכים וקישורים</h2>
       <ul class="faqdocs" id="faqDocs"></ul>
@@ -307,8 +314,8 @@ a{color:var(--accent)}
   </div>
 </footer>
 
-<script src="data.js?v=20261012b"></script>
-<script src="model.js?v=20261012b"></script>
+<script src="data.js?v=20261012c"></script>
+<script src="model.js?v=20261012c"></script>
 <script>
 const $ = id => document.getElementById(id);
 const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'], RISES = ['up', 'flat', 'down'];
@@ -488,6 +495,23 @@ function renderFaq() {
     <span class="faqb">${d.level === 'official' ? '📄 רשמי' : '🧰 כלי עזר'}</span><div class="note">${esc(d.about)}</div></li>`).join('');
 }
 $('faqQ').addEventListener('input', renderFaq);
+// "שאלו את ה-AI שלכם": כל אחד בחשבון שלו. Claude ו-ChatGPT מקבלים את השאלה בכתובת; Gemini לא, אז מעתיקים ופותחים
+const KB_URL = new URL('knowledge.txt', location.href).href;
+const aiPrompt = full => `אתה עוזר לרוכשי מגרשים ביישוב דרור (חירן), מכרזי "בנה ביתך" של רמ"י. `
+  + (full ? 'מאגר הידע מופיע למטה.' : `קרא את מאגר הידע בכתובת ${KB_URL}`)
+  + ` וענה רק לפיו. ציין לכל תשובה על מה היא מבוססת (מסמך רשמי, צוות הגרעין, ניסיון רוכשים) ומאיזה תאריך. אם יש מקורות סותרים, הצג את שניהם. אם אין במאגר תשובה, אמור זאת. זה לא ייעוץ משפטי.\n\nהשאלה שלי: ${$('aiQ').value.trim() || '(אשאל בהודעה הבאה)'}`;
+async function askAi(kind) {
+  const copy = async text => { try { await navigator.clipboard.writeText(text); return true; } catch { return false; } };
+  if (kind === 'claude') return open('https://claude.ai/new?q=' + encodeURIComponent(aiPrompt()), '_blank', 'noopener');
+  if (kind === 'chatgpt') return open('https://chatgpt.com/?q=' + encodeURIComponent(aiPrompt()), '_blank', 'noopener');
+  if (kind === 'gemini') {
+    const ok = await copy(aiPrompt());
+    $('aiMsg').textContent = ok ? '✓ ההוראה הועתקה. הדביקו אותה ב-Gemini שנפתח.' : 'ההעתקה נחסמה. העתיקו את השאלה ידנית.';
+    return open('https://gemini.google.com/app', '_blank', 'noopener');
+  }
+  const kb = await fetch('knowledge.txt').then(r => r.text()).catch(() => '');
+  $('aiMsg').textContent = kb && await copy(aiPrompt(true) + '\n\n' + kb) ? '✓ השאלה וכל המאגר הועתקו. הדביקו בכל צ\'אט AI.' : 'ההעתקה נכשלה. נסו שוב.';
+}
 
 // טבלת השוואה: עד 4 מגרשים מהפול, נתון בכל שורה
 const CMP_ROWS = [
@@ -542,7 +566,7 @@ function poolMap(pinned) {
 $('poolMap').addEventListener('toggle', () => {
   if (window.MAPGEO || !$('poolMap').open) return render();
   const sc = document.createElement('script');
-  sc.src = 'map.js?v=20261012b'; sc.onload = render;
+  sc.src = 'map.js?v=20261012c'; sc.onload = render;
   sc.onerror = () => { $('poolMapBox').innerHTML = '<p class="note">המפה לא נטענה. נסו לרענן את הדף.</p>'; };
   document.head.append(sc);
 });
@@ -653,6 +677,7 @@ document.addEventListener('click', e => {
     if (b.dataset.tab === 'faq') loadFaq();
     return;
   }
+  if (b.dataset.ai) return askAi(b.dataset.ai);
   if (b.dataset.faqcat !== undefined) { faqCat = b.dataset.faqcat; return renderFaq();
   }
   if (b.dataset.resetLive) {
