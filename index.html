@@ -53,7 +53,11 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .acts{display:flex;gap:6px;margin-top:8px}
 .more{margin-top:6px;font-size:13px;color:var(--muted)}.more summary{cursor:pointer}.rng input{width:7.5em}
 #poolMap>summary{display:inline-block;list-style:none;font-size:15px;padding:9px 16px;margin:6px 0}#poolMap>summary::-webkit-details-marker{display:none}
-.pm-bar{margin:8px 0 0;gap:6px}.pm-wrap{direction:ltr;overflow:auto;max-height:75vh;margin-top:8px;border:1px solid var(--line);border-radius:8px}.pm{display:block;background:var(--bg)}
+.pm-bar{margin:8px 0 0;gap:6px}.tabs{flex-wrap:wrap}.faqcats{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+details.faq{border-top:1px solid var(--line);padding:8px 0}details.faq>summary{cursor:pointer;font-weight:600}
+.faqa{margin:8px 0}.faqb{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0 7px;font-size:12px}
+.faqwarn{background:var(--y-bg);color:var(--y);padding:6px 8px;border-radius:6px;font-size:13px}.faqdocs li{margin:6px 0}
+.pm-wrap{direction:ltr;overflow:auto;max-height:75vh;margin-top:8px;border:1px solid var(--line);border-radius:8px}.pm{display:block;background:var(--bg)}
 .pm path{stroke:var(--card);stroke-width:.6}.pm .pm-o{fill:var(--line);opacity:.5}.pm .pm-r{fill:none;stroke:var(--muted);stroke-width:.4;opacity:.6}
 .pm-g{fill:var(--g-bg)}.pm-f{fill:var(--card);stroke:var(--muted)!important}.pm-t{fill:var(--r-bg)}.pm-p{fill:var(--accent);stroke:var(--accent)!important;stroke-width:3!important}.pm-pt{fill:var(--r);stroke:var(--r)!important;stroke-width:3!important}
 .pm text{fill:var(--ink);paint-order:stroke;stroke:var(--card);stroke-width:.25em;text-anchor:middle;dominant-baseline:middle;font-weight:600;pointer-events:none}
@@ -114,6 +118,7 @@ a{color:var(--accent)}
     <button data-tab="mine">📌 הפול שלי <span id="pinCount"></span></button>
     <button data-tab="all">📋 כל המגרשים</button>
     <button data-tab="live">❌ מה כבר נבחר</button>
+    <button data-tab="faq">❓ שאלות ותשובות</button>
   </div>
 
   <section id="tab-pool">
@@ -178,7 +183,7 @@ a{color:var(--accent)}
       <p class="summary" id="summary"></p>
       <details class="note" id="glossary" style="margin:-4px 0 12px"><summary>📖 מה אומר כל נתון בכרטיס?</summary>
         <dl class="gloss">
-          <dt id="g-price">מחיר ושטח</dt><dd>סך התשלום המשוער בקטגוריה שבחרת: קרקע, פיתוח ומבני ציבור, כולל הצמדה ומע"מ. לא כולל בנייה, היטלים ומיסים, וגם לא את <b>ערבות הנזקים</b> (5% מתשלום הפיתוח), שמופיעה בנפרד. רוב המחיר הוא עלות פיתוח שגדלה עם השטח, ולכן מגרש גדול יקר יותר בערך באותו יחס.</dd>
+          <dt id="g-price">מחיר ושטח</dt><dd>סך התשלום המשוער בקטגוריה שבחרת: קרקע, פיתוח ומבני ציבור, כולל הצמדה ומע"מ. לא כולל בנייה, היטלים ומיסים, וגם לא את <b>ערבות הנזקים</b>: ערבות בנקאית לחברת ערים בגובה 5% מהפיתוח, ולא תשלום. היא מופיעה בנפרד. רוב המחיר הוא עלות פיתוח שגדלה עם השטח, ולכן מגרש גדול יקר יותר בערך באותו יחס.</dd>
           <dt id="g-type">שכונה · סוג · מיקום</dt><dd><b>חד-משפחתי</b> = בית עומד לבד. <b>דו-משפחתי</b> (מגרשי A/B) = קיר משותף עם שכן. <b>פנימי</b> = יש בתים מכל הצדדים. <b>על גדר היישוב</b> = בקצה, בדרך כלל עם נוף פתוח. <b>פונה לשטח פתוח פנימי</b> = גובל בשטח פתוח בין שכונות. <b>🌳 גובל בשטח ירוק</b> = צמוד לפארק, שטח ציבורי פתוח או נחל.</dd>
           <dt id="g-terrain">⛰ מפלסים מול הרחוב</dt><dd>קובע איזה בית אפשר לבנות. <b>מפלס אחד</b>: הכול בגובה הרחוב; הכי פשוט וזול לבנייה, ונגיש. <b>מדורג, יורד</b>: נכנסים מהרחוב, והחצר או קומה תחתונה נמוכות יותר; מתאים לבית בשני מפלסים, ועולה יותר (קירות תומכים, מדרגות). <b>מדורג, עולה</b>: הבית מעל הרחוב; מדרגות בכניסה, יותר פרטיות ולפעמים נוף. בשכונה א' הנתון מטיוטת תכנית הבינוי, ועשוי להשתנות.</dd>
           <dt id="g-rank">גודל ומחיר: הדירוג</dt><dd>1 = הגדול / היקר ביותר מבין 297 המגרשים. "בשכונה א חד" = אותו דירוג, רק מול מגרשים מאותה שכונה ומאותו סוג. "מהגדולים" / "מהזולים" = בין 10% הקיצוניים. זו עובדה ולא תחזית, אבל היא עוזרת להעריך: מגרש שהוא מהגדולים במכרז כנראה ייבחר מוקדם, ולכן למי שרחוק בתור כדאי שיהיו ברשימה גם חלופות. <b>מחיר למ"ר</b> כמעט אחיד בשכונה א' (1,200–1,250 ₪), ובשכונות ב' וד' נע בין כ-1,030 ל-1,340 ₪.</dd>
@@ -239,6 +244,20 @@ a{color:var(--accent)}
     </div>
     <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
   </section>
+
+  <section id="tab-faq" class="hidden">
+    <div class="card">
+      <h2>❓ שאלות ותשובות</h2>
+      <p class="note">תשובות לשאלות שחוזרות בקבוצות הרוכשים, מוצלבות מול חוברת המכרז והתב"ע. ליד כל תשובה מופיע על מה היא מבוססת ומתי. <b>זה לא ייעוץ משפטי</b>, והמחייב הוא של רמ"י וחברת ערים.</p>
+      <input id="faqQ" type="search" placeholder="חיפוש: קנס, מסירה, טאבו, ערבות..." aria-label="חיפוש בשאלות" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;margin:6px 0">
+      <div class="faqcats" id="faqCats"></div>
+      <div id="faqList"><p class="note">טוען…</p></div>
+    </div>
+    <div class="card">
+      <h2>📚 מסמכים וקישורים</h2>
+      <ul class="faqdocs" id="faqDocs"></ul>
+    </div>
+  </section>
 </main>
 <footer id="about">
   <div class="card">
@@ -247,7 +266,7 @@ a{color:var(--accent)}
   <details class="more"><summary><b>מחירים</b></summary>
   <ul>
     <li><b>מילואים פעיל / לוחם (מחוסר דיור / לא מחוסר דיור):</b> מתוך טבלת חישוב העלויות של <b>אחיעד טבק</b> (צוות קב"ב, גרעין חירן), שנבנתה מחוברת המכרז 52/2025. המחירים כוללים הצמדה למדד ומע"מ, ונכונים ל-23.9.2026 (בגרסת 10/10 של הטבלה המחירים זהים).</li>
-    <li><b>ערבות נזקים</b>: תוספת של 5% מתשלום הפיתוח, לפי גרסת 10/10 של טבלת אחיעד. מוצגת בנפרד ואינה כלולה במחיר הכולל.</li>
+    <li><b>ערבות נזקים</b>: לפי חוזה התשתית בחוברת המכרז (נספח ד', סע' 11.3), ערבות אוטונומית לחברת ערים בגובה 5% מהוצאות הפיתוח כולל מע"מ, ולכל היותר 100,000 ₪. זו ערבות ולא תשלום, והסכום לפי טבלת אחיעד (גרסת 10/10). היא מוצגת בנפרד ואינה כלולה במחיר הכולל.</li>
     <li><b>כלל הציבור, וגם "בלי הנחת המילואים 35%":</b> <u>חושבו בכלי הזה</u> לפי שיעורי ההנחה בחוברת המכרז (סעיף 8.10) ולפי אותו מקדם הצמדה ומע"מ. החישוב נבדק מול העמודות הגולמיות בטבלה, אבל <b>לא הופיע כך באף מקור רשמי</b>.</li>
     <li>המחירים ימשיכו להשתנות לפי המדד עד יום התשלום. <b>הסכום המחייב הוא רק זה שתמסור רמ"י.</b></li>
     <li><b>קנס מכירה מוקדמת</b> (מכירה בתוך 5 שנים מסיום הבנייה) = סך הסבסודים: ערך הקרקע המלא פחות מה ששולם עליה (עם הצמדה ומע"מ), ועוד הנחת הפיתוח. זו הנוסחה שבטבלת אחיעד, בגרסה המתוקנת מ-10/10. שם היא חושבה לקטגוריית מילואים בלבד, ו<u>בכלי הזה היא מחושבת לפי הקטגוריה שבחרת</u>. הסכום יוצמד למדד עד יום המכירה, והחישוב המחייב הוא של רמ"י.</li>
@@ -288,8 +307,8 @@ a{color:var(--accent)}
   </div>
 </footer>
 
-<script src="data.js?v=20261012a"></script>
-<script src="model.js?v=20261012a"></script>
+<script src="data.js?v=20261012b"></script>
+<script src="model.js?v=20261012b"></script>
 <script>
 const $ = id => document.getElementById(id);
 const HOODS = ['א', 'ב', 'ג', 'ד'], TYPES = ['חד', 'דו'], EDGES = ['fence', 'open', 'inner'], RISES = ['up', 'flat', 'down'];
@@ -422,7 +441,7 @@ function card(p) {
     <details class="more"><summary>עוד פרטים</summary><ul class="kv">
       ${row('rank', 'גודל', `${rankWord(p.areaRank, 297, SIZE_W)} (${p.areaRank} מתוך 297; בשכונה ${p.hood} ${p.type}: ${p.groupRank} מתוך ${p.groupSize})`)}
       ${row('rank', 'מחיר', `${rankWord(p.priceRank, 297, PRICE_W)} (${p.priceRank} מתוך 297) · ${ppmText(p)}`)}
-      ${row('price', 'ערבות נזקים', `${ils(p.guarantee)} בנוסף למחיר`)}
+      ${row('price', 'ערבות נזקים', `${ils(p.guarantee)} (ערבות בנקאית לחברת ערים, לא תשלום)`)}
       ${p.street ? row('street', 'רחוב', STREET_LABEL[p.street]) : ''}
       ${p.pubDist !== undefined ? row('pub', 'מבני ציבור', `כ-${p.pubDist} מ'`) : ''}
       ${p.ratio !== undefined ? row('shape', 'צורה', `${shapeText(p)}${p.front ? ` · חזית לרחוב כ-${p.front} מ'` : ''}`) : ''}
@@ -441,6 +460,35 @@ function simList(p) {
       ${S.pinned.includes(q.id) ? '<span class="note">📌 בפול</span>' : `<button class="btn" data-pin="${q.id}">＋ לפול</button>`}</div>`).join('')
     : '<div class="note">לא נמצאו מגרשים דומים פנויים (אותה שכונה ואותו סוג, שטח ±15%).</div>'}</div>`;
 }
+// שאלות ותשובות: site/faq.json (נבנה ב-kb/export.py), נטען רק כשפותחים את הטאב
+let FAQ = null, faqCat = '';
+const fmtDate = d => d.split('-').reverse().join('/');
+function loadFaq() {
+  if (FAQ) return;
+  FAQ = { items: [] };
+  fetch('faq.json', { cache: 'no-cache' }).then(r => r.json()).then(j => { FAQ = j; renderFaq(); })
+    .catch(() => { FAQ = null; $('faqList').innerHTML = '<p class="note">השאלות לא נטענו. נסו לרענן את הדף.</p>'; });
+}
+function renderFaq() {
+  if (!FAQ || !FAQ.categories) return;
+  const q = $('faqQ').value.trim(), words = q.split(/\s+/).filter(Boolean);
+  const plain = h => h.replace(/<[^>]+>/g, '');
+  const hit = i => words.every(w => (i.q + ' ' + plain(i.a)).includes(w));
+  const shown = FAQ.items.filter(i => (!faqCat || i.cat === faqCat) && hit(i));
+  $('faqCats').innerHTML = [['', 'הכול'], ...FAQ.categories].map(([k, n]) =>
+    `<button class="btn${faqCat === k ? ' pri' : ''}" data-faqcat="${k}">${n}</button>`).join('');
+  const catName = Object.fromEntries(FAQ.categories);
+  $('faqList').innerHTML = shown.map(i => `<details class="faq" id="q-${i.id}"${words.length ? ' open' : ''}><summary>${esc(i.q)}</summary>
+    <div class="faqa">${i.a}</div>
+    ${i.conflict ? `<p class="faqwarn">⚠ <b>מקורות סותרים / לא מאומת:</b> ${esc(i.conflict)}</p>` : ''}
+    <p class="note">${i.basis.map(b => `<span class="faqb">${FAQ.basis[b]}</span>`).join(' ')} · נכון ל-${fmtDate(i.asOf)} · ${catName[i.cat]}</p>
+    <details class="more"><summary>מקורות</summary><ul class="note">${i.sources.map(x => `<li>${esc(x.ref)}</li>`).join('')}</ul></details>
+  </details>`).join('') || '<p class="note">לא נמצאו שאלות. נסו מילה אחרת.</p>';
+  $('faqDocs').innerHTML = FAQ.docs.map(d => `<li><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a>
+    <span class="faqb">${d.level === 'official' ? '📄 רשמי' : '🧰 כלי עזר'}</span><div class="note">${esc(d.about)}</div></li>`).join('');
+}
+$('faqQ').addEventListener('input', renderFaq);
+
 // טבלת השוואה: עד 4 מגרשים מהפול, נתון בכל שורה
 const CMP_ROWS = [
   ['מחיר', p => ils(p.price)], ['שטח', p => `${p.area} מ"ר`],
@@ -451,7 +499,7 @@ const CMP_ROWS = [
   ['רחוב', p => STREET_LABEL[p.street] || '—'], ['מבני ציבור', p => (p.pubDist !== undefined ? `${p.pubDist} מ'` : '—')],
   ['צורה', p => shapeText(p) || '—'], ['חזית לרחוב', p => (p.front ? `${p.front} מ'` : '—')],
   ['גובה', p => (p.entry !== undefined ? `${p.entry} מ' (כניסה)` : p.elev ? `${Math.round(p.elev)} מ' (לפני פיתוח)` : '—')],
-  ['ערבות נזקים (בנוסף)', p => ils(p.guarantee)], ['קנס מכירה מוקדמת', p => ils(p.penalty)], ['סטטוס', p => (p.taken ? '❌ נבחר כבר' : 'פנוי')],
+  ['ערבות נזקים (ערבות, לא תשלום)', p => ils(p.guarantee)], ['קנס מכירה מוקדמת', p => ils(p.penalty)], ['סטטוס', p => (p.taken ? '❌ נבחר כבר' : 'פנוי')],
   ['הערה שלי', p => esc(S.notes[p.id] || '')],
 ];
 function compareTable(list) {
@@ -494,7 +542,7 @@ function poolMap(pinned) {
 $('poolMap').addEventListener('toggle', () => {
   if (window.MAPGEO || !$('poolMap').open) return render();
   const sc = document.createElement('script');
-  sc.src = 'map.js?v=20261012a'; sc.onload = render;
+  sc.src = 'map.js?v=20261012b'; sc.onload = render;
   sc.onerror = () => { $('poolMapBox').innerHTML = '<p class="note">המפה לא נטענה. נסו לרענן את הדף.</p>'; };
   document.head.append(sc);
 });
@@ -601,8 +649,11 @@ document.addEventListener('click', e => {
   if (b.dataset.goto) return document.querySelector(`.tabs [data-tab="${b.dataset.goto}"]`).click();
   if (b.dataset.tab) {
     document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
-    ['pool', 'mine', 'all', 'live'].forEach(t => $('tab-' + t).classList.toggle('hidden', b.dataset.tab !== t));
+    ['pool', 'mine', 'all', 'live', 'faq'].forEach(t => $('tab-' + t).classList.toggle('hidden', b.dataset.tab !== t));
+    if (b.dataset.tab === 'faq') loadFaq();
     return;
+  }
+  if (b.dataset.faqcat !== undefined) { faqCat = b.dataset.faqcat; return renderFaq();
   }
   if (b.dataset.resetLive) {
     if (!confirm('לאפס את רשימת המגרשים שנבחרו?')) return;
