@@ -113,6 +113,7 @@ a{color:var(--accent)}
   <p class="warn">⚠ <b>כלי עזר לא רשמי</b> (לא של רמ"י, המועצה או משווק), ואינו ייעוץ. לפני החלטה יש לבדוק מול המקורות הרשמיים. <a href="#about">מקורות והסתייגויות ↓</a></p>
 </header>
 <main>
+  <p class="summary no-print" id="takenBanner" hidden></p>
   <div class="tabs no-print">
     <button data-tab="pool" class="on">🔎 הצעות מגרשים</button>
     <button data-tab="mine">📌 הפול שלי <span id="pinCount"></span></button>
@@ -583,7 +584,11 @@ function mineRow(p, i) {
 // רשימה מרכזית של מגרשים שנבחרו (taken.json, מעודכנת ע"י מפעיל האתר) + מה שהמשתמש הוסיף בעצמו
 let CENTRAL = { updated: '', plots: [] };
 const allTaken = () => [...new Set([...CENTRAL.plots, ...S.taken])];
-fetch('taken.json', { cache: 'no-cache' }).then(r => r.json()).then(j => { CENTRAL = j; render(); }).catch(() => {});
+fetch('taken.json', { cache: 'no-cache' }).then(r => r.json()).then(j => {
+  CENTRAL = j; render();
+  $('takenBanner').innerHTML = `✅ המגרשים שנבחרו מעודכנים נכון ל-${esc(j.updated.split(' ')[0])}: ${j.plots.length} מגרשים מסומנים כתפוסים אצל כולם.`;
+  $('takenBanner').hidden = !j.plots.length;
+}).catch(() => {});
 const settings = () => ({ ...S, taken: allTaken() });
 
 // ---- טופס ----
