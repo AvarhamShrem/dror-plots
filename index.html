@@ -241,6 +241,7 @@ a{color:var(--accent)}
     <div class="card no-print row">
       <label>חיפוש מגרש<input id="q" type="search" placeholder="מספר מגרש" style="font:inherit;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"></label>
       <label class="chk"><input type="checkbox" id="onlyPass"> רק מה שעובר את הסינון שלי</label>
+      <label class="chk"><input type="checkbox" id="hideTaken"> הסתר מגרשים שכבר נבחרו</label>
       <details class="more"><summary>מקרא לטבלה</summary><span class="note">* גובה, שיפוע, הפרש גובה (במטרים, בין הנקודה הגבוהה לנמוכה במגרש) לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום. "מול הרחוב" בשכונה א' לפי טיוטת תכנית הבינוי · דירוג שטח: 1 = הגדול ביותר · דירוג מחיר: 1 = היקר ביותר · הסבר מפורט על כל נתון: "📖 מה אומר כל נתון בכרטיס?" בטאב ההצעות · לחיצה על כותרת עמודה ממיינת</span></details>
     </div>
     <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
@@ -644,7 +645,7 @@ document.addEventListener('input', e => {
     const key = ['hoods', 'types', 'edges', 'rises', 'lvls', 'streets'].find(k => t.dataset[k]), v = t.dataset[key];
     S[key] = t.checked ? [...S[key], v] : S[key].filter(x => x !== v);
   } else if (t.dataset.en) { S.enabled = { ...S.enabled, [t.dataset.en]: t.checked }; renderCrit(); }
-  else if (t.id === 'q' || t.id === 'onlyPass') return renderTable();
+  else if (t.id === 'q' || t.id === 'onlyPass' || t.id === 'hideTaken') return renderTable();
   else return;
   save(); render();
 });
@@ -799,12 +800,12 @@ const COLS = [
 let sort = { key: 'score', dir: -1 };
 function renderTable() {
   $('thead').innerHTML = COLS.map(([k, l]) => `<th data-sort="${k}" class="${sort.key === k ? 'sorted' : ''}">${l}${sort.key === k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('');
-  const q = $('q').value.trim(), only = $('onlyPass').checked, s = settings();
+  const q = $('q').value.trim(), only = $('onlyPass').checked, hide = $('hideTaken').checked, s = settings();
   const ok = passesUI;
   const val = p => (sort.key === 'pin' ? +S.pinned.includes(p.id) : sort.key === 'id' ? parseInt(p.id)
     : sort.key === 'taken' ? +p.taken
     : sort.key === 'rise' && p.lvl !== undefined ? { up: p.lvl, down: -p.lvl }[p.planDir] || 0 : p[sort.key]);
-  const rows = ROWS.filter(p => (!q || p.id.includes(q)) && (!only || ok(p)))
+  const rows = ROWS.filter(p => (!q || p.id.includes(q)) && (!only || ok(p)) && !(hide && p.taken))
     .sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * sort.dir);
   const cell = {
     pin: p => (S.pinned.includes(p.id)
