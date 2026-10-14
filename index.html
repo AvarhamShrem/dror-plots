@@ -52,6 +52,15 @@ input[type=number],select{font:inherit;padding:7px 8px;border:1px solid var(--li
 .btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .acts{display:flex;gap:6px;margin-top:8px}
 .more{margin-top:6px;font-size:13px;color:var(--muted)}.more summary{cursor:pointer}.rng input{width:7.5em}
+.flist{display:flex;flex-direction:column}
+.flist>*{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:8px 0;border-top:1px solid var(--line)}
+.flist>*>.note:first-child{flex:0 0 220px;font-size:13px}
+@media (max-width:600px){.flist>*>.note:first-child{flex-basis:100%}}
+.sw{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:14px;cursor:pointer}
+.sw input{appearance:none;-webkit-appearance:none;flex:none;width:36px;height:20px;margin:0;border-radius:99px;background:var(--line);position:relative;cursor:pointer;transition:background .15s}
+.sw input::after{content:'';position:absolute;top:2px;inset-inline-start:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:inset-inline-start .15s}
+.sw input:checked{background:var(--accent)}.sw input:checked::after{inset-inline-start:18px}
+.sw input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #poolMap>summary{display:inline-block;list-style:none;font-size:15px;padding:9px 16px;margin:6px 0}#poolMap>summary::-webkit-details-marker{display:none}
 .pm-bar{margin:8px 0 0;gap:6px}.tabs{flex-wrap:wrap}.faqcats{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
 details.faq{border-top:1px solid var(--line);padding:8px 0}details.faq>summary{cursor:pointer;font-weight:600}
@@ -141,20 +150,20 @@ a{color:var(--accent)}
       <summary style="font-size:15px;color:var(--ink);font-weight:600">⚙ סינון וסדר עדיפויות <span class="note" id="settingsSum"></span></summary>
     <div style="margin-top:12px">
       <h2>2 · סינון</h2>
-      <div class="note" style="margin:-6px 0 8px">מגרשים שלא עומדים בתנאים לא יוצעו בכלל. שדה ריק = בלי הגבלה.</div>
-      <div class="row">
+      <div class="note" style="margin:-6px 0 8px">מגרשים שלא עומדים בתנאים לא יוצעו בכלל. שדה ריק או הכול מסומן = בלי הגבלה. מתג דלוק = רק מה שכתוב לידו.</div>
+      <div class="flist">
         <div class="rng"><div class="note">מחיר (₪)</div><input id="minPrice" type="number" step="10000" placeholder="מ-" aria-label="מחיר מינימלי"> – <input id="budget" type="number" step="10000" placeholder="עד" aria-label="מחיר מקסימלי"></div>
         <div class="rng"><div class="note">שטח (מ"ר)</div><input id="minArea" type="number" step="10" placeholder="מ-" aria-label="שטח מינימלי"> – <input id="maxArea" type="number" step="10" placeholder="עד" aria-label="שטח מקסימלי"></div>
         <div><div class="note">שכונות</div><div class="row" id="hoods"></div></div>
         <div><div class="note">סוג</div><div class="row" id="types"></div></div>
       </div>
       <details class="more" id="advFilters" style="margin-top:10px"><summary>סינון מתקדם <span id="advSum"></span></summary>
-      <div class="row" style="margin-top:8px">
+      <div class="flist" style="margin-top:8px">
         <div class="needs-edge"><div class="note">מיקום ביישוב <span title="מחושב מתכנית היישוב המלאה, כולל שלבים עתידיים. ראה מקורות המידע למטה">ⓘ</span></div><div class="row" id="edges"></div></div>
         <div class="needs-relief"><div class="note">מול הרחוב <span title="בשכונה א' לפי טיוטת תכנית הבינוי; בשאר השכונות לפי מפת הגבהים שלפני הפיתוח">ⓘ</span></div><div class="row" id="rises"></div></div>
         <div><div class="note">מפלסים (שכונה א' בלבד, לפי תכנית הבינוי)</div><div class="row" id="lvls"></div></div>
         <div><div class="note">סוג רחוב</div><div class="row" id="streets"></div></div>
-        <label class="chk"><input type="checkbox" id="onlyGreen"> רק מגרשים שגובלים בשטח ירוק / פארק / נחל</label>
+        <div><div class="note">שטח ירוק</div><label class="sw"><input type="checkbox" id="onlyGreen"> רק מגרשים שגובלים בשטח ירוק / פארק / נחל</label></div>
         <div class="rng"><div class="note">מרחק למבני ציבור (מ', שכונה א' בלבד)</div><input id="minPub" type="number" step="10" placeholder="מ-" aria-label="מרחק מינימלי"> – <input id="maxPub" type="number" step="10" placeholder="עד" aria-label="מרחק מקסימלי"></div>
         <div class="rng needs-relief"><div class="note">שיפוע (%)</div><input id="minSlope" type="number" step="1" placeholder="מ-" aria-label="שיפוע מינימלי"> – <input id="maxSlope" type="number" step="1" placeholder="עד" aria-label="שיפוע מקסימלי"></div>
         <div class="rng needs-relief"><div class="note">הפרש גובה במגרש (מ')</div><input id="minDrop" type="number" step="0.5" placeholder="מ-" aria-label="הפרש גובה מינימלי"> – <input id="maxDrop" type="number" step="0.5" placeholder="עד" aria-label="הפרש גובה מקסימלי"></div>
@@ -240,8 +249,8 @@ a{color:var(--accent)}
   <section id="tab-all" class="hidden">
     <div class="card no-print row">
       <label>חיפוש מגרש<input id="q" type="search" placeholder="מספר מגרש" style="font:inherit;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"></label>
-      <label class="chk"><input type="checkbox" id="onlyPass"> רק מה שעובר את הסינון שלי</label>
-      <label class="chk"><input type="checkbox" id="hideTaken"> הסתר מגרשים שכבר נבחרו</label>
+      <label class="sw"><input type="checkbox" id="onlyPass"> רק מה שעובר את הסינון שלי</label>
+      <label class="sw"><input type="checkbox" id="hideTaken"> הסתר מגרשים שכבר נבחרו</label>
       <details class="more"><summary>מקרא לטבלה</summary><span class="note">* גובה, שיפוע, הפרש גובה (במטרים, בין הנקודה הגבוהה לנמוכה במגרש) לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום. "מול הרחוב" בשכונה א' לפי טיוטת תכנית הבינוי · דירוג שטח: 1 = הגדול ביותר · דירוג מחיר: 1 = היקר ביותר · הסבר מפורט על כל נתון: "📖 מה אומר כל נתון בכרטיס?" בטאב ההצעות · לחיצה על כותרת עמודה ממיינת</span></details>
     </div>
     <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
