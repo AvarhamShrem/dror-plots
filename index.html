@@ -236,7 +236,7 @@ a{color:var(--accent)}
   <section id="tab-live" class="hidden">
     <div class="card">
       <h2>❌ מגרשים שכבר נבחרו</h2>
-      <p class="note">מגרשים שנבחרו יוצאים מההצעות, ובפול שלך הם מסומנים "נבחר כבר". הרשימה המשותפת מתעדכנת פעם ביום. מה שתוסיף כאן נשמר רק אצלך.</p>
+      <p class="note">מגרשים שנבחרו יוצאים מההצעות, ובפול שלך הם מסומנים "נבחר כבר". הרשימה מתעדכנת אוטומטית מאתר רמ"י כל כמה דקות. השעה ליד מגרש היא מתי הבדיקה זיהתה שנבחר. מה שתוסיף כאן נשמר רק אצלך.</p>
       <p class="summary" id="centralNote"></p>
       <label style="margin-top:12px">מגרשים נוספים שנבחרו ועוד לא ברשימה המשותפת (אפשר להדביק רשימה: רווח, פסיק או שורה חדשה בין מגרש למגרש)
         <textarea id="takenInput" rows="5" dir="ltr" style="font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%" placeholder="212, 213, 186B ..."></textarea></label>
@@ -591,14 +591,25 @@ function mineRow(p, i) {
   </li>`;
 }
 
-// רשימה מרכזית של מגרשים שנבחרו (taken.json, מעודכנת ע"י מפעיל האתר) + מה שהמשתמש הוסיף בעצמו
-let CENTRAL = { updated: '', plots: [] };
-const allTaken = () => [...new Set([...CENTRAL.plots, ...S.taken])];
-fetch('taken.json', { cache: 'no-cache' }).then(r => r.json()).then(j => {
-  CENTRAL = j; render();
-  $('takenBanner').innerHTML = `✅ המגרשים שנבחרו מעודכנים נכון ל-${esc(j.updated.split(' ')[0])}: ${j.plots.length} מגרשים מסומנים כתפוסים אצל כולם.`;
-  $('takenBanner').hidden = !j.plots.length;
-}).catch(() => {});
+// מגרשים שנבחרו: רשימה חיה ממפת המכרז באתר רמ"י (השרת בודק כל 5 דקות). אם השרת לא עונה: taken.json הידני.
+// ועוד מה שהמשתמש הוסיף בעצמו
+let CENTRAL = { updated: '', plots: [] }, LIVE = null;
+const shared = () => (LIVE ? LIVE.taken : CENTRAL.plots);
+const allTaken = () => [...new Set([...shared(), ...S.taken])];
+const when = t => `${t.slice(8, 10)}/${t.slice(5, 7)} ${t.slice(11, 16)}`;
+function takenBanner() {
+  const n = shared().length;
+  $('takenBanner').innerHTML = LIVE
+    ? `✅ המגרשים שנבחרו מתעדכנים אוטומטית מאתר רמ"י (נבדק ${when(LIVE.updated)}): ${n} נבחרו, ${window.PLOTS.length - n} פנויים.`
+    : `✅ המגרשים שנבחרו מעודכנים נכון ל-${esc(CENTRAL.updated.split(' ')[0])}: ${n} מגרשים מסומנים כתפוסים אצל כולם.`;
+  $('takenBanner').hidden = !n;
+}
+fetch('taken.json', { cache: 'no-cache' }).then(r => r.json()).then(j => { CENTRAL = j; render(); takenBanner(); }).catch(() => {});
+function loadLive() {
+  fetch((location.hostname === 'localhost' ? 'http://127.0.0.1:8810' : 'https://avraham-tasks.duckdns.org:8443') + '/dror/taken', { cache: 'no-store' })
+    .then(r => r.json()).then(j => { if (j.updated) { LIVE = j; render(); takenBanner(); } }).catch(() => {});
+}
+loadLive(); setInterval(loadLive, 300000);
 const settings = () => ({ ...S, taken: allTaken() });
 
 // ---- טופס ----
@@ -793,8 +804,11 @@ async function sharePool() {
 
 function renderLive(pinned) {
   const { ok, bad } = parseTaken(S.takenText);
-  $('centralNote').innerHTML = CENTRAL.plots.length
-    ? `✅ <b>הרשימה המשותפת</b> (עודכנה ${esc(CENTRAL.updated)}): ${CENTRAL.plots.length} מגרשים כבר מסומנים אצל כולם, בלי שתצטרך להקליד.` : '';
+  const sh = shared(), recent = LIVE ? Object.entries(LIVE.takenAt).sort((a, b) => (a[1] < b[1] ? 1 : -1)).slice(0, 12) : [];
+  $('centralNote').innerHTML = !sh.length ? '' : (LIVE
+    ? `✅ <b>${sh.length} מגרשים נבחרו</b> לפי אתר רמ"י (נבדק ${when(LIVE.updated)}). הם מסומנים אצל כולם, בלי שתצטרך להקליד.`
+    : `✅ <b>הרשימה המשותפת</b> (עודכנה ${esc(CENTRAL.updated)}): ${sh.length} מגרשים כבר מסומנים אצל כולם, בלי שתצטרך להקליד.`)
+    + (recent.length ? `<br>נבחרו לאחרונה: ${recent.map(([p, t]) => `<b>${esc(p)}</b> (${when(t)})`).join(' · ')}` : '');
   $('takenParse').innerHTML = (ok.length ? `✓ זוהו ${ok.length} מגרשים.` : '')
     + (bad.length ? ` <b style="color:var(--r)">⚠ לא זוהו (בדוק את המספר):</b> ${esc(bad.join(', '))}` : '');
   const lost = pinned.filter(p => p.taken);
