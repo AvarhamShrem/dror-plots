@@ -251,6 +251,7 @@ a{color:var(--accent)}
       <label>חיפוש מגרש<input id="q" type="search" placeholder="מספר מגרש" style="font:inherit;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"></label>
       <label class="sw"><input type="checkbox" id="onlyPass"> רק מה שעובר את הסינון שלי</label>
       <label class="sw"><input type="checkbox" id="hideTaken"> הסתר מגרשים שכבר נבחרו</label>
+      <button class="btn" data-copytable="1">📋 העתקה לאקסל</button><span class="note" id="copyMsg"></span>
       <details class="more"><summary>מקרא לטבלה</summary><span class="note">* גובה, שיפוע, הפרש גובה (במטרים, בין הנקודה הגבוהה לנמוכה במגרש) לפי מפת גבהים מלפני הפיתוח, ולא משקפים את המצב היום. "מול הרחוב" בשכונה א' לפי טיוטת תכנית הבינוי · דירוג שטח: 1 = הגדול ביותר · דירוג מחיר: 1 = היקר ביותר · הסבר מפורט על כל נתון: "📖 מה אומר כל נתון בכרטיס?" בטאב ההצעות · לחיצה על כותרת עמודה ממיינת</span></details>
     </div>
     <div class="tablewrap"><table><thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody></table></div>
@@ -698,6 +699,7 @@ document.addEventListener('click', e => {
     return;
   }
   if (b.dataset.ai) return askAi(b.dataset.ai);
+  if (b.dataset.copytable) return copyTable();
   if (b.dataset.faqcat !== undefined) { faqCat = b.dataset.faqcat; return renderFaq();
   }
   if (b.dataset.resetLive) {
@@ -820,7 +822,7 @@ const COLS = [
   ['pin', '📌'], ['id', 'מגרש'], ['hood', 'שכונה'], ['type', 'סוג'], ['edge', 'מיקום'], ['area', 'שטח'], ['price', 'מחיר כולל'],
   ['ppm', 'למ"ר'], ['elev', 'גובה*'], ['slope', 'שיפוע %*'], ['drop', 'הפרש גובה*'], ['rise', 'מול הרחוב'], ['ratio', 'יחס אורך/רוחב'], ['front', 'חזית לרחוב (מ׳)'], ['street', 'סוג רחוב'], ['green', 'שטח ירוק'], ['pubDist', 'מבני ציבור (מ׳)'], ['guarantee', 'ערבות נזקים'], ['penalty', 'קנס מכירה מוקדמת'], ['areaRank', 'דירוג שטח'], ['priceRank', 'דירוג מחיר'], ['taken', 'סטטוס'], ['score', 'התאמה לי'],
 ].filter(([k]) => !['elev', 'slope', 'drop', 'rise', 'ratio', 'front', 'edge'].includes(k) || window.PLOTS[0][k] !== undefined);
-let sort = { key: 'score', dir: -1 };
+let sort = { key: 'score', dir: -1 }, shown = [];
 function renderTable() {
   $('thead').innerHTML = COLS.map(([k, l]) => `<th data-sort="${k}" class="${sort.key === k ? 'sorted' : ''}">${l}${sort.key === k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('');
   const q = $('q').value.trim(), only = $('onlyPass').checked, hide = $('hideTaken').checked, s = settings();
@@ -830,6 +832,7 @@ function renderTable() {
     : sort.key === 'rise' && p.lvl !== undefined ? { up: p.lvl, down: -p.lvl }[p.planDir] || 0 : p[sort.key]);
   const rows = ROWS.filter(p => (!q || p.id.includes(q)) && (!only || ok(p)) && !(hide && p.taken))
     .sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * sort.dir);
+  shown = rows;
   const cell = {
     pin: p => (S.pinned.includes(p.id)
       ? `<button class="btn pri" data-unpin="${p.id}" title="הוצא מהפול">📌</button>`
@@ -839,6 +842,15 @@ function renderTable() {
   };
   $('tbody').innerHTML = rows.map(p => `<tr class="${ok(p) ? '' : 'miss'}">`
     + COLS.map(([k]) => `<td>${cell[k] ? cell[k](p) : p[k]}</td>`).join('') + '</tr>').join('');
+}
+// העתקה לאקסל: השורות שבטבלה כרגע (אחרי סינון ומיון), מופרדות בטאבים. מספרים בלי ₪ ופסיקים, כדי שאקסל יחשב איתם
+async function copyTable() {
+  const cols = COLS.map(([k, l], i) => [k, l.replace('*', ''), i]).filter(([k]) => k !== 'pin'), trs = $('tbody').rows;
+  const val = (p, k, i, r) => (k === 'id' ? p.id : k === 'green' ? (p.green ? 'כן' : '') : k === 'taken' ? (p.taken ? 'נבחר' : 'פנוי')
+    : typeof p[k] === 'number' && k !== 'rise' ? Math.round(p[k] * 100) / 100 : trs[r].cells[i].innerText.trim());
+  const text = [cols.map(c => c[1]), ...shown.map((p, r) => cols.map(([k, , i]) => val(p, k, i, r)))].map(l => l.join('\t')).join('\n');
+  try { await navigator.clipboard.writeText(text); $('copyMsg').textContent = `✓ הועתקו ${shown.length} מגרשים. פותחים אקסל ומדביקים (Ctrl+V).`; }
+  catch { $('copyMsg').textContent = 'הדפדפן חסם את ההעתקה. נסו שוב, או בדפדפן אחר.'; }
 }
 $('thead').addEventListener('click', e => {
   const k = e.target.closest('th')?.dataset.sort; if (!k) return;
